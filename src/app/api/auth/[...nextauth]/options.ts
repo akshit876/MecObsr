@@ -58,18 +58,46 @@ export const options: NextAuthOptions = {
   ],
   pages: {
     signIn: "/login",
-    error: '/auth/error',
-    signOut: '/auth/signout'
+    error: "/auth/error",
+    signOut: "/auth/signout",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // the user present here gets the same data as received from DB call  made above -> fetchUserInfo(credentials.opt)
-      return { ...token, ...user };
-    },
-    async session({ session, user, token }) {
-      // user param present in the session(function) does not recive all the data from DB call -> fetchUserInfo(credentials.opt)
+    // async jwt({ token, user }) {
+    //   // the user present here gets the same data as received from DB call  made above -> fetchUserInfo(credentials.opt)
+    //   return { ...token, ...user };
+    // },
+    // async session({ session, user, token }) {
+    //   // user param present in the session(function) does not recive all the data from DB call -> fetchUserInfo(credentials.opt)
+    //   session.user.role = user.role; // Add role to session
+    //   return token;
+    // },
+    async jwt({ token, user, account, profile }) {
+      // Initial sign in
+      if (user) {
+        console.log({ user });
+        token.role = user.data.role;
+        token.id = user.data.id;
+        token.name = user.data.name;
+        token.email = user.data.email;
+        // Add any other user properties you want to include
+      }
       return token;
     },
+    // Handling the session
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.role = token.role;
+        // Add any other user properties you want to include
+      }
+      return session;
+    },
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.JWT_SECRET,
 };
