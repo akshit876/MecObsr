@@ -12,7 +12,7 @@ export function useProtectedRoute() {
 
     if (!session) {
       toast.error("You must be signed in to view this page");
-      router.push("/auth/signin");
+      router.push("/login");
     }
   }, [session, status, router]);
 

@@ -14,13 +14,28 @@ import { cn } from "@/lib/utils";
 import { Calendar, CalendarIcon } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
-// import { useProtectedRoute } from "../../hooks/useProtectedRoute";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 function AdminPanel() {
   const { csvData, loading } = useCsvData();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { session, status } = useProtectedRoute();
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  // If no session, the hook will redirect, but we can return null while that happens
+  if (!session) {
+    return null;
+  }
 
   const handleDownloadCSV = async () => {
     // Implement CSV download logic here
@@ -52,7 +67,10 @@ function AdminPanel() {
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
-      a.download = `report_${format(startDate, "yyyy-MM-dd")}_to_${format(endDate, "yyyy-MM-dd")}.csv`;
+      a.download = `report_${format(startDate, "yyyy-MM-dd")}_to_${format(
+        endDate,
+        "yyyy-MM-dd"
+      )}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
