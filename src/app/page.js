@@ -1,8 +1,9 @@
 "use client";
 import StyledTable from "@/comp/StyledTable";
+import * as XLSX from "xlsx";
+import { format } from "date-fns";
 import React, { useState } from "react";
 import { useCsvData } from "../../hooks";
-import { format } from "date-fns";
 import { toast, ToastContainer } from "react-toastify";
 import {
   Popover,
@@ -23,6 +24,7 @@ function AdminPanel() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { session, status } = useProtectedRoute();
+  console.log({ startDate, endDate });
 
   if (status === "loading") {
     return (
@@ -37,16 +39,17 @@ function AdminPanel() {
     return null;
   }
 
-  const handleDownloadCSV = async () => {
-    // Implement CSV download logic here
-    console.log("Downloading CSV with date range:", startDate, endDate);
+  const handleDownloadExcel = async () => {
+    console.log("Downloading Excel with date range:", startDate, endDate);
+
     if (!startDate || !endDate) {
       toast.error("Please select both start and end dates");
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(true); // Optional: manage loading state
     try {
+      // Fetch data from the server
       const response = await fetch("/api/reports", {
         method: "POST",
         headers: {
@@ -59,10 +62,53 @@ function AdminPanel() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate report");
+        throw new Error("Failed to fetch report data");
       }
 
-      const blob = await response.blob();
+      const data = await response.json();
+
+      if (data.length === 0) {
+        toast.error("No data found for the specified date range.");
+        return;
+      }
+
+      // Format the data as per the requirements
+      const formattedData = data.map((row) => ({
+        SerialNumber: row.SerialNumber,
+        Timestamp: format(new Date(row.Timestamp), "dd/MM/yyyy HH:mm:ss"), // Format date to dd/mm/yyyy hh:mm:ss
+        MarkingData: row.MarkingData,
+        ScannerData: row.ScannerData,
+        Result: row.Result,
+      }));
+
+      // Create a worksheet from the formatted data
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+      // Calculate and set column widths based on the content of each column
+      const columnWidths = Object.keys(formattedData[0]).map((key) => ({
+        wch: Math.max(
+          key.length, // Column header width
+          ...formattedData.map((row) =>
+            row[key] ? row[key].toString().length : 10
+          ) // Content width
+        ),
+      }));
+      worksheet["!cols"] = columnWidths;
+
+      // Create a new workbook and append the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+
+      // Write the workbook to a binary string
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      // Create a Blob from the Excel binary and trigger download
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.style.display = "none";
@@ -70,17 +116,18 @@ function AdminPanel() {
       a.download = `report_${format(startDate, "yyyy-MM-dd")}_to_${format(
         endDate,
         "yyyy-MM-dd"
-      )}.csv`;
+      )}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+
+      toast.success("Report generated successfully!");
     } catch (error) {
       toast.error("Error generating report: " + error.message);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Optional: manage loading state
     }
   };
-
   // console.log({ csvData });
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -95,7 +142,7 @@ function AdminPanel() {
           onSelect={setEndDate}
           placeholder="End Date"
         />
-        <Button onClick={handleDownloadCSV}>Download CSV Report</Button>
+        <Button onClick={handleDownloadExcel}>Download CSV Report</Button>
       </div>
       <StyledTable data={csvData?.data} />
     </div>

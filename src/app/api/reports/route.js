@@ -1,6 +1,4 @@
 // File: app/api/reports/route.js
-
-import { parse } from "json2csv";
 import { NextResponse } from "next/server";
 import mongoDbService from "../../../../services/mongoDbService";
 import logger from "../../../../logger";
@@ -25,41 +23,14 @@ export async function POST(request) {
       );
     }
 
-    // Define fields for CSV based on your data structure
-    const fields = [
-      "Timestamp",
-      "SerialNumber",
-      "ScannerData",
-      "OCRData",
-      "Grade",
-      "Status",
-      "Shift",
-      "VendorCode",
-      "Die",
-      "PartNo",
-      "Date",
-    ];
-
-    // Convert data to CSV
-    const opts = { fields };
-    const csv = parse(data, opts);
-
-    // Create response with CSV data
-    const response = new NextResponse(csv);
-    response.headers.set("Content-Type", "text/csv");
-    response.headers.set(
-      "Content-Disposition",
-      `attachment; filename=report_${startDate}_to_${endDate}.csv`
-    );
-
     logger.info(
-      `Generated CSV report for date range: ${startDate} to ${endDate}`
+      `Fetched JSON report for date range: ${startDate} to ${endDate}`
     );
-    return response;
+    return NextResponse.json(data);
   } catch (error) {
-    logger.error("Error generating report:", error);
+    logger.error("Error fetching report:", error);
     return NextResponse.json(
-      { error: "Failed to generate report" },
+      { error: "Failed to fetch report" },
       { status: 500 }
     );
   }
