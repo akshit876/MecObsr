@@ -10,18 +10,26 @@ import {
 } from "react-icons/fa";
 import Link from "next/link";
 import { useState } from "react";
+import { useProtectedRoute } from "../../hooks/useProtectedRoute";
 
 const Sidebar = () => {
   const [active, setActive] = useState("Dashboard");
-
+  const { session } = useProtectedRoute();
   const menuItems = [
     { name: "Dashboard", icon: <FaHome />, href: "/" },
-    // { name: "Settings", icon: <FaChartBar />, href: "/widgets" },
+    ...(session?.user?.role === "admin"
+      ? [{ name: "Settings", icon: <FaCogs />, href: "/settings" }]
+      : []), // Conditionally add the settings link if the user is an admin
+    // Add more routes as needed
+  ];
+  const menuItems2 = [
+    { name: "Dashboard", icon: <FaHome />, href: "/" },
+    { name: "Settings", icon: <FaChartBar />, href: "/settings" },
     // { name: "PLC", icon: <FaCogs />, href: "/plc" },
     // { name: "Reports", icon: <FaTable />, href: "/reports" },
     // { name: "Advanced", icon: <FaBell />, href: "/advanced-ui" },
     // { name: "Marking Data", icon: <FaBell />, href: "/marking-data" },
-    { name: "Shift Settings", icon: <FaBell />, href: "/shift-settings" },
+    // { name: "Shift Settings", icon: <FaBell />, href: "/shift-settings" },
     // { name: "Manual Mode", icon: <FaBell />, href: "/manual-mode" },
     // { name: "Calendar", icon: <FaCalendar />, href: "/calendar" },
     // { name: "Settings", icon: <FaCogs />, href: "/settings" },

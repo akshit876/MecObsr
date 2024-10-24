@@ -155,6 +155,25 @@ class MongoDBService {
       socket.emit("error", { message: "Error fetching data from database" });
     }
   }
+
+  async savePartNumber(partNo) {
+    try {
+      // Delete the existing document in the collection to ensure only one record exists
+      await this.collection.deleteMany({}); // Clears the entire collection
+
+      // Insert the new part number
+      const result = await this.collection.insertOne({
+        partNo,
+        createdAt: new Date(),
+      });
+
+      logger.info(`Inserted new part number with ID: ${result.insertedId}`);
+      return result.insertedId;
+    } catch (error) {
+      logger.error("Error saving part number:", error);
+      throw error;
+    }
+  }
 }
 
 export default new MongoDBService();

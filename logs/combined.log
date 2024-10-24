@@ -14,3 +14,21 @@
 2024-10-24 10:26:08 [info]  : Connected successfully to MongoDB database: main-data
 2024-10-24 10:26:08 [info]  : Fetched JSON report for date range: 2024-10-21T18:30:00.000Z to 2024-10-22T18:30:00.000Z
 2024-10-24 10:27:41 [info]  : Fetched JSON report for date range: 2024-10-21T18:30:00.000Z to 2024-10-22T18:30:00.000Z
+2024-10-24 12:42:48 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 12:42:48 [error]  : Error saving part number:
+2024-10-24 12:45:03 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 12:45:03 [error]  : Error saving part number:
+2024-10-24 12:45:43 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 12:45:43 [error]  : Error saving part number:
+2024-10-24 12:48:43 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 12:48:43 [info]  : Inserted new part number with ID: 6719f4d3cb2bfb83dbc48918
+2024-10-24 12:48:43 [info]  : Part number asdsad saved successfully.
+2024-10-24 12:58:04 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 12:58:04 [info]  : Inserted new part number with ID: 6719f704cb2bfb83dbc48919
+2024-10-24 12:58:04 [info]  : Part number 873976008 saved successfully.
+2024-10-24 14:10:34 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 14:10:45 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-24 14:10:45 [info]  : Inserted new part number with ID: 671a080dcb2bfb83dbc4891a
+2024-10-24 14:10:45 [info]  : Part number 873976007 saved successfully.
+2024-10-24 14:16:59 [info]  : Inserted new part number with ID: 671a0983cb2bfb83dbc4891b
+2024-10-24 14:16:59 [info]  : Part number 873976007 saved successfully.
