@@ -32,3 +32,6 @@
 2024-10-24 14:10:45 [info]  : Part number 873976007 saved successfully.
 2024-10-24 14:16:59 [info]  : Inserted new part number with ID: 671a0983cb2bfb83dbc4891b
 2024-10-24 14:16:59 [info]  : Part number 873976007 saved successfully.
+2024-10-21 14:45:49 [info]  : Connected successfully to MongoDB database: main-data
+2024-10-21 14:47:25 [info]  : Inserted new part number with ID: 67161c251b417dfb18be978d
+2024-10-21 14:47:25 [info]  : Part number 873976008 saved successfully.
