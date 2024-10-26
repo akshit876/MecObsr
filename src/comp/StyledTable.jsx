@@ -36,7 +36,7 @@ const StyledTable = ({ data }) => {
                 <TableHead
                   key={header.key}
                   style={{ width: header.width }}
-                  className="bg-gray-50 text-left text-sm font-medium text-gray-500 py-3 px-4 border-b"
+                  className="bg-gray-50 text-left text-lg font-extrabold text-gray-700 py-4 px-5 border-b"
                 >
                   {header.label}
                 </TableHead>
@@ -49,24 +49,39 @@ const StyledTable = ({ data }) => {
         <div className="overflow-x-auto max-h-[36rem] overflow-y-auto">
           <Table className="w-full">
             <TableBody>
-              {data.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  className={rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                >
-                  {headers.map((header) => (
-                    <TableCell
-                      key={header.key}
-                      style={{ width: header.width }}
-                      className="text-sm text-gray-700 py-3 px-4 whitespace-nowrap overflow-hidden text-ellipsis border-b"
-                    >
-                      {header.key === "Timestamp"
-                        ? new Date(row[header.key]).toLocaleString()
-                        : row[header.key]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {data.map((row, rowIndex) => {
+                const isHighlighted = row["Result"] === "NG" || row["Result"] === "OK";
+                const rowBackgroundColor = row["Result"] === "NG"
+                  ? "bg-red-100"
+                  : row["Result"] === "OK"
+                  ? "bg-green-100"
+                  : rowIndex % 2 === 0
+                  ? "bg-white"
+                  : "bg-gray-50";
+
+                return (
+                  <TableRow
+                    key={rowIndex}
+                    className={`${rowBackgroundColor} ${isHighlighted ? "text-lg font-semibold" : "text-sm"}`}
+                  >
+                    {headers.map((header) => (
+                      <TableCell
+                        key={header.key}
+                        style={{ width: header.width }}
+                        className={`py-3 px-4 whitespace-nowrap overflow-hidden text-ellipsis border-b ${
+                          header.key === "Result" && (row[header.key] === "OK" || row[header.key] === "NG")
+                            ? "font-extrabold text-xl text-gray-900" // Extra bold and larger font for OK and NG
+                            : ""
+                        }`}
+                      >
+                        {header.key === "Timestamp"
+                          ? new Date(row[header.key]).toLocaleString()
+                          : row[header.key]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

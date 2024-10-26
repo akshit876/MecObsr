@@ -144,7 +144,7 @@ function AdminPanel() {
         />
         <Button onClick={handleDownloadExcel}>Download CSV Report</Button>
       </div>
-      <StyledTable data={csvData?.data} />
+      <StyledTable data={csvData?.data} highlightNGRows />
     </div>
   );
 }

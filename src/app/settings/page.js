@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify"; // Assuming you are using react-toastify for alerts
 
-const predefinedPartNos = ["873976007", "873976008"]; // Predefined part numbers from the image
+const predefinedPartNos = ["8739760007", "8739760008"]; // Predefined part numbers from the image
 
 const SettingsPage = () => {
   const [partNo, setPartNo] = useState(""); // State to store selected part number

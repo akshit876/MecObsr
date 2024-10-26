@@ -1,0 +1,240 @@
+2024-10-26T12:11:59: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:11:59: :: Created by npm, please don't edit manually.
+2024-10-26T12:11:59: ^
+2024-10-26T12:11:59: 
+2024-10-26T12:11:59: SyntaxError: Unexpected token ':'
+2024-10-26T12:11:59:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:11:59:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:11:59: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:11:59: :: Created by npm, please don't edit manually.
+2024-10-26T12:11:59: ^
+2024-10-26T12:11:59: 
+2024-10-26T12:11:59: SyntaxError: Unexpected token ':'
+2024-10-26T12:11:59:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:11:59:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:11:59: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:11:59: :: Created by npm, please don't edit manually.
+2024-10-26T12:11:59: ^
+2024-10-26T12:11:59: 
+2024-10-26T12:11:59: SyntaxError: Unexpected token ':'
+2024-10-26T12:11:59:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:11:59:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:11:59:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:11:59:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:11:59:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:11:59:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:00: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:00: ^
+2024-10-26T12:12:00: 
+2024-10-26T12:12:00: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:00:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:00:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:00:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:00:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:00:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:00:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:01: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:01: ^
+2024-10-26T12:12:01: 
+2024-10-26T12:12:01: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:01:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:01: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:01: ^
+2024-10-26T12:12:01: 
+2024-10-26T12:12:01: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:01:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:01: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:01: ^
+2024-10-26T12:12:01: 
+2024-10-26T12:12:01: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:01:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:01: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:01: ^
+2024-10-26T12:12:01: 
+2024-10-26T12:12:01: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:01:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01: C:\PROGRAM FILES\NODEJS\NPM.CMD:1
+2024-10-26T12:12:01: :: Created by npm, please don't edit manually.
+2024-10-26T12:12:01: ^
+2024-10-26T12:12:01: 
+2024-10-26T12:12:01: SyntaxError: Unexpected token ':'
+2024-10-26T12:12:01:     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
+2024-10-26T12:12:01:     at Object.<anonymous> (C:\Users\LASER_CASE_2\AppData\Roaming\npm\node_modules\pm2\lib\ProcessContainerFork.js:33:23)
+2024-10-26T12:12:01:     at Module._compile (node:internal/modules/cjs/loader:1469:14)
+2024-10-26T12:12:01:     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+2024-10-26T12:12:01:     at Module.load (node:internal/modules/cjs/loader:1288:32)
+2024-10-26T12:12:01:     at Module._load (node:internal/modules/cjs/loader:1104:12)
