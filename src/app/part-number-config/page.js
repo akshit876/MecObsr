@@ -42,7 +42,7 @@ import React from 'react';
 export default function PartNumberConfig() {
   const [configs, setConfigs] = useState([]);
   const [selectedConfig, setSelectedConfig] = useState(null);
-  const [fields, setFields] = useState([]);
+  const [fields, setFields] = useState(DEFAULT_FIELDS.map((field) => ({ ...field })));
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -204,66 +204,130 @@ export default function PartNumberConfig() {
     }
   };
 
+  const updateOrder = (index, newOrder) => {
+    const numericOrder = parseInt(newOrder);
+
+    // Allow empty input for temporary state
+    if (newOrder === '' || isNaN(numericOrder)) {
+      const updatedFields = fields.map((field, i) =>
+        i === index ? { ...field, order: '' } : field,
+      );
+      setFields(updatedFields);
+      return;
+    }
+
+    // Basic validation
+    if (isNaN(numericOrder) || numericOrder < 1) {
+      toast({
+        title: 'Invalid Order',
+        description: 'Please enter a positive number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update the order
+    const updatedFields = fields.map((field, i) =>
+      i === index ? { ...field, order: numericOrder } : field,
+    );
+    setFields(updatedFields);
+  };
+
+  // Sort fields by order for display
+  const sortedFields = [...fields].sort((a, b) => {
+    // Handle empty or invalid orders
+    if (a.order === '') return 1;
+    if (b.order === '') return -1;
+    return a.order - b.order;
+  });
+
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto p-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Part Number Configurations</CardTitle>
-            <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  New Configuration
-                </Button>
-              </DialogTrigger>
-              <DialogPortal>
-                <DialogOverlay className="fixed inset-0 bg-black/50" />
-                <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg md:w-full">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {isEditing ? 'Edit Configuration' : 'New Configuration'}
-                    </DialogTitle>
-                    <DialogDescription>
-                      Configure the fields for your part number.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="mt-4">
-                    <div className="space-y-4">
-                      {fields.map((field, index) => (
-                        <div
-                          key={field.fieldName}
-                          className="flex items-center gap-4 p-4 bg-secondary rounded-lg"
-                        >
-                          <div className="w-8 text-center">{field.order}</div>
-                          <div className="w-40 font-medium">
-                            {field.fieldName}
-                            {field.isRequired && <span className="text-red-500 ml-1">*</span>}
-                          </div>
-                          <Input
-                            value={field.value}
-                            onChange={(e) => updateFieldValue(index, e.target.value)}
-                            maxLength={field.maxLength}
-                            placeholder={`Max ${field.maxLength} chars`}
-                            className="max-w-[200px]"
-                          />
-                          <Checkbox
-                            checked={field.isChecked}
-                            onCheckedChange={() => toggleField(index)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <DialogFooter className="mt-6">
-                      <Button variant="outline" onClick={handleDialogClose}>
-                        Cancel
-                      </Button>
-                      <Button onClick={saveConfig}>Save Configuration</Button>
-                    </DialogFooter>
-                  </div>
-                </DialogContent>
-              </DialogPortal>
-            </Dialog>
+    <main className="min-h-screen bg-white p-6">
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-center text-xl border-b pb-2">CREATE PART NO</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-[1fr,80px,80px] gap-4 mb-4">
+            <div className="text-sm font-medium">Description</div>
+            <div className="text-sm font-medium text-center">Check Box</div>
+            <div className="text-sm font-medium text-center">Order</div>
+          </div>
+
+          {fields.map((field, index) => (
+            <div
+              key={field.fieldName}
+              className="grid grid-cols-[1fr,80px,80px] gap-4 items-center py-2 border-b border-gray-200"
+            >
+              <div className="flex items-center gap-4">
+                <span className="font-medium w-[150px]">
+                  {field.fieldName}
+                  {field.isRequired && <span className="text-red-500 ml-1">*</span>}
+                </span>
+                <Input
+                  value={field.value}
+                  onChange={(e) => updateFieldValue(index, e.target.value)}
+                  maxLength={field.maxLength}
+                  className="h-8"
+                  placeholder={`Max ${field.maxLength} chars`}
+                />
+              </div>
+              <div className="flex justify-center items-center">
+                <Checkbox
+                  checked={field.isChecked}
+                  onCheckedChange={() => toggleField(index)}
+                  className="h-5 w-5 border-2 rounded-sm"
+                />
+              </div>
+              <div className="flex justify-center items-center">
+                <Input
+                  type="text" // Changed to text to allow empty state
+                  value={field.order}
+                  onChange={(e) => updateOrder(index, e.target.value)}
+                  className="w-16 h-8 text-center"
+                  placeholder="#"
+                />
+              </div>
+            </div>
+          ))}
+
+          <div className="mt-6 pt-4 border-t">
+            <div className="flex items-center gap-4">
+              <span className="font-medium w-[150px]">Generated Part No:</span>
+              <div className="flex-1">
+                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+                  {generatePartNumber(sortedFields)} {/* Use sortedFields here */}
+                </code>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="text-sm text-muted-foreground">
+              Current Order:{' '}
+              {sortedFields
+                .filter((f) => f.isChecked && f.order !== '')
+                .map((f) => `${f.fieldName}(${f.order})`)
+                .join(' → ')}
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setFields(DEFAULT_FIELDS.map((field) => ({ ...field })))}
+            >
+              Reset
+            </Button>
+            <Button onClick={saveConfig}>Save Configuration</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {configs.length > 0 && (
+        <Card className="max-w-4xl mx-auto mt-8">
+          <CardHeader>
+            <CardTitle>Saved Configurations</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -275,7 +339,7 @@ export default function PartNumberConfig() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {configs?.map((config) => (
+                {configs.map((config) => (
                   <TableRow key={config._id}>
                     <TableCell>{new Date(config.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
@@ -305,8 +369,7 @@ export default function PartNumberConfig() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Configuration</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this configuration? This action
-                                cannot be undone.
+                                Are you sure you want to delete this configuration?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -325,7 +388,7 @@ export default function PartNumberConfig() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      )}
     </main>
   );
 }

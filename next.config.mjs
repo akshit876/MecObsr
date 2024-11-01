@@ -12,12 +12,16 @@ const nextConfig = {
   },
   // next.config.js
 
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = false;
-    }
-    return config;
-  },
+  // webpack: (config, { dev, isServer }) => {
+  //   if (dev && !isServer) {
+  //     config.watchOptions = {
+  //       poll: 1000, // Check for changes every second
+  //       aggregateTimeout: 300, // Delay before rebuilding
+  //     };
+  //     config.cache = false; // Disabling cache explicitly
+  //   }
+  //   return config;
+  // },
 };
 
 export default nextConfig;
