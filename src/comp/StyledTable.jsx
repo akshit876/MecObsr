@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import React from 'react';
 import {
@@ -9,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const StyledTable = ({ data }) => {
+const StyledTable = ({ data, highlightNGRows = false }) => {
   if (!data || data.length === 0) {
     return <p>No data available</p>;
   }

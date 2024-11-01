@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify'; // Assuming you are using react-toastify for alerts
+import { useSession } from "next-auth/react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner"; // Add this import
 
 const predefinedPartNos = ['8739760007', '8739760008']; // Predefined part numbers from the image
 
@@ -9,6 +11,7 @@ const SettingsPage = () => {
   const [partNo, setPartNo] = useState(''); // State to store selected part number
   const [loading, setLoading] = useState(false); // Loading state for API request
   const [initialLoading, setInitialLoading] = useState(true); // Loading state for initial part no fetch
+  const { data: session, status } = useSession();
 
   // Fetch the current part number when the component mounts
   useEffect(() => {
@@ -63,6 +66,14 @@ const SettingsPage = () => {
       setLoading(false);
     }
   };
+
+  if (status === "loading") {
+    return <LoadingSpinner />;
+  }
+
+  if (!session) {
+    return null; // or redirect to login
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-center">

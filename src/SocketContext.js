@@ -2,6 +2,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
+import { useSession } from "next-auth/react";
 
 // Create a Context for the socket connection
 const SocketContext = createContext(null);
@@ -13,24 +14,36 @@ export const useSocket = () => {
 // Socket Provider component
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const { status, data: session } = useSession();
 
   useEffect(() => {
-    const newSocket = io.connect('http://localhost:3002', {
-      withCredentials: true,
-      transportOptions: {
-        polling: {
-          extraHeaders: {
-            'my-custom-header': 'value',
+    // Only connect if user is authenticated
+    if (status === "authenticated" && session) {
+      const newSocket = io.connect('http://localhost:3002', {
+        withCredentials: true,
+        transportOptions: {
+          polling: {
+            extraHeaders: {
+              'my-custom-header': 'value',
+            },
           },
         },
-      },
-    }); // Adjust the URL as needed
-    setSocket(newSocket);
+      });
+      setSocket(newSocket);
 
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+    
+    // Cleanup socket if session ends
     return () => {
-      newSocket.disconnect(); // Cleanup on unmount
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
     };
-  }, []);
+  }, [status, session]);
 
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };

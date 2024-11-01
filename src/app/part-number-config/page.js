@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,13 +15,14 @@ import {
 } from '@/components/ui/table';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogOverlay,
+  DialogPortal,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -36,7 +36,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DEFAULT_FIELDS } from '../../db/models/partNumber.model';
-import { PlusCircle } from 'lucide-react';
+import { Copy, Edit, PlusCircle, Trash2 } from 'lucide-react';
+import React from 'react';
 
 export default function PartNumberConfig() {
   const [configs, setConfigs] = useState([]);
@@ -145,13 +146,6 @@ export default function PartNumberConfig() {
     setDialogOpen(true);
   };
 
-  const handleNew = () => {
-    setSelectedConfig(null);
-    setFields(DEFAULT_FIELDS.map((field) => ({ ...field })));
-    setIsEditing(false);
-    setDialogOpen(true);
-  };
-
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`/api/part-number-config/${id}`, {
@@ -197,60 +191,78 @@ export default function PartNumberConfig() {
     setIsEditing(false);
   };
 
+  const handleDialogOpenChange = (open) => {
+    setDialogOpen(open);
+    if (open) {
+      setSelectedConfig(null);
+      setFields(DEFAULT_FIELDS.map((field) => ({ ...field })));
+      setIsEditing(false);
+    } else {
+      setFields([]);
+      setSelectedConfig(null);
+      setIsEditing(false);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen">
       <div className="container mx-auto p-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Part Number Configurations</CardTitle>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
               <DialogTrigger asChild>
-                <Button onClick={handleNew}>
+                <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   New Configuration
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>
-                    {isEditing ? 'Edit Configuration' : 'New Configuration'}
-                  </DialogTitle>
-                  <DialogDescription>Configure the fields for your part number.</DialogDescription>
-                </DialogHeader>
-                <div className="mt-4">
-                  <div className="space-y-4">
-                    {fields.map((field, index) => (
-                      <div
-                        key={field.fieldName}
-                        className="flex items-center gap-4 p-4 bg-secondary rounded-lg"
-                      >
-                        <div className="w-8 text-center">{field.order}</div>
-                        <div className="w-40 font-medium">
-                          {field.fieldName}
-                          {field.isRequired && <span className="text-red-500 ml-1">*</span>}
+              <DialogPortal>
+                <DialogOverlay className="fixed inset-0 bg-black/50" />
+                <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg md:w-full">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {isEditing ? 'Edit Configuration' : 'New Configuration'}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Configure the fields for your part number.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <div className="space-y-4">
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.fieldName}
+                          className="flex items-center gap-4 p-4 bg-secondary rounded-lg"
+                        >
+                          <div className="w-8 text-center">{field.order}</div>
+                          <div className="w-40 font-medium">
+                            {field.fieldName}
+                            {field.isRequired && <span className="text-red-500 ml-1">*</span>}
+                          </div>
+                          <Input
+                            value={field.value}
+                            onChange={(e) => updateFieldValue(index, e.target.value)}
+                            maxLength={field.maxLength}
+                            placeholder={`Max ${field.maxLength} chars`}
+                            className="max-w-[200px]"
+                          />
+                          <Checkbox
+                            checked={field.isChecked}
+                            onCheckedChange={() => toggleField(index)}
+                          />
                         </div>
-                        <Input
-                          value={field.value}
-                          onChange={(e) => updateFieldValue(index, e.target.value)}
-                          maxLength={field.maxLength}
-                          placeholder={`Max ${field.maxLength} chars`}
-                          className="max-w-[200px]"
-                        />
-                        <Checkbox
-                          checked={field.isChecked}
-                          onCheckedChange={() => toggleField(index)}
-                        />
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <DialogFooter className="mt-6">
+                      <Button variant="outline" onClick={handleDialogClose}>
+                        Cancel
+                      </Button>
+                      <Button onClick={saveConfig}>Save Configuration</Button>
+                    </DialogFooter>
                   </div>
-                  <DialogFooter className="mt-6">
-                    <Button variant="outline" onClick={handleDialogClose}>
-                      Cancel
-                    </Button>
-                    <Button onClick={saveConfig}>Save Configuration</Button>
-                  </DialogFooter>
-                </div>
-              </DialogContent>
+                </DialogContent>
+              </DialogPortal>
             </Dialog>
           </CardHeader>
           <CardContent>

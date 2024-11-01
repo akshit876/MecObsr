@@ -1,17 +1,14 @@
-/* eslint-disable react/prop-types */
 // app/layout.js or app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import AuthProvider from './context/authprovider';
-import { SessionProvider } from 'next-auth/react';
-import './globals.css';
+
+import { ErrorToastHandler } from '@/comp/ErrorToasthandler';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { SocketProvider } from '@/SocketContext';
-import { ToastProvider } from '@/comp/ToastProvider';
-import { ErrorToastHandler } from '@/comp/ErrorToasthandler';
+import './globals.css';
 import { Providers } from './providers';
+import React from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 

@@ -1,19 +1,17 @@
 'use client';
 import StyledTable from '@/comp/StyledTable';
-import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks';
-import { toast, ToastContainer } from 'react-toastify';
-import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-
-import { cn } from '@/lib/utils';
-import { Calendar, CalendarIcon } from 'lucide-react';
-import { DatePicker } from '@/components/ui/date-picker';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useProtectedRoute } from '../../hooks/useProtectedRoute';
-import PartNumberConfig from '@/components/PartNumberConfig';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
+import { useProtectedRoute } from '../../hooks/useProtectedRoute';
+import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 function AdminPanel() {
   const { csvData, loading } = useCsvData();
@@ -26,9 +24,7 @@ function AdminPanel() {
   console.log({ startDate, endDate });
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">Loading...</div>
-    );
+    return <LoadingSpinner />;
   }
 
   // If no session, the hook will redirect, but we can return null while that happens
@@ -126,13 +122,35 @@ function AdminPanel() {
   };
   // console.log({ csvData });
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="mb-6 flex items-center space-x-4">
-        <DatePicker selected={startDate} onSelect={setStartDate} placeholder="Start Date" />
-        <DatePicker selected={endDate} onSelect={setEndDate} placeholder="End Date" />
-        <Button onClick={handleDownloadExcel}>Download CSV Report</Button>
-      </div>
-      <StyledTable data={csvData?.data} highlightNGRows />
+    <div className="h-[calc(100vh-4rem)] bg-gray-100">
+      {status === 'loading' ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="h-full flex flex-col">
+          <div className="flex items-center gap-4 px-0 py-4">
+            <DatePicker selected={startDate} onSelect={setStartDate} placeholder="Start Date" />
+            <DatePicker selected={endDate} onSelect={setEndDate} placeholder="End Date" />
+            <Button 
+              variant="secondary" 
+              style={{ color: 'white' }}
+              className="[&]:!text-white [&>*]:!text-white [&]:hover:!text-white"
+              onClick={handleDownloadExcel}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
+                  Generating...
+                </>
+              ) : (
+                'Download CSV Report'
+              )}
+            </Button>
+          </div>
+          <div className="px-0 flex-1">
+            <StyledTable data={csvData?.data} highlightNGRows />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
