@@ -1,6 +1,6 @@
-import { format } from "date-fns";
-import SerialNumberGeneratorService from "./serialNumber.js";
-import logger from "../logger.js";
+import { format } from 'date-fns';
+import SerialNumberGeneratorService from './serialNumber.js';
+import logger from '../logger.js';
 
 class BarcodeGenerator {
   constructor(shiftUtility) {
@@ -11,15 +11,15 @@ class BarcodeGenerator {
   async initialize(dbName, collectionName) {
     try {
       await this.serialNumberService.initialize(dbName, collectionName);
-      logger.info("BarcodeGenerator initialized successfully");
+      logger.info('BarcodeGenerator initialized successfully');
     } catch (error) {
-      logger.error("Failed to initialize BarcodeGenerator:", error);
+      logger.error('Failed to initialize BarcodeGenerator:', error);
       throw error;
     }
   }
 
   generateBarcodeData(date = new Date()) {
-    const dateString = format(date, "ddMMyy");
+    const dateString = format(date, 'ddMMyy');
     const shift = this.shiftUtility.getCurrentShift(date);
     // const shiftCode = this.getShiftCode(shift);
     const serialString = this.serialNumberService.getNextSerialNumber();

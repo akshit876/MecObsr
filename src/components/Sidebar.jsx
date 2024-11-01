@@ -1,30 +1,23 @@
 // components/Sidebar.js
-"use client";
-import {
-  FaHome,
-  FaChartBar,
-  FaCogs,
-  FaBell,
-  FaTable,
-  FaCalendar,
-} from "react-icons/fa";
-import Link from "next/link";
-import { useState } from "react";
-import { useProtectedRoute } from "../../hooks/useProtectedRoute";
+'use client';
+import { FaHome, FaChartBar, FaCogs, FaBell, FaTable, FaCalendar } from 'react-icons/fa';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 
 const Sidebar = () => {
-  const [active, setActive] = useState("Dashboard");
+  const [active, setActive] = useState('Dashboard');
   const { session } = useProtectedRoute();
   const menuItems = [
-    { name: "Dashboard", icon: <FaHome />, href: "/" },
-    ...(session?.user?.role === "admin"
-      ? [{ name: "Settings", icon: <FaCogs />, href: "/settings" }]
+    { name: 'Dashboard', icon: <FaHome />, href: '/' },
+    ...(session?.user?.role === 'admin'
+      ? [{ name: 'Settings', icon: <FaCogs />, href: '/settings' }]
       : []), // Conditionally add the settings link if the user is an admin
     // Add more routes as needed
   ];
   const menuItems2 = [
-    { name: "Dashboard", icon: <FaHome />, href: "/" },
-    { name: "Settings", icon: <FaChartBar />, href: "/settings" },
+    { name: 'Dashboard', icon: <FaHome />, href: '/' },
+    { name: 'Settings', icon: <FaChartBar />, href: '/settings' },
     // { name: "PLC", icon: <FaCogs />, href: "/plc" },
     // { name: "Reports", icon: <FaTable />, href: "/reports" },
     // { name: "Advanced", icon: <FaBell />, href: "/advanced-ui" },
@@ -46,9 +39,7 @@ const Sidebar = () => {
             key={item.name}
             href={item.href}
             className={`flex items-center gap-3 p-2 rounded-md transition-all ${
-              active === item.name
-                ? "bg-[#4B49AC] text-white"
-                : "text-[#7DA0FA] hover:bg-[#2D2F3A]"
+              active === item.name ? 'bg-[#4B49AC] text-white' : 'text-[#7DA0FA] hover:bg-[#2D2F3A]'
             }`}
             onClick={() => setActive(item.name)}
           >

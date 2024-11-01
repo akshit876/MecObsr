@@ -1,29 +1,29 @@
-"use client";
-import React from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import { Select } from "@/components/ui/select";
+'use client';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { Select } from '@/components/ui/select';
 
 const Register = () => {
   const router = useRouter();
-  const [username, setUsername] = React.useState("");
-  const [pass, setPassword] = React.useState("");
-  const [confirmPass, setConfirmPass] = React.useState("");
-  const [role, setRole] = React.useState("operator"); // default role
-  const [error, setError] = React.useState("");
+  const [username, setUsername] = React.useState('');
+  const [pass, setPassword] = React.useState('');
+  const [confirmPass, setConfirmPass] = React.useState('');
+  const [role, setRole] = React.useState('operator'); // default role
+  const [error, setError] = React.useState('');
 
-  const baseURL = process.env.NEXT_PUBLIC_HOSTNAME + "register";
+  const baseURL = process.env.NEXT_PUBLIC_HOSTNAME + 'register';
 
   const validateForm = () => {
     if (pass !== confirmPass) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return false;
     }
     if (!username || !pass || !confirmPass || !role) {
-      setError("All fields are required");
+      setError('All fields are required');
       return false;
     }
-    setError("");
+    setError('');
     return true;
   };
 
@@ -39,11 +39,11 @@ const Register = () => {
     try {
       const response = await axios.post(baseURL, requestBody);
       console.log(response);
-      alert("Account created successfully!");
-      router.push("/");
+      alert('Account created successfully!');
+      router.push('/');
     } catch (error) {
-      console.error("Registration error:", error);
-      setError(error.response?.data?.message || "Something went wrong...");
+      console.error('Registration error:', error);
+      setError(error.response?.data?.message || 'Something went wrong...');
     }
   };
 
@@ -67,10 +67,7 @@ const Register = () => {
           }}
         >
           <div className="mb-4">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="username" className="block text-sm font-medium text-gray-600">
               Username
             </label>
             <input
@@ -83,10 +80,7 @@ const Register = () => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
               Password
             </label>
             <input
@@ -99,10 +93,7 @@ const Register = () => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-600">
               Confirm Password
             </label>
             <input
@@ -115,10 +106,7 @@ const Register = () => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="role" className="block text-sm font-medium text-gray-600">
               Role
             </label>
             <select

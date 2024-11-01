@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useErrorToast } from "../../hooks/useToast";
+import { useErrorToast } from '../../hooks/useToast';
 
 // import { useErrorToast } from "../hooks/useErrorToast";
 

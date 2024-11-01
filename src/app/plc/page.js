@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ErrorToastHandler } from "@/comp/ErrorToasthandler";
-import ModbusUI from "@/comp/ModbusPLC";
-import { ToastProvider } from "@/comp/ToastProvider";
+import { ErrorToastHandler } from '@/comp/ErrorToasthandler';
+import ModbusUI from '@/comp/ModbusPLC';
+import { ToastProvider } from '@/comp/ToastProvider';
 
 export default function ModbusPage() {
   return (

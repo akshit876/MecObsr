@@ -1,5 +1,5 @@
-import { parse, isAfter, isBefore, addDays, format, set } from "date-fns";
-import mongoDbService from "./mongoDbService.js";
+import { parse, isAfter, isBefore, addDays, format, set } from 'date-fns';
+import mongoDbService from './mongoDbService.js';
 
 export function transformMongoObject(shiftConfig) {
   // Create an array of shifts
@@ -22,7 +22,7 @@ export function transformMongoObject(shiftConfig) {
 }
 
 export async function getShiftConfigFromDB() {
-  await mongoDbService.connect("main-data", "configs");
+  await mongoDbService.connect('main-data', 'configs');
   const collection = mongoDbService.collection;
   const config = await collection.findOne({});
   console.log({ config });
@@ -30,21 +30,21 @@ export async function getShiftConfigFromDB() {
 }
 
 export async function updateShiftConfigInDB(newConfig) {
-  await mongoDbService.connect("main-data", "configs");
+  await mongoDbService.connect('main-data', 'configs');
   const collection = mongoDbService.collection;
   await collection.updateOne(
     {}, // Update the first document found
     { $set: { shiftConfig: newConfig } }, // Set the new configuration
-    { upsert: true } // Create a new document if none exists
+    { upsert: true }, // Create a new document if none exists
   );
 }
 class ShiftUtility {
   constructor(shiftConfig = null) {
     // Initialize shiftConfig from MongoDB
     this.shiftConfig = shiftConfig || {
-      A: { start: "06:00", end: "14:30" },
-      B: { start: "14:30", end: "23:00" },
-      C: { start: "23:00", end: "06:00" },
+      A: { start: '06:00', end: '14:30' },
+      B: { start: '14:30', end: '23:00' },
+      C: { start: '23:00', end: '06:00' },
     };
   }
 
@@ -66,8 +66,7 @@ class ShiftUtility {
       }
 
       if (
-        (isAfter(currentTime, start) ||
-          currentTime.getTime() === start.getTime()) &&
+        (isAfter(currentTime, start) || currentTime.getTime() === start.getTime()) &&
         isBefore(currentTime, end)
       ) {
         return shift;
@@ -75,7 +74,7 @@ class ShiftUtility {
     }
 
     // If no shift is found (shouldn't happen with 24-hour coverage)
-    return "Unknown";
+    return 'Unknown';
   }
 
   getNextShift(currentShift) {
@@ -93,7 +92,7 @@ class ShiftUtility {
   }
 
   _parseTime(timeString, baseDate) {
-    const [hours, minutes] = timeString.split(":").map(Number);
+    const [hours, minutes] = timeString.split(':').map(Number);
     return set(baseDate, { hours, minutes, seconds: 0, milliseconds: 0 });
   }
 
@@ -163,5 +162,5 @@ async function run() {
 
 // Run the example
 run().catch((error) => {
-  console.error("Error running the shift utility:", error);
+  console.error('Error running the shift utility:', error);
 });

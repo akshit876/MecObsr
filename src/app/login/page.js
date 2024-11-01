@@ -1,34 +1,30 @@
-"use client";
-import React from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+'use client';
+import React from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
   const router = useRouter();
-  const [username, setU] = React.useState("");
-  const [pass, setP] = React.useState("");
+  const [username, setU] = React.useState('');
+  const [pass, setP] = React.useState('');
 
   const submitHandler = async (data) => {
-    const resdata = await signIn("credentials", {
+    const resdata = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
     });
 
     console.log(resdata);
-    if (
-      resdata.status === 400 ||
-      resdata.status === 401 ||
-      resdata.status === 403
-    ) {
-      console.log("Invalid Credentials!");
-      alert("Invalid Credentials!");
+    if (resdata.status === 400 || resdata.status === 401 || resdata.status === 403) {
+      console.log('Invalid Credentials!');
+      alert('Invalid Credentials!');
     } else if (resdata.status === 500) {
-      console.log("Server error!");
-      alert("Server error!");
+      console.log('Server error!');
+      alert('Server error!');
     } else {
-      alert("Login successfull!");
-      router.push("/");
+      alert('Login successfull!');
+      router.push('/');
       console.log(resdata);
     }
   };
@@ -47,10 +43,7 @@ const Login = () => {
           }}
         >
           <div className="mb-4">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="username" className="block text-sm font-medium text-gray-600">
               Username
             </label>
             <input
@@ -63,10 +56,7 @@ const Login = () => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
               Password
             </label>
             <input

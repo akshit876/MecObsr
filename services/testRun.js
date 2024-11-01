@@ -1,5 +1,5 @@
 // import BufferedComPortService from "./ComPortService.js";
-import { writeBitsWithRest } from "./modbus.js";
+import { writeBitsWithRest } from './modbus.js';
 // import { sleep } from "./testCycle.js";
 
 // const comService = new BufferedComPortService({
@@ -37,8 +37,8 @@ async function runn() {
     //   }
     // }
   } catch (comError) {
-    console.log("Failed to initialize serial port:", comError);
-    console.log("Retrying in 5 seconds...");
+    console.log('Failed to initialize serial port:', comError);
+    console.log('Retrying in 5 seconds...');
     // await sleep(5000);
   }
 }

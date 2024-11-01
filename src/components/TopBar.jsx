@@ -1,8 +1,8 @@
-"use client";
-import { useState } from "react";
-import { FaSearch, FaUserCircle } from "react-icons/fa";
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+'use client';
+import { useState } from 'react';
+import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +10,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { IoSettingsOutline } from "react-icons/io5";
-import { FiLogOut } from "react-icons/fi";
-import { CgProfile } from "react-icons/cg";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { FiLogOut } from 'react-icons/fi';
+import { CgProfile } from 'react-icons/cg';
 
 const TopBar = () => {
   const { data: session } = useSession();
@@ -24,9 +24,9 @@ const TopBar = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      router.push("/login");
+      router.push('/login');
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     }
   };
 
@@ -66,13 +66,11 @@ const TopBar = () => {
             <DropdownMenuLabel className="p-3 bg-gray-50/50 rounded-md">
               <div className="flex flex-col space-y-2">
                 <p className="text-sm font-semibold text-gray-900">
-                  {session?.user?.name || "User"}
+                  {session?.user?.name || 'User'}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {session?.user?.email}
-                </p>
+                <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
                 <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 mt-1 w-fit">
-                  {session?.user?.role || "user"}
+                  {session?.user?.role || 'user'}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -82,7 +80,7 @@ const TopBar = () => {
             {/* Menu Items */}
             <DropdownMenuItem
               className="p-3 cursor-pointer hover:bg-gray-50 rounded-md flex items-center gap-3 text-gray-700"
-              onClick={() => router.push("/profile")}
+              onClick={() => router.push('/profile')}
             >
               <CgProfile className="h-4 w-4" />
               <span>Profile</span>
@@ -90,7 +88,7 @@ const TopBar = () => {
 
             <DropdownMenuItem
               className="p-3 cursor-pointer hover:bg-gray-50 rounded-md flex items-center gap-3 text-gray-700"
-              onClick={() => router.push("/settings")}
+              onClick={() => router.push('/settings')}
             >
               <IoSettingsOutline className="h-4 w-4" />
               <span>Settings</span>

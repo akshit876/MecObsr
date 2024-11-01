@@ -1,8 +1,8 @@
-import logger from "../logger.js";
+import logger from '../logger.js';
 
 export function emitErrorEvent(socket, errorType, errorMessage) {
   if (socket) {
-    socket.emit("error", {
+    socket.emit('error', {
       type: errorType,
       message: errorMessage,
     });

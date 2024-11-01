@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const configSchema = new Schema(
   {
@@ -7,7 +7,7 @@ const configSchema = new Schema(
       required: true,
     },
   },
-  { collection: "configs" } // Specify the collection name
+  { collection: 'configs' }, // Specify the collection name
 );
 
 export default configSchema;

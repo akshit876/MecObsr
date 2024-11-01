@@ -1,17 +1,17 @@
-"use client";
-import { useSocket } from "@/SocketContext";
-import React, { useState, useEffect, useRef } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+'use client';
+import { useSocket } from '@/SocketContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ServoSettings = () => {
   const [settings, setSettings] = useState({
-    homePosition: { position: "234.56", speed: "1000" },
-    scannerPosition: { position: "234.56", speed: "1000" },
-    ocrPosition: { position: "234.56", speed: "1000" },
-    markPosition: { position: "234.56", speed: "1000" },
-    fwdEndLimit: "234.56",
-    revEndLimit: "234.56",
+    homePosition: { position: '234.56', speed: '1000' },
+    scannerPosition: { position: '234.56', speed: '1000' },
+    ocrPosition: { position: '234.56', speed: '1000' },
+    markPosition: { position: '234.56', speed: '1000' },
+    fwdEndLimit: '234.56',
+    revEndLimit: '234.56',
   });
 
   const [loading, setLoading] = useState({
@@ -52,10 +52,10 @@ const ServoSettings = () => {
     }
     return () => {
       if (socket) {
-        socket.off("servo-settings-update");
-        socket.off("servo-setting-change-response");
-        socket.off("manual-run-response");
-        socket.off("servo-setting-change");
+        socket.off('servo-settings-update');
+        socket.off('servo-setting-change-response');
+        socket.off('manual-run-response');
+        socket.off('servo-setting-change');
       }
     };
   }, [socket]);
@@ -71,8 +71,7 @@ const ServoSettings = () => {
 
   const handleInputBlur = (key, subKey) => {
     const value = inputRefs.current[key][subKey].value;
-    const isPosition =
-      subKey === "position" || key === "fwdEndLimit" || key === "revEndLimit";
+    const isPosition = subKey === 'position' || key === 'fwdEndLimit' || key === 'revEndLimit';
     if (validateInput(value, isPosition)) {
       setSettings((prev) => ({
         ...prev,
@@ -84,7 +83,7 @@ const ServoSettings = () => {
           setting: key,
           value: subKey ? { [subKey]: value } : value,
         });
-        socket.emit("servo-setting-change", {
+        socket.emit('servo-setting-change', {
           setting: key,
           value: subKey ? { [subKey]: value } : value,
         });
@@ -93,9 +92,9 @@ const ServoSettings = () => {
       toast.error(
         `Invalid input. ${
           isPosition
-            ? "Position must be between 1.00 and 400.00"
-            : "Speed must be between 0 and 2000"
-        }`
+            ? 'Position must be between 1.00 and 400.00'
+            : 'Speed must be between 0 and 2000'
+        }`,
       );
       // Revert the input value to the original settings value if validation fails
       if (inputRefs.current[key] && inputRefs.current[key][subKey]) {
@@ -107,7 +106,7 @@ const ServoSettings = () => {
   const handleButtonClick = (operation) => {
     if (socket) {
       setLoading((prev) => ({ ...prev, [operation]: true }));
-      socket.emit("manual-run", operation);
+      socket.emit('manual-run', operation);
       setTimeout(() => {
         setLoading((prev) => ({ ...prev, [operation]: false }));
       }, 200);
@@ -115,19 +114,12 @@ const ServoSettings = () => {
   };
 
   const handleInputKeyDown = (e, key, subKey) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleInputBlur(key, subKey);
     }
   };
 
-  const InputValue = ({
-    value,
-    register,
-    onBlur,
-    onKeyDown,
-    inputKey,
-    subKey,
-  }) => (
+  const InputValue = ({ value, register, onBlur, onKeyDown, inputKey, subKey }) => (
     <div className="relative bg-black border border-green-500 w-32 h-12 rounded-md overflow-hidden">
       <input
         type="text"
@@ -142,18 +134,11 @@ const ServoSettings = () => {
         onKeyDown={(e) => onKeyDown(e, inputKey, subKey)} // Handle key down events
         className="w-full h-full bg-transparent text-green-400 font-bold text-2xl px-2 text-right focus:outline-none focus:ring-2 focus:ring-green-500"
       />
-      <div className="absolute bottom-0 left-1 text-[10px] text-white">
-        {register}
-      </div>
+      <div className="absolute bottom-0 left-1 text-[10px] text-white">{register}</div>
     </div>
   );
 
-  const PositionButton = ({
-    label,
-    register,
-    operation,
-    color = "bg-purple-400",
-  }) => (
+  const PositionButton = ({ label, register, operation, color = 'bg-purple-400' }) => (
     <button
       className={`${color} text-black border border-green-500 rounded-md h-14 w-36 text-sm font-semibold hover:opacity-90 transition-opacity flex flex-col justify-center items-center relative`}
       onClick={() => handleButtonClick(operation)}
@@ -165,7 +150,7 @@ const ServoSettings = () => {
         </div>
       ) : (
         <>
-          {label.split("\n").map((text, i) => (
+          {label.split('\n').map((text, i) => (
             <div key={i}>{text}</div>
           ))}
           <span className="text-[10px]">{register}</span>
@@ -177,28 +162,20 @@ const ServoSettings = () => {
   return (
     <div className="min-h-screen bg-black text-white p-8 flex justify-center items-center">
       <div className="w-[1000px]">
-        <h1 className="text-4xl font-bold text-center text-white mb-8">
-          SERVO SETTINGS
-        </h1>
+        <h1 className="text-4xl font-bold text-center text-white mb-8">SERVO SETTINGS</h1>
 
         <div className="space-y-6">
           <div className="flex items-center mb-2">
             <div className="w-48"></div>
             <div className="flex space-x-4 items-center">
-              <span className="text-sm font-bold text-white w-32 text-center">
-                POSITION/MM
-              </span>
-              <span className="text-sm font-bold text-white w-32 text-center">
-                SPEED/RPM
-              </span>
+              <span className="text-sm font-bold text-white w-32 text-center">POSITION/MM</span>
+              <span className="text-sm font-bold text-white w-32 text-center">SPEED/RPM</span>
             </div>
           </div>
 
-          {["HOME", "SCANNER", "OCR", "MARK"].map((position, index) => (
+          {['HOME', 'SCANNER', 'OCR', 'MARK'].map((position, index) => (
             <div key={position} className="flex items-center">
-              <span className="text-lg font-bold w-48 text-white">
-                {position} POSITION
-              </span>
+              <span className="text-lg font-bold w-48 text-white">{position} POSITION</span>
               <div className="flex space-x-4 items-center">
                 <InputValue
                   value={settings[`${position.toLowerCase()}Position`].position}
@@ -227,9 +204,7 @@ const ServoSettings = () => {
           ))}
 
           <div className="flex items-center">
-            <span className="text-lg font-bold w-48 text-white">
-              FWD END LIMIT
-            </span>
+            <span className="text-lg font-bold w-48 text-white">FWD END LIMIT</span>
             <div className="flex space-x-4 items-center">
               <InputValue
                 value={settings.fwdEndLimit}
@@ -239,18 +214,12 @@ const ServoSettings = () => {
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown} // Pass key down handler
               />
-              <PositionButton
-                label="JOG FWD"
-                register="D1414.B8"
-                operation="jogFwd"
-              />
+              <PositionButton label="JOG FWD" register="D1414.B8" operation="jogFwd" />
             </div>
           </div>
 
           <div className="flex items-center">
-            <span className="text-lg font-bold w-48 text-white">
-              REV END LIMIT
-            </span>
+            <span className="text-lg font-bold w-48 text-white">REV END LIMIT</span>
             <div className="flex space-x-4 items-center">
               <InputValue
                 value={settings.revEndLimit}
@@ -260,11 +229,7 @@ const ServoSettings = () => {
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown} // Pass key down handler
               />
-              <PositionButton
-                label="JOG REV"
-                register="D1414.B9"
-                operation="jogRev"
-              />
+              <PositionButton label="JOG REV" register="D1414.B9" operation="jogRev" />
               <PositionButton
                 label="SERVO HOME"
                 register="D1414.B10"

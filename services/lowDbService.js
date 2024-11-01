@@ -1,14 +1,14 @@
 /* eslint-disable consistent-return */
-import { Low } from "lowdb";
-import { JSONFilePreset } from "lowdb/node";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
+import { Low } from 'lowdb';
+import { JSONFilePreset } from 'lowdb/node';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Define the path to the database file
-const filePath = path.join(__dirname, "../data", "db.json");
+const filePath = path.join(__dirname, '../data', 'db.json');
 console.log({ filePath });
 
 // Set up the adapter and LowDB instance
@@ -26,7 +26,7 @@ async function initDb() {
     db.data ||= { data: {} };
     await db.write();
   } catch (error) {
-    console.error("Error reading or writing database:", error);
+    console.error('Error reading or writing database:', error);
     // Optionally throw the error to stop execution or handle differently
     throw error;
   }
@@ -38,7 +38,7 @@ async function setData(key, value) {
     db.data.data[key] = value;
     await db.write();
   } catch (error) {
-    console.error("Error writing to database:", error);
+    console.error('Error writing to database:', error);
   }
 }
 
@@ -52,7 +52,7 @@ async function deleteData(key) {
     }
     return false;
   } catch (error) {
-    console.error("Error writing to database:", error);
+    console.error('Error writing to database:', error);
   }
 }
 

@@ -1,5 +1,5 @@
-import { MongoClient } from "mongodb";
-import logger from "../logger.js";
+import { MongoClient } from 'mongodb';
+import logger from '../logger.js';
 // import logger from "./logger.js";
 
 class MongoDBService {
@@ -11,7 +11,7 @@ class MongoDBService {
 
   async connect(dbName, collectionName) {
     try {
-      const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
+      const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
       this.client = new MongoClient(uri);
       await this.client.connect();
       this.db = this.client.db(dbName);
@@ -19,7 +19,7 @@ class MongoDBService {
       logger.info(`Connected successfully to MongoDB database: ${dbName}`);
     } catch (error) {
       console.error({ error });
-      logger.error("MongoDB connection error:", error);
+      logger.error('MongoDB connection error:', error);
       throw error;
     }
   }
@@ -27,7 +27,7 @@ class MongoDBService {
   async disconnect() {
     if (this.client) {
       await this.client.close();
-      logger.info("Disconnected from MongoDB");
+      logger.info('Disconnected from MongoDB');
     }
   }
 
@@ -37,24 +37,20 @@ class MongoDBService {
       logger.info(`Inserted record with ID: ${result.insertedId}`);
       return result.insertedId;
     } catch (error) {
-      logger.error("Error inserting record:", error);
+      logger.error('Error inserting record:', error);
       throw error;
     }
   }
 
   async getLatestSerialNumber() {
     try {
-      const latestRecord = await this.collection
-        .find()
-        .sort({ Timestamp: -1 })
-        .limit(1)
-        .toArray();
+      const latestRecord = await this.collection.find().sort({ Timestamp: -1 }).limit(1).toArray();
       if (latestRecord.length > 0) {
         return parseInt(latestRecord[0].SerialNumber, 10);
       }
       return 0;
     } catch (error) {
-      logger.error("Error getting latest serial number:", error);
+      logger.error('Error getting latest serial number:', error);
       throw error;
     }
   }
@@ -67,7 +63,7 @@ class MongoDBService {
         })
         .toArray();
     } catch (error) {
-      logger.error("Error getting records by date range:", error);
+      logger.error('Error getting records by date range:', error);
       throw error;
     }
   }
@@ -86,21 +82,18 @@ class MongoDBService {
         })
         .toArray();
     } catch (error) {
-      logger.error("Error getting records by shift:", error);
+      logger.error('Error getting records by shift:', error);
       throw error;
     }
   }
 
   async updateRecord(id, updateData) {
     try {
-      const result = await this.collection.updateOne(
-        { _id: id },
-        { $set: updateData }
-      );
+      const result = await this.collection.updateOne({ _id: id }, { $set: updateData });
       logger.info(`Updated ${result.modifiedCount} record(s)`);
       return result.modifiedCount;
     } catch (error) {
-      logger.error("Error updating record:", error);
+      logger.error('Error updating record:', error);
       throw error;
     }
   }
@@ -109,27 +102,19 @@ class MongoDBService {
     try {
       // Check if we're connected to the database, if not, try to connect
       if (!this.collection) {
-        logger.info(
-          "MongoDB connection not established. Attempting to connect..."
-        );
+        logger.info('MongoDB connection not established. Attempting to connect...');
         if (!dbName || !collectionName) {
-          throw new Error(
-            "Database name and collection name are required for connection"
-          );
+          throw new Error('Database name and collection name are required for connection');
         }
         await this.connect(dbName, collectionName);
       }
 
       // Fetch data from MongoDB, sorted in descending order by Timestamp
-      const data = await this.collection
-        .find({})
-        .sort({ Timestamp: -1 })
-        .limit(100)
-        .toArray();
+      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(100).toArray();
 
       if (data.length === 0) {
-        logger.info("No data found in MongoDB collection.");
-        socket.emit("mongodb-data", { data: [] });
+        logger.info('No data found in MongoDB collection.');
+        socket.emit('mongodb-data', { data: [] });
         return;
       }
 
@@ -147,12 +132,12 @@ class MongoDBService {
       // console.log({ transformedData });
 
       // Send the data to the client
-      socket.emit("csv-data", { data: transformedData });
+      socket.emit('csv-data', { data: transformedData });
       logger.info(`Emitted MongoDB data to client: ${socket.id}`);
     } catch (error) {
       console.error({ error });
-      logger.error("Error in sendMongoDbDataToClient: ", error.message);
-      socket.emit("error", { message: "Error fetching data from database" });
+      logger.error('Error in sendMongoDbDataToClient: ', error.message);
+      socket.emit('error', { message: 'Error fetching data from database' });
     }
   }
 
@@ -170,7 +155,7 @@ class MongoDBService {
       logger.info(`Inserted new part number with ID: ${result.insertedId}`);
       return result.insertedId;
     } catch (error) {
-      logger.error("Error saving part number:", error);
+      logger.error('Error saving part number:', error);
       throw error;
     }
   }

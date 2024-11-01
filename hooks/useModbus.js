@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
-import { useState, useEffect, useCallback } from "react";
-import { useSocket } from "@/SocketContext";
+import { useState, useEffect, useCallback } from 'react';
+import { useSocket } from '@/SocketContext';
 
 export function useModbus({ readRange, writeRange, readOnly = false }) {
   const [readRegisters, setReadRegisters] = useState({});
@@ -10,7 +10,7 @@ export function useModbus({ readRange, writeRange, readOnly = false }) {
 
   const fetchReadRegisters = useCallback(() => {
     if (socket && readOnly) {
-      socket.emit("request-modbus-data", {
+      socket.emit('request-modbus-data', {
         register: readRange.register,
         bits: readRange.bits,
         interval: 500,
@@ -42,20 +42,20 @@ export function useModbus({ readRange, writeRange, readOnly = false }) {
     // Listen for Modbus data updates with a unique event name
     socket.on(eventName, handleModbusData);
     // fetchReadRegisters(); // Initial fetch
-    socket.emit("request-modbus-data", {
+    socket.emit('request-modbus-data', {
       register: readRange.register,
       bits: readRange.bits,
       interval: 500,
       eventName,
     });
-    console.log("here", {
+    console.log('here', {
       register: readRange.register,
       bits: readRange.bits,
       interval: 500,
     });
 
     return () => {
-      socket.off("modbus-data", handleModbusData);
+      socket.off('modbus-data', handleModbusData);
     };
   }, [socket, readOnly, readRange]);
 
@@ -77,14 +77,14 @@ export function useModbus({ readRange, writeRange, readOnly = false }) {
   const handleWrite = useCallback(
     (address, bit, value) => {
       if (socket) {
-        socket.emit("write-modbus-register", {
+        socket.emit('write-modbus-register', {
           address,
           bit,
           value,
         });
       }
     },
-    [socket]
+    [socket],
   );
 
   return {

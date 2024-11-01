@@ -1,20 +1,21 @@
 /* eslint-disable react/prop-types */
 // app/layout.js or app/layout.tsx
-import { Inter } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
-import "./globals.css";
-import Sidebar from "../components/Sidebar";
-import TopBar from "../components/TopBar";
-import { SocketProvider } from "@/SocketContext";
-import { ToastProvider } from "@/comp/ToastProvider";
-import { ErrorToastHandler } from "@/comp/ErrorToasthandler";
-import { Providers } from "./providers";
+import { Inter } from 'next/font/google';
+import { SessionProvider } from 'next-auth/react';
+import './globals.css';
+import Sidebar from '../components/Sidebar';
+import TopBar from '../components/TopBar';
+import { SocketProvider } from '@/SocketContext';
+import { ToastProvider } from '@/comp/ToastProvider';
 
-const inter = Inter({ subsets: ["latin"] });
+import { ErrorToastHandler } from '@/comp/ErrorToasthandler';
+import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: "Dashboard",
-  description: "Dark Themed Dashboard",
+  title: 'Dashboard',
+  description: 'Dark Themed Dashboard',
 };
 
 export default function RootLayout({ children }) {

@@ -1,32 +1,26 @@
 // components/PortForm.js
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 // import { Button } from "@shadcn/ui/button"; // Use the Button component from shadcn
 // import { Input } from "@shadcn/ui/input"; // Use the Input component from shadcn
 // import { Label } from "@shadcn/ui/label"; // Use the Label component from shadcn
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const socket = io(); // Establish a socket connection
 
 const PortForm = () => {
-  const [port, setPort] = useState("");
+  const [port, setPort] = useState('');
 
   // Effect to listen for any confirmation of data being set
   useEffect(() => {
-    socket.on("data-set", (response) => {
+    socket.on('data-set', (response) => {
       if (response.success) {
-        alert("Port saved successfully!");
+        alert('Port saved successfully!');
       } else {
         alert(`Failed to save port: ${response.error}`);
       }
@@ -34,35 +28,30 @@ const PortForm = () => {
 
     // Cleanup the event listener on component unmount
     return () => {
-      socket.off("data-set");
+      socket.off('data-set');
     };
   }, []);
 
   const handleSave = (e) => {
     e.preventDefault();
     if (!port) {
-      alert("Please enter a port value.");
+      alert('Please enter a port value.');
       return;
     }
 
     // Emit event to save or update port in the backend
-    socket.emit("set-data", { key: "port", value: port });
+    socket.emit('set-data', { key: 'port', value: port });
   };
 
   return (
     <Card className="max-w-md mx-auto mt-10 shadow-lg">
       <CardHeader className="border-b p-4">
-        <CardTitle className="text-lg font-semibold text-gray-800">
-          Set Port
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-800">Set Port</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
         <form onSubmit={handleSave}>
           <div className="mb-4">
-            <Label
-              htmlFor="port"
-              className="block mb-2 text-gray-700 font-medium"
-            >
+            <Label htmlFor="port" className="block mb-2 text-gray-700 font-medium">
               Port
             </Label>
             <Input

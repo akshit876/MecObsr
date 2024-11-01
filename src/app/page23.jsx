@@ -1,32 +1,26 @@
-"use client";
-import React from "react";
-import { signIn } from "next-auth/react";
+'use client';
+import React from 'react';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 const Login = () => {
   const router = useRouter();
-  const [username,setU]=React.useState('');
-  const [pass,setP]=React.useState('');
+  const [username, setU] = React.useState('');
+  const [pass, setP] = React.useState('');
 
   const submitHandler = async (data) => {
-    const resdata = await signIn("credentials", {
+    const resdata = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
     });
 
     console.log(resdata);
-    if (
-      resdata.status === 400 ||
-      resdata.status === 401 ||
-      resdata.status === 403
-    ) {
-      console.log("Invalid Credentials!");
+    if (resdata.status === 400 || resdata.status === 401 || resdata.status === 403) {
+      console.log('Invalid Credentials!');
       alert('Invalid Credentials!');
     } else if (resdata.status === 500) {
-      console.log(
-        "Server error!"
-      );
+      console.log('Server error!');
       alert('Server error!');
     } else {
       alert('Login successfull!');
@@ -39,18 +33,17 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full p-6 bg-white rounded-md shadow-md">
         <h2 className="text-2xl font-bold mb-4">Login</h2>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          submitHandler({
-            email: e.target.username.value,
-            password: e.target.password.value,
-          });
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitHandler({
+              email: e.target.username.value,
+              password: e.target.password.value,
+            });
+          }}
+        >
           <div className="mb-4">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="username" className="block text-sm font-medium text-gray-600">
               Username
             </label>
             <input
@@ -59,14 +52,11 @@ const Login = () => {
               name="username"
               className="mt-1 p-2 w-full border rounded-md"
               value={username}
-              onChange={e=>setU(e.target.value)}
+              onChange={(e) => setU(e.target.value)}
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-600"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
               Password
             </label>
             <input
@@ -75,7 +65,7 @@ const Login = () => {
               name="password"
               className="mt-1 p-2 w-full border rounded-md"
               value={pass}
-              onChange={e=>setP(e.target.value)}
+              onChange={(e) => setP(e.target.value)}
             />
           </div>
           <button

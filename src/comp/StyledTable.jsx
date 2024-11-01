@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import React from "react";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import React from 'react';
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 const StyledTable = ({ data }) => {
   if (!data || data.length === 0) {
@@ -15,11 +15,11 @@ const StyledTable = ({ data }) => {
   }
 
   const headers = [
-    { key: "SerialNumber", label: "Serial Number", width: "150px" },
-    { key: "MarkingData", label: "Marking Data", width: "150px" },
-    { key: "ScannerData", label: "Scanner Data", width: "150px" },
-    { key: "Result", label: "Result", width: "100px" },
-    { key: "Timestamp", label: "Timestamp", width: "200px" },
+    { key: 'SerialNumber', label: 'Serial Number', width: '150px' },
+    { key: 'MarkingData', label: 'Marking Data', width: '150px' },
+    { key: 'ScannerData', label: 'Scanner Data', width: '150px' },
+    { key: 'Result', label: 'Result', width: '100px' },
+    { key: 'Timestamp', label: 'Timestamp', width: '200px' },
   ];
 
   return (
@@ -50,31 +50,33 @@ const StyledTable = ({ data }) => {
           <Table className="w-full">
             <TableBody>
               {data.map((row, rowIndex) => {
-                const isHighlighted = row["Result"] === "NG" || row["Result"] === "OK";
-                const rowBackgroundColor = row["Result"] === "NG"
-                  ? "bg-red-100"
-                  : row["Result"] === "OK"
-                  ? "bg-green-100"
-                  : rowIndex % 2 === 0
-                  ? "bg-white"
-                  : "bg-gray-50";
+                const isHighlighted = row['Result'] === 'NG' || row['Result'] === 'OK';
+                const rowBackgroundColor =
+                  row['Result'] === 'NG'
+                    ? 'bg-red-100'
+                    : row['Result'] === 'OK'
+                      ? 'bg-green-100'
+                      : rowIndex % 2 === 0
+                        ? 'bg-white'
+                        : 'bg-gray-50';
 
                 return (
                   <TableRow
                     key={rowIndex}
-                    className={`${rowBackgroundColor} ${isHighlighted ? "text-lg font-semibold" : "text-sm"}`}
+                    className={`${rowBackgroundColor} ${isHighlighted ? 'text-lg font-semibold' : 'text-sm'}`}
                   >
                     {headers.map((header) => (
                       <TableCell
                         key={header.key}
                         style={{ width: header.width }}
                         className={`py-3 px-4 whitespace-nowrap overflow-hidden text-ellipsis border-b ${
-                          header.key === "Result" && (row[header.key] === "OK" || row[header.key] === "NG")
-                            ? "font-extrabold text-xl text-gray-900" // Extra bold and larger font for OK and NG
-                            : ""
+                          header.key === 'Result' &&
+                          (row[header.key] === 'OK' || row[header.key] === 'NG')
+                            ? 'font-extrabold text-xl text-gray-900' // Extra bold and larger font for OK and NG
+                            : ''
                         }`}
                       >
-                        {header.key === "Timestamp"
+                        {header.key === 'Timestamp'
                           ? new Date(row[header.key]).toLocaleString()
                           : row[header.key]}
                       </TableCell>

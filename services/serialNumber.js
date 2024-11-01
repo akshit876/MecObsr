@@ -1,14 +1,6 @@
-import {
-  format,
-  parse,
-  isAfter,
-  setHours,
-  setMinutes,
-  isSameDay,
-  isBefore,
-} from "date-fns";
-import MongoDBService from "./mongoDbService.js";
-import logger from "../logger.js";
+import { format, parse, isAfter, setHours, setMinutes, isSameDay, isBefore } from 'date-fns';
+import MongoDBService from './mongoDbService.js';
+import logger from '../logger.js';
 
 class SerialNumberGeneratorService {
   constructor() {
@@ -104,7 +96,7 @@ class SerialNumberGeneratorService {
 
   async initialize(dbName, collectionName) {
     if (this.isInitialized) {
-      logger.info("SerialNumberGeneratorService already initialized");
+      logger.info('SerialNumberGeneratorService already initialized');
       return;
     }
 
@@ -117,13 +109,11 @@ class SerialNumberGeneratorService {
         this.currentSerialNumber = parseInt(lastDocument.SerialNumber, 10) + 1;
         this.lastResetDate = new Date(lastDocument.Timestamp);
         logger.info(
-          `Initialized serial number to ${this.currentSerialNumber} from last MongoDB document`
+          `Initialized serial number to ${this.currentSerialNumber} from last MongoDB document`,
         );
       } else {
         this.currentSerialNumber = 1;
-        logger.info(
-          "No previous documents found, starting with serial number 0001"
-        );
+        logger.info('No previous documents found, starting with serial number 0001');
       }
 
       // Check if a reset is needed when initializing
@@ -131,7 +121,7 @@ class SerialNumberGeneratorService {
 
       this.isInitialized = true;
     } catch (error) {
-      logger.error("Error initializing SerialNumberGeneratorService:", error);
+      logger.error('Error initializing SerialNumberGeneratorService:', error);
       throw error;
     }
   }
@@ -145,14 +135,14 @@ class SerialNumberGeneratorService {
         .toArray();
       return latestRecord[0] || null;
     } catch (error) {
-      logger.error("Error fetching last document from MongoDB:", error);
+      logger.error('Error fetching last document from MongoDB:', error);
       throw error;
     }
   }
 
   getNextSerialNumber() {
     this.checkAndResetSerialNumber();
-    const serialNumber = this.currentSerialNumber.toString().padStart(4, "0");
+    const serialNumber = this.currentSerialNumber.toString().padStart(4, '0');
     this.currentSerialNumber++;
     return serialNumber;
   }
@@ -166,13 +156,13 @@ class SerialNumberGeneratorService {
       now.getMonth(),
       now.getDate(),
       this.resetHour,
-      this.resetMinute
+      this.resetMinute,
     );
 
     console.log({
-      now: format(now, "yyyy-MM-dd HH:mm:ss"),
-      resetTime: format(resetTime, "yyyy-MM-dd HH:mm:ss"),
-      lastResetDate: format(this.lastResetDate, "yyyy-MM-dd HH:mm:ss"),
+      now: format(now, 'yyyy-MM-dd HH:mm:ss'),
+      resetTime: format(resetTime, 'yyyy-MM-dd HH:mm:ss'),
+      lastResetDate: format(this.lastResetDate, 'yyyy-MM-dd HH:mm:ss'),
       isAfterResetTime: isAfter(now, resetTime), // True if now is past 6:00 AM today
       isSameDayAsLastReset: isSameDay(now, this.lastResetDate), // True if last reset was today
       isLastResetBeforeResetTime: isBefore(this.lastResetDate, resetTime), // Check if last reset was before reset time today
@@ -183,14 +173,11 @@ class SerialNumberGeneratorService {
     // 2. The last reset was on the same day but before today's reset time
     if (
       isAfter(now, resetTime) &&
-      (!isSameDay(now, this.lastResetDate) ||
-        isBefore(this.lastResetDate, resetTime))
+      (!isSameDay(now, this.lastResetDate) || isBefore(this.lastResetDate, resetTime))
     ) {
       this.currentSerialNumber = 1;
       this.lastResetDate = now;
-      logger.info(
-        `Serial number reset to 0001 at ${format(now, "yyyy-MM-dd HH:mm:ss")}`
-      );
+      logger.info(`Serial number reset to 0001 at ${format(now, 'yyyy-MM-dd HH:mm:ss')}`);
     }
   }
 }

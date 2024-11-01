@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
-"use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import io from "socket.io-client";
+'use client';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import io from 'socket.io-client';
 
 // Create a Context for the socket connection
 const SocketContext = createContext(null);
@@ -15,12 +15,12 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io.connect("http://localhost:3002", {
+    const newSocket = io.connect('http://localhost:3002', {
       withCredentials: true,
       transportOptions: {
         polling: {
           extraHeaders: {
-            "my-custom-header": "value",
+            'my-custom-header': 'value',
           },
         },
       },
@@ -32,7 +32,5 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  return (
-    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };

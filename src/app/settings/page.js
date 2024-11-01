@@ -1,12 +1,12 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "react-toastify"; // Assuming you are using react-toastify for alerts
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify'; // Assuming you are using react-toastify for alerts
 
-const predefinedPartNos = ["8739760007", "8739760008"]; // Predefined part numbers from the image
+const predefinedPartNos = ['8739760007', '8739760008']; // Predefined part numbers from the image
 
 const SettingsPage = () => {
-  const [partNo, setPartNo] = useState(""); // State to store selected part number
+  const [partNo, setPartNo] = useState(''); // State to store selected part number
   const [loading, setLoading] = useState(false); // Loading state for API request
   const [initialLoading, setInitialLoading] = useState(true); // Loading state for initial part no fetch
 
@@ -14,16 +14,16 @@ const SettingsPage = () => {
   useEffect(() => {
     const fetchCurrentPartNo = async () => {
       try {
-        const response = await fetch("/api/config"); // GET request to fetch current part number
+        const response = await fetch('/api/config'); // GET request to fetch current part number
         const data = await response.json();
         if (response.ok && data.partNo) {
           setPartNo(data.partNo); // Set the fetched part number in the state
         } else {
-          toast.error("Failed to fetch current part number.");
+          toast.error('Failed to fetch current part number.');
         }
       } catch (error) {
-        console.error("Error fetching part number:", error);
-        toast.error("An error occurred while fetching the part number.");
+        console.error('Error fetching part number:', error);
+        toast.error('An error occurred while fetching the part number.');
       } finally {
         setInitialLoading(false); // Mark initial loading as complete
       }
@@ -35,30 +35,30 @@ const SettingsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
     if (!partNo) {
-      toast.error("Part number is required.");
+      toast.error('Part number is required.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("/api/config", {
-        method: "POST",
+      const response = await fetch('/api/config', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ partNo }), // Send the selected part number to the API
       });
 
       const data = await response.json();
       if (response.ok) {
-        toast.success("Part number saved successfully!");
+        toast.success('Part number saved successfully!');
       } else {
-        toast.error(data.error || "Failed to save part number.");
+        toast.error(data.error || 'Failed to save part number.');
       }
     } catch (error) {
-      console.error("Error saving part number:", error);
-      toast.error("An error occurred while saving the part number.");
+      console.error('Error saving part number:', error);
+      toast.error('An error occurred while saving the part number.');
     } finally {
       setLoading(false);
     }
@@ -74,10 +74,7 @@ const SettingsPage = () => {
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label
-                htmlFor="partNo"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="partNo" className="block text-sm font-medium text-gray-700">
                 Part Number
               </label>
               {/* Plain HTML Select Dropdown */}
@@ -100,7 +97,7 @@ const SettingsPage = () => {
             </div>
 
             <Button type="submit" disabled={loading} className="w-full mt-4">
-              {loading ? "Saving..." : "Save Part Number"}
+              {loading ? 'Saving...' : 'Save Part Number'}
             </Button>
           </form>
         )}

@@ -1,9 +1,9 @@
 /* eslint-disable consistent-return */
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { toast } from "react-toastify";
-import { useSocket } from "@/SocketContext";
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { useSocket } from '@/SocketContext';
 
 export function useErrorToast() {
   const socket = useSocket();
@@ -12,9 +12,9 @@ export function useErrorToast() {
     if (!socket) return;
 
     const handleError = (error) => {
-      console.log("eror", error);
-      toast.error(error.message || "An error occurred", {
-        position: "top-center",
+      console.log('eror', error);
+      toast.error(error.message || 'An error occurred', {
+        position: 'top-center',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -22,16 +22,16 @@ export function useErrorToast() {
         draggable: true,
         progress: undefined,
         style: {
-          fontSize: "1.5rem",
+          fontSize: '1.5rem',
           fontWeight: 700,
         },
       });
     };
 
-    socket.on("error", handleError);
+    socket.on('error', handleError);
 
     return () => {
-      socket.off("error", handleError);
+      socket.off('error', handleError);
     };
   }, [socket]);
 }
