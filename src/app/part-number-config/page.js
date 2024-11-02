@@ -1,28 +1,4 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogOverlay,
-  DialogPortal,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,10 +10,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { DEFAULT_FIELDS } from '../../db/models/partNumber.model';
-import { Copy, Edit, PlusCircle, Trash2 } from 'lucide-react';
-import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Copy, Edit, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { DEFAULT_FIELDS } from '../../db/models/partNumber.model';
+import React from 'react';
 
 export default function PartNumberConfig() {
   const [configs, setConfigs] = useState([]);
@@ -57,6 +46,7 @@ export default function PartNumberConfig() {
       const response = await fetch('/api/part-number-config');
       const data = await response.json();
       setConfigs(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Failed to load configurations');
     }
@@ -153,14 +143,14 @@ export default function PartNumberConfig() {
     navigator.clipboard.writeText(text);
     toast.success('Part number copied to clipboard');
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDialogClose = () => {
     setDialogOpen(false);
     setFields([]);
     setSelectedConfig(null);
     setIsEditing(false);
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDialogOpenChange = (open) => {
     setDialogOpen(open);
     if (open) {

@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledTable = ({ data, highlightNGRows = false }) => {
   if (!data || data.length === 0) {
     return <p>No data available</p>;
