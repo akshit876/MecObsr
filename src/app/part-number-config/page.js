@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -38,13 +37,13 @@ import {
 import { DEFAULT_FIELDS } from '../../db/models/partNumber.model';
 import { Copy, Edit, PlusCircle, Trash2 } from 'lucide-react';
 import React from 'react';
+import { toast } from 'react-toastify';
 
 export default function PartNumberConfig() {
   const [configs, setConfigs] = useState([]);
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [fields, setFields] = useState(DEFAULT_FIELDS.map((field) => ({ ...field })));
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   console.log('DEFAULT_FIELDS', DEFAULT_FIELDS);
   console.log({ dialogOpen });
@@ -59,11 +58,7 @@ export default function PartNumberConfig() {
       const data = await response.json();
       setConfigs(data);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load configurations',
-        variant: 'destructive',
-      });
+      toast.error('Failed to load configurations');
     }
   };
 
@@ -78,11 +73,7 @@ export default function PartNumberConfig() {
   const updateFieldValue = (index, value) => {
     const field = fields[index];
     if (field.maxLength && value.length > field.maxLength) {
-      toast({
-        title: 'Validation Error',
-        description: `Maximum length is ${field.maxLength} characters`,
-        variant: 'destructive',
-      });
+      toast.error(`Maximum length is ${field.maxLength} characters`);
       return;
     }
 
@@ -100,13 +91,9 @@ export default function PartNumberConfig() {
       );
 
       if (missingRequired.length > 0) {
-        toast({
-          title: 'Validation Error',
-          description: `Please fill in required fields: ${missingRequired
-            .map((f) => f.fieldName)
-            .join(', ')}`,
-          variant: 'destructive',
-        });
+        toast.error(
+          `Please fill in required fields: ${missingRequired.map((f) => f.fieldName).join(', ')}`,
+        );
         return;
       }
 
@@ -124,18 +111,11 @@ export default function PartNumberConfig() {
       await loadConfigs();
       setIsEditing(false);
       setSelectedConfig(null);
-      setFields([]);
+      setFields(DEFAULT_FIELDS.map((field) => ({ ...field })));
 
-      toast({
-        title: 'Success',
-        description: 'Configuration saved successfully',
-      });
+      toast.success('Configuration saved successfully');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message);
     }
   };
 
@@ -155,16 +135,9 @@ export default function PartNumberConfig() {
       if (!response.ok) throw new Error('Failed to delete configuration');
 
       await loadConfigs();
-      toast({
-        title: 'Success',
-        description: 'Configuration deleted successfully',
-      });
+      toast.success('Configuration deleted successfully');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(error.message);
     }
   };
 
@@ -178,10 +151,7 @@ export default function PartNumberConfig() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied',
-      description: 'Part number copied to clipboard',
-    });
+    toast.success('Part number copied to clipboard');
   };
 
   const handleDialogClose = () => {
@@ -218,11 +188,7 @@ export default function PartNumberConfig() {
 
     // Basic validation
     if (isNaN(numericOrder) || numericOrder < 1) {
-      toast({
-        title: 'Invalid Order',
-        description: 'Please enter a positive number',
-        variant: 'destructive',
-      });
+      toast.error('Please enter a positive number');
       return;
     }
 
@@ -267,7 +233,7 @@ export default function PartNumberConfig() {
                 <Input
                   value={field.value}
                   onChange={(e) => updateFieldValue(index, e.target.value)}
-                  maxLength={field.maxLength}
+                  // maxLength={field.maxLength}
                   className="h-8"
                   placeholder={`Max ${field.maxLength} chars`}
                 />
