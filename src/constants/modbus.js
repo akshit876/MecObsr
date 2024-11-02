@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export const MODBUS_ADDRESSES = {
   INPUT_START: parseInt(process.env.NEXT_PUBLIC_READ_START_1 || '1400', 10),
   OUTPUT_START: parseInt(process.env.NEXT_PUBLIC_READ_START_2 || '1404', 10),

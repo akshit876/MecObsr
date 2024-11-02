@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React from 'react';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
