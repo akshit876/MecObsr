@@ -1,10 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -13,13 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Search, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import React from 'react';
+import mongoose from 'mongoose';
 
 export default function PartNumberSelect() {
   const [configs, setConfigs] = useState([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -66,7 +67,26 @@ export default function PartNumberSelect() {
         throw new Error('Invalid configuration');
       }
 
-      // Store the selected config
+      const partNumber = generatePartNumber(config.fields);
+
+      // Update the current part number in MongoDB via API
+      const response = await fetch('/api/part-number/update-current', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          partNumber,
+          selectedBy: session?.user?.email,
+          selectedAt: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update current part number');
+      }
+
+      // Store in localStorage
       localStorage.setItem(
         'selectedPartConfig',
         JSON.stringify({
@@ -76,7 +96,6 @@ export default function PartNumberSelect() {
         }),
       );
 
-      // Redirect to operator dashboard
       router.push('/operator-dashboard');
       toast.success('Part number selected successfully');
     } catch (error) {
@@ -169,6 +188,7 @@ export default function PartNumberSelect() {
             <TableBody>
               {filteredConfigs.map((config) => {
                 const partNumber = generatePartNumber(config.fields);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const details = getPartNumberDetails(config.fields);
 
                 return (
@@ -213,3 +233,21 @@ export default function PartNumberSelect() {
     </div>
   );
 }
+
+const updateCurrentPartNumber = async (partNumber) => {
+  try {
+    const mainDataDB = mongoose.connection.useDb('main-data');
+    const result = await mainDataDB.collection('config').findOneAndUpdate(
+      {}, // empty filter to match first document
+      { $set: { currentPartNumber: partNumber } },
+      {
+        upsert: true,
+        returnDocument: 'after', // returns the updated document
+      },
+    );
+    return result;
+  } catch (error) {
+    console.error('Error updating current part number:', error);
+    throw error;
+  }
+};
