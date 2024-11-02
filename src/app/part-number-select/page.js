@@ -1,10 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -13,13 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Search, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import React from 'react';
-
 export default function PartNumberSelect() {
   const [configs, setConfigs] = useState([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -169,6 +168,7 @@ export default function PartNumberSelect() {
             <TableBody>
               {filteredConfigs.map((config) => {
                 const partNumber = generatePartNumber(config.fields);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const details = getPartNumberDetails(config.fields);
 
                 return (

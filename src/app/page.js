@@ -14,7 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 function AdminPanel() {
-  const { csvData, loading } = useCsvData();
+  const { csvData } = useCsvData();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);

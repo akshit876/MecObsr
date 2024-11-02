@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ToastContainer } from 'react-toastify';
@@ -9,6 +10,9 @@ export const metadata = {
   title: 'Part Number Configuration',
   description: 'Configure part numbers for your system',
 };
+
+/* eslint-disable react/prop-types, react/display-name */
+import React from 'react';
 
 export default function RootLayout({ children }) {
   return (

@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import React from 'react';
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
@@ -34,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { DEFAULT_FIELDS } from '../lib/models/partNumber.model';
 
 export default function PartNumberConfig() {
   const [configs, setConfigs] = useState([]);
@@ -52,6 +55,7 @@ export default function PartNumberConfig() {
       const response = await fetch('/api/part-number-config');
       const data = await response.json();
       setConfigs(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast({
         title: 'Error',

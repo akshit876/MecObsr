@@ -1,12 +1,9 @@
 /* eslint-disable react/prop-types */
 // app/layout.js or app/layout.tsx
 import { Inter } from 'next/font/google';
-import { SessionProvider } from 'next-auth/react';
-import './globals.css';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { SocketProvider } from '@/SocketContext';
-import { ToastProvider } from '@/comp/ToastProvider';
+import './globals.css';
 
 import { ErrorToastHandler } from '@/comp/ErrorToasthandler';
 import { Providers } from './providers';
@@ -17,6 +14,8 @@ export const metadata = {
   title: 'Dashboard',
   description: 'Dark Themed Dashboard',
 };
+
+import React from 'react';
 
 export default function RootLayout({ children }) {
   return (
