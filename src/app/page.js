@@ -1,7 +1,7 @@
 'use client';
 import StyledTable from '@/comp/StyledTable';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks';
@@ -13,25 +13,46 @@ import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-function AdminPanel() {
+function Page() {
   const { csvData } = useCsvData();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [currentPartNumber, setCurrentPartNumber] = useState(null);
 
   const { session, status } = useProtectedRoute();
   console.log({ startDate, endDate });
+
+  useEffect(() => {
+    const fetchCurrentPartNumber = async () => {
+      try {
+        const response = await fetch('/api/part-number/get-current', {
+          method: 'GET', // Make sure this is GET
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) throw new Error('Failed to fetch current part number');
+        const data = await response.json();
+        setCurrentPartNumber(data.currentPartNumber);
+      } catch (error) {
+        console.error('Error fetching current part number:', error);
+      }
+    };
+
+    fetchCurrentPartNumber();
+  }, []);
 
   if (status === 'loading') {
     return <LoadingSpinner />;
   }
 
-  // If no session, the hook will redirect, but we can return null while that happens
-  if (!session) {
-    router.push('/login');
-    return null;
-  }
+  // // If no session, the hook will redirect, but we can return null while that happens
+  // if (!session) {
+  //   router.push('/login');
+  //   return null;
+  // }
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
@@ -122,16 +143,30 @@ function AdminPanel() {
   };
   // console.log({ csvData });
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gray-100">
+    <div className="h-[calc(100vh-4rem)] bg-gray-100 p-6">
       {status === 'loading' ? (
         <LoadingSpinner />
       ) : (
         <div className="h-full flex flex-col">
+          {currentPartNumber && (
+            <div className="bg-green-500 text-white py-3 shadow-lg rounded-lg">
+              <div className="container flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-medium">Current Part Number:</span>
+                  <code className="px-3 py-1 rounded-md bg-green-700 text-white font-mono text-lg font-bold">
+                    {currentPartNumber}
+                  </code>
+                </div>
+                <div className="text-sm">Last Updated: {new Date().toLocaleTimeString()}</div>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-4 px-0 py-4">
             <DatePicker selected={startDate} onSelect={setStartDate} placeholder="Start Date" />
             <DatePicker selected={endDate} onSelect={setEndDate} placeholder="End Date" />
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               style={{ color: 'white' }}
               className="[&]:!text-white [&>*]:!text-white [&]:hover:!text-white"
               onClick={handleDownloadExcel}
@@ -155,4 +190,4 @@ function AdminPanel() {
   );
 }
 
-export default AdminPanel;
+export default Page;

@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 export function useProtectedRoute() {
@@ -8,13 +8,13 @@ export function useProtectedRoute() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'loading') return; // Do nothing while loading
-
-    if (!session) {
-      toast.error('You must be signed in to view this page');
+    if (status === 'unauthenticated') {
+      toast.error('Please login to access this page', {
+        toastId: 'auth-error',
+      });
       router.push('/login');
     }
-  }, [session, status]);
+  }, [status, router]);
 
   return { session, status };
 }

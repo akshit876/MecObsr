@@ -9,6 +9,7 @@ import TopBar from '../components/TopBar';
 import './globals.css';
 import { Providers } from './providers';
 import React from 'react';
+import TestSidebar from './test-sidebar/page.js';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,8 +36,8 @@ export default function RootLayout({
             <ErrorToastHandler />
             <div className="flex">
               {/* Sidebar with a fixed width */}
-              <Sidebar />
-
+              {/* <Sidebar /> */}
+              <TestSidebar />
               {/* Main content area */}
             </div>
             <div className="flex-1 flex flex-col ml-64 bg-[#F3F4F6]">

@@ -37,7 +37,7 @@ const Login = () => {
       console.log('SignIn Result:', result);
 
       if (result?.error) {
-        toast.error(result.error || 'Login failed');
+        toast.error('Invalid username or password');
         return;
       }
 

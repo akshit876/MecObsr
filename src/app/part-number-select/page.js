@@ -31,7 +31,7 @@ export default function PartNumberSelect() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (session?.user?.role !== 'operator') {
-      router.push('/dashboard');
+      // router.push('/dashboard');
       toast.error('Access denied. Operator access only.');
     }
   }, [session, status, router]);
@@ -96,7 +96,7 @@ export default function PartNumberSelect() {
         }),
       );
 
-      router.push('/operator-dashboard');
+      router.replace('/');
       toast.success('Part number selected successfully');
     } catch (error) {
       console.error('Selection error:', error);
