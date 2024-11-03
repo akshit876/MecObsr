@@ -198,7 +198,7 @@ export default function PartNumberConfig() {
   });
 
   return (
-    <main className="min-h-screen bg-white p-6">
+    <main className="min-h-screen bg-gray-100 p-6">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-center text-xl border-b pb-2">CREATE PART NO</CardTitle>
