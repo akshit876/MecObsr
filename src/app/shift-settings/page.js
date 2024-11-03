@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button'; // Import Button component
+import { Button } from '@/components/ui/button';
 import { useSocket } from '@/SocketContext';
-import { toast } from 'react-toastify'; // Import toast for notifications
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ShiftSetting = () => {
   const socket = useSocket();
@@ -19,10 +20,26 @@ const ShiftSetting = () => {
   useEffect(() => {
     socket.on('shift-update', (data) => {
       setShifts((prevShifts) => ({ ...prevShifts, ...data }));
+      toast.info('Shift times updated!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     });
 
     socket.on('current-shift-update', (shift) => {
       setCurrentShift(shift);
+      toast.info(`Current shift changed to ${shift}`, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     });
 
     return () => {
@@ -37,7 +54,7 @@ const ShiftSetting = () => {
   };
 
   const validateTimeFormat = (time) => {
-    const regex = /^([01]\d|2[0-3]):([0-5]\d)$/; // 24-hour format regex
+    const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
     return regex.test(time);
   };
 
@@ -45,18 +62,45 @@ const ShiftSetting = () => {
     // Validate all shifts
     for (const [shift, time] of Object.entries(shifts)) {
       if (!validateTimeFormat(time)) {
-        toast.error(`Please enter a valid time for shift ${shift} in 24-hour format (HH:MM)`);
+        toast.error(`Invalid time format for Shift ${shift}. Use HH:MM format (24-hour)`, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
         return;
       }
     }
 
     // Emit the shift settings to the server
     socket.emit('update-shifts', shifts);
-    toast.success('Shift settings updated successfully!');
+    toast.success('Shift settings updated successfully!', {
+      position: 'top-right',
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: 'colored',
+    });
   };
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <Card className="w-[850px]">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">SHIFT SETTING</CardTitle>
@@ -72,7 +116,15 @@ const ShiftSetting = () => {
                 value={time}
                 onChange={(e) => handleShiftChange(shift, e.target.value)}
                 className="mt-1 text-2xl font-bold text-yellow-400 bg-black border-green-500"
-                placeholder="HH:MM" // Placeholder for clarity
+                placeholder="HH:MM"
+                onBlur={(e) => {
+                  if (e.target.value && !validateTimeFormat(e.target.value)) {
+                    toast.warning(`Please use HH:MM format for Shift ${shift}`, {
+                      position: 'top-right',
+                      autoClose: 3000,
+                    });
+                  }
+                }}
               />
             </div>
           ))}

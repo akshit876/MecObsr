@@ -1,7 +1,16 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Home, Settings, ChevronRight, MenuIcon, Hash, ChevronDown } from 'lucide-react';
+import {
+  Home,
+  Settings,
+  ChevronRight,
+  MenuIcon,
+  Hash,
+  ChevronDown,
+  Clock,
+  TicketCheckIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -44,7 +53,12 @@ export default function TestSidebar() {
               {
                 label: 'Part Number Select',
                 href: '/part-number-select',
-                icon: Hash,
+                icon: TicketCheckIcon,
+              },
+              {
+                label: 'Shift Config',
+                href: '/shift-config',
+                icon: Clock,
               },
             ],
           },
