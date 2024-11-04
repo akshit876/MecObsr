@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,8 @@ const ShiftSetting = () => {
     { id: 'B', startTime: '', endTime: '', duration: 0 },
     { id: 'C', startTime: '', endTime: '', duration: 0 },
   ]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   // Generate time options in 30-minute intervals
   const generateTimeOptions = () => {
@@ -106,15 +108,77 @@ const ShiftSetting = () => {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateShifts()) return;
 
-    toast.success('Shift settings updated successfully!', {
-      position: 'top-right',
-      autoClose: 3000,
-      theme: 'colored',
-    });
+    setIsLoading(true);
+    try {
+      console.log(shifts);
+      const response = await fetch('/api/shift-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shifts: shifts.map((shift) => ({
+            shiftId: shift.id,
+            startTime: shift.startTime,
+            endTime: shift.endTime,
+            duration: shift.duration,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save configuration');
+      }
+
+      toast.success('Shift settings updated successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to save shift configuration', {
+        position: 'top-right',
+        autoClose: 5000,
+      });
+      console.error('Error saving shifts:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch('/api/shift-config');
+        const data = await response.json();
+
+        if (data.shifts?.length > 0) {
+          console.log(data.shifts);
+          setShifts(
+            data.shifts.map((shift) => ({
+              id: shift.shiftId || shift.id,
+              startTime: shift.startTime,
+              endTime: shift.endTime,
+              duration: shift.duration,
+            })),
+          );
+        }
+      } catch (error) {
+        toast.error('Failed to fetch shift configuration', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        console.error('Error fetching config:', error);
+      }
+    };
+
+    fetchConfig();
+  }, []);
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100 p-6">
@@ -214,9 +278,9 @@ const ShiftSetting = () => {
           <Button
             onClick={handleSubmit}
             className="w-full mt-6"
-            disabled={shifts.reduce((sum, shift) => sum + shift.duration, 0) !== 24}
+            disabled={shifts.reduce((sum, shift) => sum + shift.duration, 0) !== 24 || isLoading}
           >
-            Update Shift Configuration
+            {isLoading ? 'Saving...' : 'Update Shift Configuration'}
           </Button>
         </CardContent>
       </Card>
