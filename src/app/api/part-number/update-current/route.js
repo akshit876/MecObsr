@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
-// import { authOptions } from '@/lib/auth';
 
 export async function POST(request) {
   try {
@@ -14,25 +13,34 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized - Please login' }, { status: 401 });
     }
 
-    const { partNumber, selectedBy, selectedAt } = await request.json();
+    const { modelConfig, selectedBy, selectedAt } = await request.json();
 
-    if (!partNumber) {
-      return NextResponse.json({ error: 'Part number is required' }, { status: 400 });
+    if (!modelConfig || !modelConfig.fields) {
+      return NextResponse.json({ error: 'Model configuration is required' }, { status: 400 });
     }
+
+    // Generate part number from the model fields
+    const generatedPartNo = modelConfig.fields
+      .filter(field => field.isChecked && field.value)
+      .sort((a, b) => a.order - b.order)
+      .map(field => field.value)
+      .join('');
 
     // Connect to main-data database
     const mainDataDB = mongoose.connection.useDb('main-data');
 
-    // Update the config
+    // Update the config with model configuration and generated part number
     const result = await mainDataDB.collection('config').findOneAndUpdate(
       {},
       {
         $set: {
-          currentPartNumber: partNumber,
-          partNo: partNumber,
+          currentModelConfig: modelConfig,
+          modelFields: modelConfig.fields,
           selectedBy,
           selectedAt,
           updatedAt: new Date().toISOString(),
+          currentPartNumber: generatedPartNo,
+          partNo: generatedPartNo,
         },
       },
       {
@@ -41,12 +49,22 @@ export async function POST(request) {
       },
     );
 
+    // Log the model change for audit purposes
+    await mainDataDB.collection('model_change_logs').insertOne({
+      modelConfig,
+      generatedPartNo,
+      selectedBy,
+      selectedAt,
+      createdAt: new Date().toISOString(),
+    });
+
     return NextResponse.json({
       success: true,
       data: result,
+      generatedPartNo,
     });
   } catch (error) {
-    console.error('Error updating current part number:', error);
-    return NextResponse.json({ error: 'Failed to update current part number' }, { status: 500 });
+    console.error('Error updating current model configuration:', error);
+    return NextResponse.json({ error: 'Failed to update current model configuration' }, { status: 500 });
   }
 } 

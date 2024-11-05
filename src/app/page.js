@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import useModelStore from '@/store/modelStore';
 
 function Page() {
   const { csvData } = useCsvData();
@@ -19,29 +20,27 @@ function Page() {
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [currentPartNumber, setCurrentPartNumber] = useState(null);
+  const [currentModelNumber, setCurrentModelNumber] = useState(null);
+  const { selectedModel, modelFields } = useModelStore();
 
   const { session, status } = useProtectedRoute();
   console.log({ startDate, endDate });
 
   useEffect(() => {
-    const fetchCurrentPartNumber = async () => {
+    const fetchCurrentModel = async () => {
       try {
-        const response = await fetch('/api/part-number/get-current', {
-          method: 'GET', // Make sure this is GET
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!response.ok) throw new Error('Failed to fetch current part number');
+        const response = await fetch('/api/part-number/get-current');
+        if (!response.ok) throw new Error('Failed to fetch current model configuration');
         const data = await response.json();
-        setCurrentPartNumber(data.currentPartNumber);
+
+        setCurrentModelNumber(data.currentModelNumber || 'No Model Selected');
       } catch (error) {
-        console.error('Error fetching current part number:', error);
+        console.error('Error fetching current model:', error);
+        toast.error('Failed to fetch current model configuration');
       }
     };
 
-    fetchCurrentPartNumber();
+    fetchCurrentModel();
   }, []);
 
   if (status === 'loading') {
@@ -148,13 +147,13 @@ function Page() {
         <LoadingSpinner />
       ) : (
         <div className="h-full flex flex-col">
-          {currentPartNumber && (
-            <div className="bg-green-500 text-white py-3 shadow-lg rounded-lg">
+          {currentModelNumber && (
+            <div className="bg-blue-600 text-white py-3 shadow-lg rounded-lg">
               <div className="container flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium">Current Part Number:</span>
-                  <code className="px-3 py-1 rounded-md bg-green-700 text-white font-mono text-lg font-bold">
-                    {currentPartNumber}
+                  <span className="text-lg font-medium">Current Model:</span>
+                  <code className="px-3 py-1 rounded-md bg-blue-700 text-white font-mono text-lg font-bold">
+                    {currentModelNumber}
                   </code>
                 </div>
                 <div className="text-sm">Last Updated: {new Date().toLocaleTimeString()}</div>

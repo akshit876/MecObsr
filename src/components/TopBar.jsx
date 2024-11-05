@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -15,14 +15,17 @@ import { Button } from '@/components/ui/button';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { FiLogOut } from 'react-icons/fi';
 import { CgProfile } from 'react-icons/cg';
+import useModelStore from '@/store/modelStore';
 
 const TopBar = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  console.log({ session });
+  const clearModel = useModelStore((state) => state.clearModel);
+  // console.log({ session });
 
   const handleLogout = async () => {
     try {
+      clearModel();
       await signOut();
       router.push('/login');
     } catch (error) {

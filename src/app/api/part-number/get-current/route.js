@@ -30,6 +30,7 @@ export const GET = async () => {
     return NextResponse.json({
       success: true,
       currentPartNumber: currentConfig.currentPartNumber,
+      currentModelNumber: currentConfig.currentModelConfig.modelNumber,
     });
   } catch (error) {
     console.error('Detailed error:', error);

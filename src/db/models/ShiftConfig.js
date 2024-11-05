@@ -1,29 +1,18 @@
 import mongoose from 'mongoose';
 
+const shiftSchema = new mongoose.Schema({
+  shiftId: String,
+  name: String,
+  startTime: String,
+  endTime: String,
+  duration: Number
+});
+
 const shiftConfigSchema = new mongoose.Schema({
-  shifts: [{
-    shiftNumber: Number,
-    startTime: String,
-    duration: Number,
-    shiftCode: {
-      type: String,
-      maxLength: 1,
-      match: /^[A-Za-z]$/
-    }
-  }],
-  totalHours: {
-    type: Number,
-    validate: {
-      validator: function(value) {
-        return value === 24;
-      },
-      message: 'Total shift duration must equal 24 hours'
-    }
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+  shifts: [shiftSchema],
+  totalHours: Number
+}, {
+  timestamps: true
 });
 
 export default mongoose.models.ShiftConfig || mongoose.model('ShiftConfig', shiftConfigSchema); 

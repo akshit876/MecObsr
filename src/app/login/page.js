@@ -3,6 +3,7 @@ import React from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import useModelStore from '@/store/modelStore';
 
 const Login = () => {
   const router = useRouter();
@@ -10,7 +11,11 @@ const Login = () => {
   const [username, setU] = React.useState('');
   const [pass, setP] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [models, setModels] = React.useState([]);
+  const [selectedModelId, setSelectedModelId] = React.useState('');
+  const setSelectedModel = useModelStore((state) => state.setSelectedModel);
 
+  console.log({ models });
   // Redirect if already logged in
   React.useEffect(() => {
     if (session?.user) {
@@ -23,43 +28,92 @@ const Login = () => {
     }
   }, [session, router]);
 
+  React.useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('/api/part-number-config');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          // Filter and map the models to get their Model Number values
+          const modelsList = data.map((config) => {
+            const modelNumberField = config.fields.find(
+              (field) => field.fieldName === 'Model Number',
+            );
+            return {
+              id: config._id,
+              modelNumber: modelNumberField?.value || 'Unnamed Model',
+              fields: config.fields,
+            };
+          });
+          setModels(modelsList);
+        }
+      } catch (error) {
+        console.error('Error fetching models:', error);
+        toast.error('Failed to load models');
+      }
+    };
+
+    fetchModels();
+  }, []);
+
+  const handleModelChange = (e) => {
+    setSelectedModelId(e.target.value);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // First attempt login
       const result = await signIn('credentials', {
         email: username,
         password: pass,
         redirect: false,
       });
 
-      console.log('SignIn Result:', result);
-
       if (result?.error) {
-        toast.error('Invalid username or password');
+        toast.error(result.error);
         return;
       }
 
-      // Get the updated session after login
-      const response = await fetch('/api/auth/session');
-      const sessionData = await response.json();
-      
-      console.log('Session Data:', sessionData);
-
-      if (sessionData?.user) {
-        toast.success('Login successful!');
-        
-        // Redirect based on role
-        if (sessionData.user.role === 'operator') {
-          router.push('/part-number-select');
-        } else {
-          router.push('/dashboard');
-        }
+      // After successful login, update the model configuration
+      const selectedModelData = models.find((model) => model.id === selectedModelId);
+      if (!selectedModelData) {
+        throw new Error('Model configuration not found');
       }
+
+      // Update the current model configuration in MongoDB
+      const response = await fetch('/api/part-number/update-current', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          modelConfig: selectedModelData,
+          selectedBy: username, // Use the username that just logged in
+          selectedAt: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update model configuration');
+      }
+
+      const updatedConfig = await response.json();
+
+      // Update Zustand store with the selected model
+      setSelectedModel({
+        id: selectedModelId,
+        fields: selectedModelData.fields,
+        config: updatedConfig,
+      });
+
+      toast.success('Login successful');
+      router.push('/'); // Redirect after everything is done
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Login failed');
+      console.error('Error:', error);
+      toast.error(error.message || 'Login process failed');
     } finally {
       setIsLoading(false);
     }
@@ -109,19 +163,33 @@ const Login = () => {
               required
             />
           </div>
+          <div className="mb-4">
+            <label htmlFor="model" className="block text-sm font-medium text-gray-600">
+              Model Number
+            </label>
+            <select
+              id="model"
+              name="model"
+              className="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedModelId}
+              onChange={handleModelChange}
+              disabled={isLoading}
+              required
+            >
+              <option value="">Select a model</option>
+              {models.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.modelNumber || 'Unnamed Model'}
+                </option>
+              ))}
+            </select>
+          </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300"
-            disabled={isLoading}
+            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            disabled={isLoading || !selectedModelId}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Logging in...
-              </div>
-            ) : (
-              'Login'
-            )}
+            {isLoading ? 'Processing...' : 'Login'}
           </button>
         </form>
       </div>
