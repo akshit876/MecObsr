@@ -2,6 +2,38 @@ const mongoose = require('mongoose');
 
 const DEFAULT_FIELDS = [
   {
+    fieldName: 'Model Number',
+    value: '',
+    isChecked: false,
+    isRequired: true,
+    maxLength: 20,
+    order: -1,
+  },
+  {
+    fieldName: 'Year',
+    value: '',
+    isChecked: true,
+    isRequired: false,
+    maxLength: 4,
+    order: 5,
+  },
+  {
+    fieldName: 'Month',
+    value: '',
+    isChecked: true,
+    isRequired: false,
+    maxLength: 2,
+    order: 6,
+  },
+  {
+    fieldName: 'Date',
+    value: '',
+    isChecked: true,
+    isRequired: false,
+    maxLength: 2,
+    order: 7,
+  },
+  {
     fieldName: 'PART NO',
     order: 1,
     isChecked: true,
@@ -31,30 +63,6 @@ const DEFAULT_FIELDS = [
     isChecked: true,
     value: '',
     maxLength: 3,
-    isRequired: true,
-  },
-  {
-    fieldName: 'YEAR',
-    order: 5,
-    isChecked: true,
-    value: '',
-    maxLength: 2,
-    isRequired: true,
-  },
-  {
-    fieldName: 'DATE',
-    order: 6,
-    isChecked: true,
-    value: '',
-    maxLength: 2,
-    isRequired: true,
-  },
-  {
-    fieldName: 'MONTH',
-    order: 7,
-    isChecked: true,
-    value: '',
-    maxLength: 2,
     isRequired: true,
   },
   {
@@ -108,7 +116,13 @@ const PartNumberFieldSchema = new mongoose.Schema({
   order: {
     type: Number,
     required: true,
-    min: 1,
+    min: [-1, 'Order must be -1 or greater than 0'],
+    validate: {
+      validator: function (v) {
+        return v === -1 || v > 0;
+      },
+      message: 'Order must be -1 for inactive fields or greater than 0 for active fields',
+    },
   },
   isChecked: {
     type: Boolean,
@@ -135,10 +149,11 @@ const PartNumberConfigSchema = new mongoose.Schema(
       default: DEFAULT_FIELDS,
       validate: {
         validator: function (fields) {
-          const orders = fields.map((f) => f.order);
-          return new Set(orders).size === orders.length;
+          const activeOrders = fields.filter((f) => f.order > 0).map((f) => f.order);
+
+          return new Set(activeOrders).size === activeOrders.length;
         },
-        message: 'Field orders must be unique',
+        message: 'Active field orders must be unique',
       },
     },
   },

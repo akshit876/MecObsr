@@ -34,6 +34,7 @@ export default function PartNumberConfig() {
   const [fields, setFields] = useState(DEFAULT_FIELDS.map((field) => ({ ...field })));
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [yearFormat, setYearFormat] = useState('short');
   console.log('DEFAULT_FIELDS', DEFAULT_FIELDS);
   console.log({ dialogOpen });
 
@@ -52,59 +53,99 @@ export default function PartNumberConfig() {
     }
   };
 
-  const toggleField = (index) => {
-    const updatedFields = fields.map((field, i) => ({
-      ...field,
-      isChecked: i === index ? !field.isChecked : field.isChecked,
-    }));
-    setFields(updatedFields);
+  // Debug log to check fields state
+  console.log('Current Fields:', fields);
+
+  const toggleField = (fieldName) => {
+    console.log('Toggling field:', fieldName); // Debug log
+
+    setFields((prevFields) => {
+      const newFields = prevFields.map((field) => {
+        if (field.fieldName === fieldName) {
+          console.log('Found field to toggle:', field.fieldName); // Debug log
+          return { ...field, isChecked: !field.isChecked };
+        }
+        return field;
+      });
+      console.log('Updated fields:', newFields); // Debug log
+      return newFields;
+    });
   };
 
   const updateFieldValue = (index, value) => {
     const field = fields[index];
-    if (field.maxLength && value.length > field.maxLength) {
-      toast.error(`Maximum length is ${field.maxLength} characters`);
+
+    // Skip if trying to edit read-only date fields
+    if (['Year', 'Month', 'Date'].includes(field.fieldName)) {
       return;
     }
 
-    const updatedFields = fields.map((field, i) => ({
-      ...field,
-      value: i === index ? value : field.value,
-    }));
-    setFields(updatedFields);
+    // Check max length
+    if (field.maxLength && value.length > field.maxLength) {
+      return;
+    }
+
+    // Update single field directly instead of mapping entire array
+    setFields((prevFields) => {
+      const newFields = [...prevFields];
+      newFields[index] = { ...field, value };
+      return newFields;
+    });
   };
 
   const saveConfig = async () => {
     try {
-      const missingRequired = fields.filter(
-        (field) => field.isRequired && field.isChecked && !field.value,
-      );
-
-      if (missingRequired.length > 0) {
-        toast.error(
-          `Please fill in required fields: ${missingRequired.map((f) => f.fieldName).join(', ')}`,
-        );
+      // Check if Model Number is filled
+      const modelNumber = fields.find((f) => f.fieldName === 'Model Number');
+      if (!modelNumber?.value) {
+        toast.error('Model Number is required');
         return;
       }
+
+      // Prepare fields for saving
+      const fieldsToSave = fields.map((field) => {
+        // For Model Number
+        if (field.fieldName === 'Model Number') {
+          return {
+            ...field,
+            order: 999,
+            isChecked: false,
+            isRequired: true, // Ensure it's marked as required
+          };
+        }
+
+        // For unchecked fields
+        if (!field.isChecked) {
+          return {
+            ...field,
+            order: 999,
+          };
+        }
+
+        // For checked fields, keep their order
+        return field;
+      });
 
       const response = await fetch('/api/part-number-config', {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: selectedConfig?._id,
-          fields: fields,
+          fields: fieldsToSave,
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to save configuration');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save configuration');
+      }
 
       await loadConfigs();
       setIsEditing(false);
       setSelectedConfig(null);
-      setFields(DEFAULT_FIELDS.map((field) => ({ ...field })));
-
       toast.success('Configuration saved successfully');
     } catch (error) {
+      console.error('Save error:', error);
       toast.error(error.message);
     }
   };
@@ -133,7 +174,7 @@ export default function PartNumberConfig() {
 
   const generatePartNumber = (configFields) => {
     return configFields
-      .filter((field) => field.isChecked)
+      .filter((field) => field.isChecked && field.order > 0) // Only include fields with positive order
       .sort((a, b) => a.order - b.order)
       .map((field) => field.value)
       .join('');
@@ -167,26 +208,28 @@ export default function PartNumberConfig() {
   const updateOrder = (index, newOrder) => {
     const numericOrder = parseInt(newOrder);
 
-    // Allow empty input for temporary state
-    if (newOrder === '' || isNaN(numericOrder)) {
-      const updatedFields = fields.map((field, i) =>
-        i === index ? { ...field, order: '' } : field,
-      );
-      setFields(updatedFields);
-      return;
+    if (newOrder === '') {
+      return; // Allow empty temporary state
     }
 
-    // Basic validation
     if (isNaN(numericOrder) || numericOrder < 1) {
-      toast.error('Please enter a positive number');
+      toast.error('Please enter a number greater than 0');
       return;
     }
 
-    // Update the order
-    const updatedFields = fields.map((field, i) =>
-      i === index ? { ...field, order: numericOrder } : field,
-    );
-    setFields(updatedFields);
+    // Check if order already exists in other fields
+    const orderExists = fields.some((field, i) => i !== index && field.order === numericOrder);
+
+    if (orderExists) {
+      toast.error('This order number is already in use');
+      return;
+    }
+
+    setFields((prevFields) => {
+      const newFields = [...prevFields];
+      newFields[index] = { ...newFields[index], order: numericOrder };
+      return newFields;
+    });
   };
 
   // Sort fields by order for display
@@ -197,101 +240,293 @@ export default function PartNumberConfig() {
     return a.order - b.order;
   });
 
-  return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-center text-xl border-b pb-2">CREATE PART NO</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-[1fr,80px,80px] gap-4 mb-4">
-            <div className="text-sm font-medium">Description</div>
-            <div className="text-sm font-medium text-center">Check Box</div>
-            <div className="text-sm font-medium text-center">Order</div>
-          </div>
+  // Function to get current date values
+  const getCurrentDateValues = () => {
+    const now = new Date();
+    const year =
+      yearFormat === 'short'
+        ? now.getFullYear().toString().slice(-2)
+        : now.getFullYear().toString();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const date = now.getDate().toString().padStart(2, '0');
+    return { year, month, date };
+  };
 
-          {fields.map((field, index) => (
-            <div
-              key={field.fieldName}
-              className="grid grid-cols-[1fr,80px,80px] gap-4 items-center py-2 border-b border-gray-200"
-            >
-              <div className="flex items-center gap-4">
-                <span className="font-medium w-[150px]">
-                  {field.fieldName}
-                  {field.isRequired && <span className="text-red-500 ml-1">*</span>}
-                </span>
-                <Input
-                  value={field.value}
-                  onChange={(e) => updateFieldValue(index, e.target.value)}
-                  // maxLength={field.maxLength}
-                  className="h-8"
-                  placeholder={`Max ${field.maxLength} chars`}
-                />
+  // Function to update date fields
+  const updateDateFields = () => {
+    const { year, month, date } = getCurrentDateValues();
+
+    const updatedFields = fields.map((field) => {
+      switch (field.fieldName) {
+        case 'Year':
+          return {
+            ...field,
+            value: year,
+            order: 5,
+            isChecked: true,
+          };
+        case 'Month':
+          return {
+            ...field,
+            value: month,
+            order: 6,
+            isChecked: true,
+          };
+        case 'Date':
+          return {
+            ...field,
+            value: date,
+            order: 7,
+            isChecked: true,
+          };
+        default:
+          return field;
+      }
+    });
+
+    setFields(updatedFields);
+  };
+
+  // Call updateDateFields on initial load and when yearFormat changes
+  useEffect(() => {
+    updateDateFields();
+  }, [yearFormat]);
+
+  // Also call updateDateFields when component mounts
+  useEffect(() => {
+    updateDateFields();
+  }, []);
+
+  // Render fields separately from model number
+  const renderFields = () => {
+    const displayFields = fields.filter((field) => field.fieldName !== 'Model Number');
+
+    return displayFields.map((field) => (
+      <div
+        key={field.fieldName}
+        className="grid grid-cols-[1fr,80px,80px] gap-4 items-center py-2 border-b border-gray-200"
+      >
+        <div className="flex items-center gap-4">
+          <span className="font-medium w-[150px]">
+            {field.fieldName}
+            {field.isRequired && <span className="text-red-500 ml-1">*</span>}
+          </span>
+          <Input
+            value={field.value}
+            onChange={(e) => {
+              const index = fields.findIndex((f) => f.fieldName === field.fieldName);
+              updateFieldValue(index, e.target.value);
+            }}
+            className={`h-8 ${['Year', 'Month', 'Date'].includes(field.fieldName) ? 'bg-gray-100' : ''}`}
+            placeholder={`Max ${field.maxLength} chars`}
+            readOnly={['Year', 'Month', 'Date'].includes(field.fieldName)}
+            maxLength={field.maxLength}
+          />
+        </div>
+        <div className="flex justify-center items-center">
+          <Checkbox
+            checked={field.isChecked}
+            onCheckedChange={() => {
+              console.log('Checkbox clicked for:', field.fieldName); // Debug log
+              toggleField(field.fieldName);
+            }}
+            className="h-5 w-5 border-2 rounded-sm"
+          />
+        </div>
+        <div className="flex justify-center items-center">
+          <Input
+            type="text"
+            value={field.order}
+            onChange={(e) => {
+              const index = fields.findIndex((f) => f.fieldName === field.fieldName);
+              updateOrder(index, e.target.value);
+            }}
+            className="w-16 h-8 text-center"
+            placeholder="#"
+          />
+        </div>
+      </div>
+    ));
+  };
+
+  // Add a helper function to get Model Number
+  const getModelNumber = (configFields) => {
+    const modelNumberField = configFields.find((f) => f.fieldName === 'Model Number');
+    return modelNumberField?.value || '';
+  };
+
+  return (
+    <main className="h-screen bg-gray-100 p-3 overflow-hidden">
+      <div className="h-full grid grid-cols-2 gap-3">
+        {/* Left Side - Create Form */}
+        <Card className="h-full">
+          <CardHeader className="py-2">
+            <CardTitle className="text-center text-lg">CREATE PART NO</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 p-3">
+            {/* Year Format and Model Number in same row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Year Format Selector - More compact */}
+              <div className="bg-gray-50 rounded-lg border p-2">
+                <div className="text-xs font-medium mb-1">Year Format</div>
+                <div className="flex gap-4">
+                  <label className="flex items-center space-x-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="yearFormat"
+                      value="short"
+                      checked={yearFormat === 'short'}
+                      onChange={(e) => setYearFormat(e.target.value)}
+                      className="w-3 h-3"
+                    />
+                    <span className="text-xs">Short (24)</span>
+                  </label>
+                  <label className="flex items-center space-x-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="yearFormat"
+                      value="full"
+                      checked={yearFormat === 'full'}
+                      onChange={(e) => setYearFormat(e.target.value)}
+                      className="w-3 h-3"
+                    />
+                    <span className="text-xs">Full (2024)</span>
+                  </label>
+                </div>
               </div>
-              <div className="flex justify-center items-center">
-                <Checkbox
-                  checked={field.isChecked}
-                  onCheckedChange={() => toggleField(index)}
-                  className="h-5 w-5 border-2 rounded-sm"
-                />
-              </div>
-              <div className="flex justify-center items-center">
-                <Input
-                  type="text" // Changed to text to allow empty state
-                  value={field.order}
-                  onChange={(e) => updateOrder(index, e.target.value)}
-                  className="w-16 h-8 text-center"
-                  placeholder="#"
-                />
+
+              {/* Model Number Input - More compact */}
+              <div className="bg-gray-50 rounded-lg border p-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    Model Number <span className="text-red-500">*</span>
+                  </span>
+                  <Input
+                    value={fields.find((f) => f.fieldName === 'Model Number')?.value || ''}
+                    onChange={(e) => {
+                      const index = fields.findIndex((f) => f.fieldName === 'Model Number');
+                      updateFieldValue(index, e.target.value);
+                    }}
+                    className="h-7 text-sm"
+                    placeholder="Enter Model Number"
+                    maxLength={20}
+                    required
+                  />
+                </div>
               </div>
             </div>
-          ))}
 
-          <div className="mt-6 pt-4 border-t">
-            <div className="flex items-center gap-4">
-              <span className="font-medium w-[150px]">Generated Part No:</span>
-              <div className="flex-1">
-                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                  {generatePartNumber(sortedFields)} {/* Use sortedFields here */}
+            {/* Fields Grid - More compact */}
+            <div className="border rounded-lg">
+              <div className="grid grid-cols-[1fr,60px,60px] gap-2 text-xs font-medium bg-gray-50 p-2 border-b">
+                <div>Description</div>
+                <div className="text-center">Check</div>
+                <div className="text-center">Order</div>
+              </div>
+              <div className="p-2 space-y-1">
+                {fields
+                  .filter((field) => field.fieldName !== 'Model Number')
+                  .map((field) => (
+                    <div
+                      key={field.fieldName}
+                      className="grid grid-cols-[1fr,60px,60px] gap-2 items-center"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium min-w-[100px]">
+                          {field.fieldName}
+                          {field.isRequired && <span className="text-red-500 ml-0.5">*</span>}
+                        </span>
+                        <Input
+                          value={field.value}
+                          onChange={(e) => {
+                            const index = fields.findIndex((f) => f.fieldName === field.fieldName);
+                            updateFieldValue(index, e.target.value);
+                          }}
+                          className="h-7 text-sm"
+                          placeholder={`Max ${field.maxLength}`}
+                          readOnly={['Year', 'Month', 'Date'].includes(field.fieldName)}
+                          maxLength={field.maxLength}
+                        />
+                      </div>
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={field.isChecked}
+                          onCheckedChange={() => toggleField(field.fieldName)}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                      <div className="flex justify-center">
+                        <Input
+                          type="text"
+                          value={field.order}
+                          onChange={(e) => {
+                            const index = fields.findIndex((f) => f.fieldName === field.fieldName);
+                            updateOrder(index, e.target.value);
+                          }}
+                          className="w-12 h-7 text-sm text-center"
+                          placeholder="#"
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Generated Part Number - Highlighted and Bigger */}
+            <div className="bg-blue-50 rounded-lg border-2 border-blue-200 p-3 space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-blue-700">Generated Part No:</span>
+                <code className="bg-white px-4 py-2 rounded-md text-lg font-bold font-mono tracking-wider text-blue-800 shadow-sm">
+                  {generatePartNumber(sortedFields)}
                 </code>
               </div>
+              <div className="text-xs text-blue-600">
+                Order:{' '}
+                {sortedFields
+                  .filter((f) => f.isChecked && f.order !== '')
+                  .map((f) => (
+                    <span key={f.fieldName} className="inline-flex items-center">
+                      <span className="font-medium">{f.fieldName}</span>
+                      <span className="mx-1 text-blue-400">({f.order})</span>
+                      {/* Add arrow except for last item */}
+                      {f !==
+                        sortedFields.filter((f) => f.isChecked && f.order !== '').slice(-1)[0] && (
+                        <span className="mx-1 text-blue-400">→</span>
+                      )}
+                    </span>
+                  ))}
+              </div>
             </div>
-          </div>
 
-          <div className="mt-4">
-            <div className="text-sm text-muted-foreground">
-              Current Order:{' '}
-              {sortedFields
-                .filter((f) => f.isChecked && f.order !== '')
-                .map((f) => `${f.fieldName}(${f.order})`)
-                .join(' → ')}
+            {/* Buttons - More compact */}
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setFields(DEFAULT_FIELDS.map((field) => ({ ...field })))}
+              >
+                Reset
+              </Button>
+              <Button size="sm" onClick={saveConfig}>
+                Save Configuration
+              </Button>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="mt-6 flex justify-end gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setFields(DEFAULT_FIELDS.map((field) => ({ ...field })))}
-            >
-              Reset
-            </Button>
-            <Button onClick={saveConfig}>Save Configuration</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {configs.length > 0 && (
-        <Card className="max-w-4xl mx-auto mt-8">
-          <CardHeader>
-            <CardTitle>Saved Configurations</CardTitle>
+        {/* Right Side - Saved Configurations */}
+        <Card className="h-full">
+          <CardHeader className="py-2">
+            <CardTitle className="text-lg">Saved Configurations</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Created At</TableHead>
-                  <TableHead>Part Number</TableHead>
-                  <TableHead className="w-[120px]">Actions</TableHead>
+                  <TableHead className="py-2">Created At</TableHead>
+                  <TableHead className="py-2">Model Number</TableHead>
+                  <TableHead className="py-2">Part Number</TableHead>
+                  <TableHead className="w-[100px] py-2">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -300,11 +535,16 @@ export default function PartNumberConfig() {
                     <TableCell>{new Date(config.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+                        {getModelNumber(config.fields)}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
                         {generatePartNumber(config.fields)}
                       </code>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(config)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -344,7 +584,8 @@ export default function PartNumberConfig() {
             </Table>
           </CardContent>
         </Card>
-      )}
+      </div>
     </main>
   );
 }
+

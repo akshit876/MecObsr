@@ -1,42 +1,66 @@
 /* eslint-disable consistent-return */
 import { useSocket } from '@/SocketContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useProtectedRoute } from './useProtectedRoute';
 
 export const useCsvData = () => {
   const [csvData, setCsvData] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const socket = useSocket(); // Get the socket instance from context
-
+  const [loading, setLoading] = useState(true);
+  const socket = useSocket();
   const { session, status } = useProtectedRoute();
-  console.log('a', { session });
-  useEffect(() => {
-    if (!socket || !session) return; // Ensure the socket is available
 
-    // Function to handle incoming CSV data
+  // Create a memoized function for requesting data
+  const requestCsvData = useCallback(() => {
+    if (!socket || !session?.user) return;
+
+    setLoading(true);
+    socket.emit('request-csv-data', {
+      userId: session.user.id,
+      userName: session.user.email,
+      userRole: session.user.role,
+    });
+  }, [socket, session]);
+
+  useEffect(() => {
+    if (!socket || !session) return;
+
+    // Handle incoming CSV data
     const handleCsvData = (data) => {
-      console.log({ data });
+      console.log('Received CSV data:', data);
       setCsvData(data);
-      setLoading(false); // Set loading to false once data is received
+      setLoading(false);
     };
 
-    // Request CSV data on component mount
-    setLoading(true); // Set loading to true when requesting data
-    console.log({ session });
-    socket.emit('request-csv-data', {
-      userId: session?.user?.id, // Assuming session contains user information
-      userName: session?.user?.email, // You can add any other details as required
-      userRole: session?.user?.role,
+    // Setup socket event listeners
+    socket.on('csv-data', handleCsvData);
+    socket.on('connect', () => {
+      console.log('Socket connected, requesting data...');
+      requestCsvData();
+    });
+    socket.on('reconnect', () => {
+      console.log('Socket reconnected, requesting data...');
+      requestCsvData();
     });
 
-    // Listen for the csv-data event from the server
-    socket.on('csv-data', handleCsvData);
+    // Initial request for data
+    requestCsvData();
 
-    // Cleanup the event listener on component unmount
+    // Cleanup
     return () => {
       socket.off('csv-data', handleCsvData);
+      socket.off('connect');
+      socket.off('reconnect');
     };
-  }, [session]);
+  }, [socket, session, requestCsvData]);
 
-  return { csvData, loading }; // Return loading state along with csvData
+  // Function to manually refresh data
+  const refreshData = () => {
+    requestCsvData();
+  };
+
+  return { 
+    csvData, 
+    loading,
+    refreshData // Expose refresh function
+  };
 };
