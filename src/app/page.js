@@ -13,6 +13,7 @@ import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import useModelStore from '@/store/modelStore';
+import { useSocket } from '@/SocketContext';
 
 function Page() {
   const { csvData } = useCsvData();
@@ -22,6 +23,7 @@ function Page() {
   const router = useRouter();
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   const { selectedModel, modelFields } = useModelStore();
+  const socket = useSocket();
 
   const { session, status } = useProtectedRoute();
   console.log({ startDate, endDate });
@@ -43,15 +45,37 @@ function Page() {
     fetchCurrentModel();
   }, []);
 
-  if (status === 'loading') {
-    return <LoadingSpinner />;
-  }
+  useEffect(() => {
+    if (!socket) return;
 
-  // // If no session, the hook will redirect, but we can return null while that happens
-  // if (!session) {
-  //   router.push('/login');
-  //   return null;
-  // }
+    // Scanner trigger response handler
+    const handleScannerTriggerResponse = (response) => {
+      if (response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    };
+
+    // Mark on response handler
+    const handleMarkOnResponse = (response) => {
+      if (response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    };
+
+    // Register event listeners
+    socket.on('scanner_trigger_response', handleScannerTriggerResponse);
+    socket.on('mark_on_response', handleMarkOnResponse);
+
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off('scanner_trigger_response', handleScannerTriggerResponse);
+      socket.off('mark_on_response', handleMarkOnResponse);
+    };
+  }, [socket]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
@@ -140,6 +164,23 @@ function Page() {
       setIsLoading(false); // Optional: manage loading state
     }
   };
+
+  const handleScannerTrigger = () => {
+    if (!socket.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    socket.emit('scanner_trigger');
+  };
+
+  const handleMarkOn = () => {
+    if (!socket.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    socket.emit('mark_on');
+  };
+
   // console.log({ csvData });
   return (
     <div className="h-[calc(100vh-4rem)] bg-gray-100 p-6">
@@ -148,17 +189,36 @@ function Page() {
       ) : (
         <div className="h-full flex flex-col">
           {currentModelNumber && (
-            <div className="bg-blue-600 text-white py-3 shadow-lg rounded-lg">
-              <div className="container flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium">Current Model:</span>
-                  <code className="px-3 py-1 rounded-md bg-blue-700 text-white font-mono text-lg font-bold">
-                    {currentModelNumber}
-                  </code>
+            <>
+              <div className="bg-blue-600 text-white py-3 shadow-lg rounded-lg">
+                <div className="container flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium">Current Model:</span>
+                    <code className="px-3 py-1 rounded-md bg-blue-700 text-white font-mono text-lg font-bold">
+                      {currentModelNumber}
+                    </code>
+                  </div>
+                  <div className="text-sm">Last Updated: {new Date().toLocaleTimeString()}</div>
                 </div>
-                <div className="text-sm">Last Updated: {new Date().toLocaleTimeString()}</div>
               </div>
-            </div>
+
+              {/* <div className="flex items-center gap-4 mt-4">
+                <Button
+                  variant="default"
+                  onClick={handleScannerTrigger}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Scanner Trigger
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={handleMarkOn}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Mark On
+                </Button>
+              </div> */}
+            </>
           )}
 
           <div className="flex items-center gap-4 px-0 py-4">
@@ -178,6 +238,20 @@ function Page() {
               ) : (
                 'Download CSV Report'
               )}
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleScannerTrigger}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Scanner Trigger
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleMarkOn}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Mark On
             </Button>
           </div>
           <div className="px-0 flex-1">
