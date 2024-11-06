@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useProtectedRoute } from '../../../hooks/useProtectedRoute.js';
+import React from 'react';
 
 function SerialConfig() {
   const [serialConfig, setSerialConfig] = useState({

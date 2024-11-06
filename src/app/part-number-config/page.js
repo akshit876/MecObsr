@@ -39,24 +39,39 @@ export default function PartNumberConfig() {
 
   useEffect(() => {
     const initialize = async () => {
-      await loadConfigs();
-      await fetchShifts(); // This will also call updateDateFields after fetching shifts
+      try {
+        await Promise.all([loadConfigs(), fetchShifts()]);
+      } catch (error) {
+        console.error('Initialization error:', error);
+      }
     };
     initialize();
 
-    // Set up the interval for updates
     const interval = setInterval(() => {
       updateDateFields();
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(interval);
-  }, []); // Empty dependency array for initial load
+  }, []);
 
   const fetchShifts = async () => {
     try {
       const response = await fetch('/api/shift-config');
       const data = await response.json();
-      console.log('Fetched shifts:', data); // Debug log
+
+      if (!data.shifts || !Array.isArray(data.shifts)) {
+        console.error('Invalid shifts data format:', data);
+        toast.error('Invalid shift data received');
+        return;
+      }
+
+      if (data.shifts.length === 0) {
+        console.warn('No shifts configured in the system');
+        toast.warning('No shifts are configured');
+        return;
+      }
+
+      console.log('Successfully loaded shifts:', data.shifts);
       setShifts(data.shifts);
       updateDateFields(); // Immediately update fields after getting shifts
     } catch (error) {
@@ -67,13 +82,13 @@ export default function PartNumberConfig() {
 
   const getCurrentShift = (shiftsData) => {
     if (!shiftsData || shiftsData.length === 0) {
-      console.log('No shifts data available');
+      console.warn('No shifts data available - please configure shifts');
       return '';
     }
 
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
-    console.log('Current time in minutes:', currentTime);
+    console.log('Current time in minutes:', currentTime, 'Available shifts:', shiftsData);
 
     for (const shift of shiftsData) {
       // Convert shift times to minutes for comparison
@@ -480,6 +495,17 @@ export default function PartNumberConfig() {
     return modelNumberField?.value || '';
   };
 
+  // First, let's create a reinitialization function
+  const reinitialize = async () => {
+    try {
+      await Promise.all([loadConfigs(), fetchShifts()]);
+      updateDateFields(); // Update date fields after fetching fresh data
+    } catch (error) {
+      console.error('Reinitialization error:', error);
+      toast.error('Failed to refresh data');
+    }
+  };
+
   return (
     <main className="h-screen bg-gray-100 p-3 overflow-hidden">
       <div className="h-full grid grid-cols-2 gap-3">
@@ -628,7 +654,44 @@ export default function PartNumberConfig() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setFields(DEFAULT_FIELDS.map((field) => ({ ...field })))}
+                onClick={async () => {
+                  const preservedFields = [
+                    'Year',
+                    'Month',
+                    'Date',
+                    'Julian Date',
+                    'Shift',
+                    'Serial Number',
+                  ];
+
+                  // Reset fields
+                  setFields((prevFields) =>
+                    DEFAULT_FIELDS.map((defaultField) => {
+                      // For preserved fields, keep current values
+                      if (preservedFields.includes(defaultField.fieldName)) {
+                        const currentField = prevFields.find(
+                          (f) => f.fieldName === defaultField.fieldName,
+                        );
+                        return {
+                          ...defaultField,
+                          value: currentField?.value || defaultField.value,
+                          isChecked: true, // Keep these checked
+                          order: currentField?.order || defaultField.order,
+                        };
+                      }
+                      // For non-preserved fields, reset completely
+                      return {
+                        ...defaultField,
+                        value: '', // Clear the value
+                        // isChecked: false,  // Uncheck
+                        // order: ''  // Clear the order
+                      };
+                    }),
+                  );
+
+                  // Reinitialize data
+                  // await reinitialize();
+                }}
               >
                 Reset
               </Button>

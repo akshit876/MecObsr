@@ -10,7 +10,7 @@ export async function GET() {
     }
 
     const mainDataDB = mongoose.connection.useDb('main-data');
-    const config = await mainDataDB.collection('serial_config').findOne({});
+    const config = await mainDataDB.collection('serialNoconfig').findOne({});
 
     return NextResponse.json(config || {
       initialValue: '0',
@@ -34,7 +34,7 @@ export async function POST(request) {
     const config = await request.json();
     const mainDataDB = mongoose.connection.useDb('main-data');
 
-    const result = await mainDataDB.collection('serial_config').findOneAndUpdate(
+    const result = await mainDataDB.collection('serialNoconfig').findOneAndUpdate(
       {},
       {
         $set: {

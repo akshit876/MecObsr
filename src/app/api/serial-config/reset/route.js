@@ -10,13 +10,13 @@ export async function POST() {
     }
 
     const mainDataDB = mongoose.connection.useDb('main-data');
-    const config = await mainDataDB.collection('serial_config').findOne({});
+    const config = await mainDataDB.collection('serialNoconfig').findOne({});
 
     if (!config) {
       return NextResponse.json({ error: 'No configuration found' }, { status: 404 });
     }
 
-    const result = await mainDataDB.collection('serial_config').findOneAndUpdate(
+    const result = await mainDataDB.collection('serialNoconfig').findOneAndUpdate(
       {},
       {
         $set: {
@@ -25,7 +25,7 @@ export async function POST() {
           resetBy: session.user.email,
         },
       },
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
 
     // Log the reset
@@ -42,4 +42,4 @@ export async function POST() {
     console.error('Error resetting serial number:', error);
     return NextResponse.json({ error: 'Failed to reset serial number' }, { status: 500 });
   }
-} 
+}
