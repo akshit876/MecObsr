@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Clock,
   TicketCheckIcon,
+  RotateCcw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -59,6 +60,12 @@ export default function TestSidebar() {
                 label: 'Shift Config',
                 href: '/shift-config',
                 icon: Clock,
+              },
+              {
+                label: 'Serial Configuration',
+                icon: RotateCcw,
+                color: 'text-green-700',
+                href: '/serial-config',
               },
             ],
           },
