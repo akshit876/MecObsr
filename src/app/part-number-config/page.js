@@ -35,19 +35,90 @@ export default function PartNumberConfig() {
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [yearFormat, setYearFormat] = useState('short');
-  console.log('DEFAULT_FIELDS', DEFAULT_FIELDS);
-  console.log({ dialogOpen });
+  const [shifts, setShifts] = useState([]);
 
   useEffect(() => {
-    loadConfigs();
-  }, []);
+    const initialize = async () => {
+      await loadConfigs();
+      await fetchShifts(); // This will also call updateDateFields after fetching shifts
+    };
+    initialize();
+
+    // Set up the interval for updates
+    const interval = setInterval(() => {
+      updateDateFields();
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array for initial load
+
+  const fetchShifts = async () => {
+    try {
+      const response = await fetch('/api/shift-config');
+      const data = await response.json();
+      console.log('Fetched shifts:', data); // Debug log
+      setShifts(data.shifts);
+      updateDateFields(); // Immediately update fields after getting shifts
+    } catch (error) {
+      console.error('Shift fetch error:', error);
+      toast.error('Failed to load shift configurations');
+    }
+  };
+
+  const getCurrentShift = (shiftsData) => {
+    if (!shiftsData || shiftsData.length === 0) {
+      console.log('No shifts data available');
+      return '';
+    }
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    console.log('Current time in minutes:', currentTime);
+
+    for (const shift of shiftsData) {
+      // Convert shift times to minutes for comparison
+      const [startHour, startMin] = shift.startTime.split(':').map(Number);
+      const [endHour, endMin] = shift.endTime.split(':').map(Number);
+
+      const startTimeInMinutes = startHour * 60 + startMin;
+      const endTimeInMinutes = endHour * 60 + endMin;
+
+      console.log('Checking shift:', {
+        name: shift.name,
+        start: startTimeInMinutes,
+        end: endTimeInMinutes,
+        currentTime,
+      });
+
+      // Handle shifts that cross midnight
+      if (endTimeInMinutes < startTimeInMinutes) {
+        if (currentTime >= startTimeInMinutes || currentTime <= endTimeInMinutes) {
+          return shift.name;
+        }
+      } else {
+        if (currentTime >= startTimeInMinutes && currentTime <= endTimeInMinutes) {
+          return shift.name;
+        }
+      }
+    }
+
+    return ''; // Return empty if no shift matches
+  };
+
+  const getJulianDate = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    return dayOfYear.toString().padStart(3, '0');
+  };
 
   const loadConfigs = async () => {
     try {
       const response = await fetch('/api/part-number-config');
       const data = await response.json();
       setConfigs(data);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Failed to load configurations');
     }
@@ -57,17 +128,17 @@ export default function PartNumberConfig() {
   console.log('Current Fields:', fields);
 
   const toggleField = (fieldName) => {
-    console.log('Toggling field:', fieldName); // Debug log
-
     setFields((prevFields) => {
       const newFields = prevFields.map((field) => {
         if (field.fieldName === fieldName) {
-          console.log('Found field to toggle:', field.fieldName); // Debug log
+          if (!field.isChecked && (!field.value || field.value.trim() === '')) {
+            toast.error(`Cannot check ${fieldName} - value is required`);
+            return field;
+          }
           return { ...field, isChecked: !field.isChecked };
         }
         return field;
       });
-      console.log('Updated fields:', newFields); // Debug log
       return newFields;
     });
   };
@@ -75,8 +146,10 @@ export default function PartNumberConfig() {
   const updateFieldValue = (index, value) => {
     const field = fields[index];
 
-    // Skip if trying to edit read-only date fields
-    if (['Year', 'Month', 'Date'].includes(field.fieldName)) {
+    // Skip if trying to edit read-only fields
+    if (
+      ['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(field.fieldName)
+    ) {
       return;
     }
 
@@ -85,7 +158,6 @@ export default function PartNumberConfig() {
       return;
     }
 
-    // Update single field directly instead of mapping entire array
     setFields((prevFields) => {
       const newFields = [...prevFields];
       newFields[index] = { ...field, value };
@@ -95,34 +167,42 @@ export default function PartNumberConfig() {
 
   const saveConfig = async () => {
     try {
-      // Check if Model Number is filled
+      let j = 0;
       const modelNumber = fields.find((f) => f.fieldName === 'Model Number');
       if (!modelNumber?.value) {
         toast.error('Model Number is required');
         return;
       }
 
-      // Prepare fields for saving
+      const emptyCheckedFields = fields.filter(
+        (field) => field.isChecked && (!field.value || field.value.trim() === ''),
+      );
+
+      if (emptyCheckedFields.length > 0) {
+        toast.error(
+          `The following checked fields cannot be empty: ${emptyCheckedFields.map((f) => f.fieldName).join(', ')}`,
+        );
+        return;
+      }
+
       const fieldsToSave = fields.map((field) => {
-        // For Model Number
         if (field.fieldName === 'Model Number') {
           return {
             ...field,
             order: 999,
             isChecked: false,
-            isRequired: true, // Ensure it's marked as required
+            isRequired: true,
           };
         }
 
-        // For unchecked fields
         if (!field.isChecked) {
+          j++;
           return {
             ...field,
-            order: 999,
+            order: 999 + j,
           };
         }
 
-        // For checked fields, keep their order
         return field;
       });
 
@@ -174,7 +254,7 @@ export default function PartNumberConfig() {
 
   const generatePartNumber = (configFields) => {
     return configFields
-      .filter((field) => field.isChecked && field.order > 0) // Only include fields with positive order
+      .filter((field) => field.isChecked && field.order > 0)
       .sort((a, b) => a.order - b.order)
       .map((field) => field.value)
       .join('');
@@ -184,14 +264,14 @@ export default function PartNumberConfig() {
     navigator.clipboard.writeText(text);
     toast.success('Part number copied to clipboard');
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const handleDialogClose = () => {
     setDialogOpen(false);
     setFields([]);
     setSelectedConfig(null);
     setIsEditing(false);
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const handleDialogOpenChange = (open) => {
     setDialogOpen(open);
     if (open) {
@@ -209,7 +289,7 @@ export default function PartNumberConfig() {
     const numericOrder = parseInt(newOrder);
 
     if (newOrder === '') {
-      return; // Allow empty temporary state
+      return;
     }
 
     if (isNaN(numericOrder) || numericOrder < 1) {
@@ -217,7 +297,6 @@ export default function PartNumberConfig() {
       return;
     }
 
-    // Check if order already exists in other fields
     const orderExists = fields.some((field, i) => i !== index && field.order === numericOrder);
 
     if (orderExists) {
@@ -255,6 +334,14 @@ export default function PartNumberConfig() {
   // Function to update date fields
   const updateDateFields = () => {
     const { year, month, date } = getCurrentDateValues();
+    const julianDate = getJulianDate();
+    const currentShift = getCurrentShift(shifts);
+
+    console.log('Updating fields with:', {
+      julianDate,
+      currentShift,
+      shifts, // Debug log
+    });
 
     const updatedFields = fields.map((field) => {
       switch (field.fieldName) {
@@ -279,18 +366,40 @@ export default function PartNumberConfig() {
             order: 7,
             isChecked: true,
           };
+        case 'Julian Date':
+          return {
+            ...field,
+            value: julianDate,
+            order: 4,
+            isChecked: true,
+          };
+        case 'Shift':
+          return {
+            ...field,
+            value: currentShift,
+            order: 12,
+            isChecked: true,
+          };
+        case 'Serial Number':
+          return {
+            ...field,
+            value: '0001',
+            order: 8, // Adjust order as needed
+            isChecked: true,
+          };
         default:
           return field;
       }
     });
 
+    console.log('Updated fields:', updatedFields); // Debug log
     setFields(updatedFields);
   };
 
   // Call updateDateFields on initial load and when yearFormat changes
   useEffect(() => {
     updateDateFields();
-  }, [yearFormat]);
+  }, [yearFormat, shifts]);
 
   // Also call updateDateFields when component mounts
   useEffect(() => {
@@ -299,7 +408,25 @@ export default function PartNumberConfig() {
 
   // Render fields separately from model number
   const renderFields = () => {
-    const displayFields = fields.filter((field) => field.fieldName !== 'Model Number');
+    // Create a Set of unique field names that have already been rendered
+    const renderedFields = new Set();
+
+    const displayFields = fields
+      .filter((field) => {
+        // Skip Model Number and already rendered fields
+        if (field.fieldName === 'Model Number' || renderedFields.has(field.fieldName)) {
+          return false;
+        }
+        // Add field name to rendered set
+        renderedFields.add(field.fieldName);
+        return true;
+      })
+      .sort((a, b) => {
+        // Sort by order, putting empty orders at the end
+        if (a.order === '') return 1;
+        if (b.order === '') return -1;
+        return a.order - b.order;
+      });
 
     return displayFields.map((field) => (
       <div
@@ -308,7 +435,7 @@ export default function PartNumberConfig() {
       >
         <div className="flex items-center gap-4">
           <span className="font-medium w-[150px]">
-            {field.fieldName}
+            {field.fieldName.toUpperCase()}
             {field.isRequired && <span className="text-red-500 ml-1">*</span>}
           </span>
           <Input
@@ -317,19 +444,17 @@ export default function PartNumberConfig() {
               const index = fields.findIndex((f) => f.fieldName === field.fieldName);
               updateFieldValue(index, e.target.value);
             }}
-            className={`h-8 ${['Year', 'Month', 'Date'].includes(field.fieldName) ? 'bg-gray-100' : ''}`}
-            placeholder={`Max ${field.maxLength} chars`}
-            readOnly={['Year', 'Month', 'Date'].includes(field.fieldName)}
+            className={`h-8 ${['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(field.fieldName) ? 'bg-gray-100' : ''}`}
+            readOnly={['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(
+              field.fieldName,
+            )}
             maxLength={field.maxLength}
           />
         </div>
         <div className="flex justify-center items-center">
           <Checkbox
             checked={field.isChecked}
-            onCheckedChange={() => {
-              console.log('Checkbox clicked for:', field.fieldName); // Debug log
-              toggleField(field.fieldName);
-            }}
+            onCheckedChange={() => toggleField(field.fieldName)}
             className="h-5 w-5 border-2 rounded-sm"
           />
         </div>
@@ -409,7 +534,7 @@ export default function PartNumberConfig() {
                     }}
                     className="h-7 text-sm"
                     placeholder="Enter Model Number"
-                    maxLength={20}
+                    // maxLength={20}
                     required
                   />
                 </div>
@@ -433,7 +558,7 @@ export default function PartNumberConfig() {
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium min-w-[100px]">
-                          {field.fieldName}
+                          {field.fieldName.toUpperCase()}
                           {field.isRequired && <span className="text-red-500 ml-0.5">*</span>}
                         </span>
                         <Input
@@ -443,9 +568,9 @@ export default function PartNumberConfig() {
                             updateFieldValue(index, e.target.value);
                           }}
                           className="h-7 text-sm"
-                          placeholder={`Max ${field.maxLength}`}
+                          // placeholder={`Max ${field.maxLength}`}
                           readOnly={['Year', 'Month', 'Date'].includes(field.fieldName)}
-                          maxLength={field.maxLength}
+                          // maxLength={field.maxLength}
                         />
                       </div>
                       <div className="flex justify-center">
@@ -588,4 +713,3 @@ export default function PartNumberConfig() {
     </main>
   );
 }
-
