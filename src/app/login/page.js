@@ -23,7 +23,7 @@ const Login = () => {
       if (role === 'operator') {
         router.push('/part-number-select');
       } else {
-        router.push('/dashboard');
+        router.push('/');
       }
     }
   }, [session, router]);

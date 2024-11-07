@@ -16,20 +16,44 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { FiLogOut } from 'react-icons/fi';
 import { CgProfile } from 'react-icons/cg';
 import useModelStore from '@/store/modelStore';
+import { toast } from 'react-toastify';
 
 const TopBar = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const clearModel = useModelStore((state) => state.clearModel);
-  // console.log({ session });
 
   const handleLogout = async () => {
     try {
+      // First, call the logout API to log the session end
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to log logout');
+      }
+
+      // Clear any local state
       clearModel();
-      await signOut();
+
+      // Then perform NextAuth signOut
+      await signOut({ redirect: false });
+
+      // Finally redirect to login page
       router.push('/login');
+      toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error('Error during logout');
+
+      // Still attempt to sign out and redirect even if logging fails
+      clearModel();
+      await signOut({ redirect: false });
+      router.push('/login');
     }
   };
 
