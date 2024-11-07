@@ -12,7 +12,7 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect() {
+async function dbConnect(dbName = 'main-data') {
   if (cached.conn) {
     return cached.conn;
   }
@@ -20,6 +20,7 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: true,
+      dbName: dbName,
     };
 
     cached.promise = await mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

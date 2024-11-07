@@ -1,31 +1,36 @@
-import { connectToDatabase } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
+import dbConnect from '@/db/config/dbConnect';
+import mongoose from 'mongoose';
 
 export async function GET() {
   try {
-    const { db } = await connectToDatabase();
+    await dbConnect('main-data');
     
-    // Get the latest record sorted by timestamp
-    const latestRecord = await db
-      .collection('records')
+    const recordsCollection = mongoose.connection.db.collection('records');
+    
+    const latestRecord = await recordsCollection
       .findOne(
-        {}, // empty filter to match all documents
-        { 
+        {}, 
+        {
           sort: { timestamp: -1 },
-          projection: { serialNumber: 1, timestamp: 1 } 
+          projection: { serialNumber: 1, timestamp: 1, _id: 0 }
         }
       );
 
     if (!latestRecord) {
-      return NextResponse.json({ message: 'No records found' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'No records found' }, 
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(latestRecord);
+
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch latest record' },
+      { error: 'Failed to fetch latest record' }, 
       { status: 500 }
     );
   }
-} 
+}
