@@ -51,11 +51,11 @@ export default function TestSidebar() {
                 href: '/part-number-config',
                 icon: Hash,
               },
-              {
-                label: 'Part Number Select',
-                href: '/part-number-select',
-                icon: TicketCheckIcon,
-              },
+              // {
+              //   label: 'Part Number Select',
+              //   href: '/part-number-select',
+              //   icon: TicketCheckIcon,
+              // },
               {
                 label: 'Shift Config',
                 href: '/shift-config',
