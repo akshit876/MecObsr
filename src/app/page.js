@@ -180,6 +180,13 @@ function Page() {
     }
     socket.emit('mark_on');
   };
+  const handleLigt = () => {
+    if (!socket.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    socket.emit('light_on');
+  };
 
   // console.log({ csvData });
   return (
@@ -252,6 +259,13 @@ function Page() {
               className="bg-red-600 hover:bg-red-700"
             >
               Mark On
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleLigt}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              LIGHT
             </Button>
           </div>
           <div className="px-0 flex-1">
