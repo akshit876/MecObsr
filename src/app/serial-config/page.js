@@ -14,7 +14,7 @@ function SerialConfig() {
     initialValue: '',
     currentValue: '',
     resetValue: '',
-    resetInterval: 'daily', // daily, weekly, monthly, yearly
+    resetTime: '00:00', // New: store time instead of interval
   });
   const [isLoading, setIsLoading] = useState(false);
   const { status } = useProtectedRoute();
@@ -77,7 +77,7 @@ function SerialConfig() {
         resetValue: serialConfig.resetValue,
         currentValue: serialConfig.currentValue,
         initialValue: serialConfig.initialValue,
-        resetInterval: serialConfig.resetInterval
+        resetTime: serialConfig.resetTime,
       });
 
       toast.success('Serial number reset successfully');
@@ -95,14 +95,14 @@ function SerialConfig() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <Card className="max-w-2xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-6">Serial Number Configuration</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
+      <Card className="max-w-2xl mx-auto p-8 shadow-lg">
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Serial Number Configuration</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Initial Value</label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Initial Value</label>
               <Input
                 type="number"
                 value={serialConfig.initialValue}
@@ -113,22 +113,26 @@ function SerialConfig() {
                   }))
                 }
                 placeholder="Enter initial serial number"
+                className="h-11 text-base"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Current Value (Read-only)</label>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Current Value</label>
               <Input
                 type="number"
                 value={serialConfig.currentValue}
                 readOnly
-                className="bg-gray-50"
+                className="h-11 text-base bg-gray-50 border-gray-200 text-gray-500"
               />
+              <p className="text-xs text-gray-500">
+                This value is read-only and updates automatically
+              </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Reset Value</label>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Reset Value</label>
               <Input
                 type="number"
                 value={serialConfig.resetValue}
@@ -139,33 +143,45 @@ function SerialConfig() {
                   }))
                 }
                 placeholder="Enter reset value"
+                className="h-11 text-base"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Reset Interval</label>
-              <select
-                className="w-full p-2 border rounded-md"
-                value={serialConfig.resetInterval}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Daily Reset Time</label>
+              <Input
+                type="time"
+                value={serialConfig.resetTime}
                 onChange={(e) =>
                   setSerialConfig((prev) => ({
                     ...prev,
-                    resetInterval: e.target.value,
+                    resetTime: e.target.value,
                   }))
                 }
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+                className="h-11 text-base w-48"
+                required
+              />
+              <p className="text-xs text-gray-500">
+                The serial number will automatically reset at this time every day
+              </p>
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? 'Saving...' : 'Save Configuration'}
+          <div className="flex gap-4 pt-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 h-11 text-base font-semibold"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  Saving...
+                </span>
+              ) : (
+                'Save Configuration'
+              )}
             </Button>
 
             <Button
@@ -173,9 +189,16 @@ function SerialConfig() {
               variant="destructive"
               onClick={handleReset}
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 h-11 text-base font-semibold"
             >
-              {isLoading ? 'Resetting...' : 'Reset Serial Number'}
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  Resetting...
+                </span>
+              ) : (
+                'Reset Serial Number'
+              )}
             </Button>
           </div>
         </form>
