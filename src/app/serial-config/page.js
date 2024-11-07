@@ -27,10 +27,21 @@ function SerialConfig() {
 
   const fetchCurrentConfig = async () => {
     try {
-      const response = await fetch('/api/serial-config');
-      if (!response.ok) throw new Error('Failed to fetch configuration');
-      const data = await response.json();
-      setSerialConfig(data);
+      // Fetch the serial config
+      const configResponse = await fetch('/api/serial-config');
+      if (!configResponse.ok) throw new Error('Failed to fetch configuration');
+      const configData = await configResponse.json();
+
+      // Fetch the latest record to get current value
+      const recordsResponse = await fetch('/api/records/latest');
+      if (!recordsResponse.ok) throw new Error('Failed to fetch latest record');
+      const latestRecord = await recordsResponse.json();
+
+      // Update state with config data and current value from latest record
+      setSerialConfig({
+        ...configData,
+        currentValue: latestRecord?.serialNumber || configData.currentValue,
+      });
     } catch (error) {
       console.error('Error fetching config:', error);
       toast.error('Failed to load serial number configuration');
