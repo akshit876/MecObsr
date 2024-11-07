@@ -16,80 +16,112 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
   }
 
   const headers = [
-    { key: 'SerialNumber', label: 'Serial Number', width: '150px' },
-    { key: 'MarkingData', label: 'Marking Data', width: '150px' },
-    { key: 'ScannerData', label: 'Scanner Data', width: '150px' },
-    { key: 'Result', label: 'Result', width: '100px' },
-    { key: 'Timestamp', label: 'Timestamp', width: '200px' },
+    { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
+    { key: 'MarkingData', label: 'Marking Data', width: '35%' },
+    { key: 'ScannerData', label: 'Scanner Data', width: '35%' },
+    { key: 'Result', label: 'Result', width: '8%' },
+    { key: 'Timestamp', label: 'Timestamp', width: '10%' },
   ];
 
+  const getResultStyles = (result) => {
+    switch (result) {
+      case 'OK':
+        return 'bg-green-600 text-white font-bold px-3 py-1 rounded-full border-2 border-green-700 shadow-sm';
+      case 'NG':
+        return 'bg-red-600 text-white font-bold px-4 py-1.5 rounded-full border-2 border-red-700 shadow-md';
+      default:
+        return '';
+    }
+  };
+
+  const getCellStyles = (header, isNG) => {
+    let baseStyles = "p-3 border border-gray-900 text-sm";
+    
+    // Add bold styling for Marking and Scanner data
+    if (header.key === 'MarkingData' || header.key === 'ScannerData') {
+      baseStyles += ' font-semibold text-gray-900';
+    }
+    
+    // Add NG text color if applicable
+    if (isNG) {
+      baseStyles += ' text-red-900';
+    }
+    
+    return baseStyles;
+  };
+
   return (
-    <Card className="w-full mt-8 shadow-lg overflow-hidden">
-      <CardHeader>
-        <h1 className="text-2xl font-bold text-gray-800">Scan Results</h1>
-      </CardHeader>
-      <CardContent>
-        {/* Fixed Header Table */}
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              {headers.map((header) => (
-                <TableHead
-                  key={header.key}
-                  style={{ width: header.width }}
-                  className="bg-gray-50 text-left text-lg font-extrabold text-gray-700 py-4 px-5 border-b"
+    <div className="w-full border border-gray-900">
+      <table className="w-full table-fixed border-collapse">
+        {/* Header */}
+        <thead>
+          <tr>
+            {headers.map((header) => (
+              <th
+                key={header.key}
+                style={{ width: header.width }}
+                className="bg-white text-left text-sm font-semibold text-gray-900 p-3 border border-gray-900"
+              >
+                {header.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+      </table>
+
+      {/* Scrollable Body */}
+      <div className="overflow-auto max-h-[calc(100vh-16rem)]">
+        <table className="w-full table-fixed border-collapse">
+          <tbody>
+            {data.map((row, rowIndex) => {
+              const isNG = row['Result'] === 'NG';
+              const isOK = row['Result'] === 'OK';
+              const rowBackgroundColor = isNG
+                ? 'bg-red-100'
+                : isOK
+                  ? 'bg-green-100'
+                  : rowIndex % 2 === 0
+                    ? 'bg-white'
+                    : 'bg-gray-50';
+
+              return (
+                <tr
+                  key={rowIndex}
+                  className={`${rowBackgroundColor}`}
                 >
-                  {header.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-        </Table>
-
-        {/* Scrollable Table Container */}
-        <div className="overflow-x-auto max-h-[36rem] overflow-y-auto">
-          <Table className="w-full">
-            <TableBody>
-              {data.map((row, rowIndex) => {
-                const isHighlighted = row['Result'] === 'NG' || row['Result'] === 'OK';
-                const rowBackgroundColor =
-                  row['Result'] === 'NG'
-                    ? 'bg-red-100'
-                    : row['Result'] === 'OK'
-                      ? 'bg-green-100'
-                      : rowIndex % 2 === 0
-                        ? 'bg-white'
-                        : 'bg-gray-50';
-
-                return (
-                  <TableRow
-                    key={rowIndex}
-                    className={`${rowBackgroundColor} ${isHighlighted ? 'text-lg font-semibold' : 'text-sm'}`}
-                  >
-                    {headers.map((header) => (
-                      <TableCell
-                        key={header.key}
-                        style={{ width: header.width }}
-                        className={`py-3 px-4 whitespace-nowrap overflow-hidden text-ellipsis border-b ${
-                          header.key === 'Result' &&
-                          (row[header.key] === 'OK' || row[header.key] === 'NG')
-                            ? 'font-extrabold text-xl text-gray-900' // Extra bold and larger font for OK and NG
-                            : ''
-                        }`}
-                      >
-                        {header.key === 'Timestamp'
-                          ? new Date(row[header.key]).toLocaleString()
-                          : row[header.key]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+                  {headers.map((header) => (
+                    <td
+                      key={header.key}
+                      style={{ width: header.width }}
+                      className={getCellStyles(header, isNG)}
+                    >
+                      {header.key === 'Result' ? (
+                        <span className={getResultStyles(row[header.key])}>
+                          {row[header.key]}
+                        </span>
+                      ) : header.key === 'Timestamp' ? (
+                        new Date(row[header.key]).toLocaleString()
+                      ) : (
+                        <div 
+                          className={`truncate ${
+                            (header.key === 'MarkingData' || header.key === 'ScannerData') 
+                              ? 'font-semibold text-gray-900' 
+                              : ''
+                          }`} 
+                          title={row[header.key]}
+                        >
+                          {row[header.key]}
+                        </div>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

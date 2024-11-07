@@ -77,6 +77,21 @@ const Login = () => {
         return;
       }
 
+      // After successful login, log the session
+      const sessionLogResponse = await fetch('/api/auth/session-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userAgent: window.navigator.userAgent,
+        }),
+      });
+
+      if (!sessionLogResponse.ok) {
+        console.error('Failed to log session');
+      }
+
       // After successful login, update the model configuration
       const selectedModelData = models.find((model) => model.id === selectedModelId);
       if (!selectedModelData) {

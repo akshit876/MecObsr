@@ -206,11 +206,11 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="h-[calc(100vh-4rem)] bg-slate-50 p-4">
+    <div className="h-[calc(100vh-4rem)] bg-slate-100 p-4">
       {status === 'loading' ? (
         <LoadingSpinner />
       ) : (
-        <div className="h-full flex flex-col gap-3">
+        <div className="h-full flex flex-col gap-3 bg-slate-100">
           {/* Compressed Current Model Section */}
           {currentModelNumber && (
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-2 px-4 shadow-md rounded-lg">
@@ -299,7 +299,7 @@ function Page() {
             {/* Marking Data Section */}
             <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
               <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">Marking Data</h2>
-              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 min-h-[120px] font-mono">
+              <div className="p-2 bg-slate-50 rounded border border-slate-200 min-h-[80px] font-mono text-xs">
                 {markingData || 'Waiting for data...'}
               </div>
             </div>
@@ -307,14 +307,14 @@ function Page() {
             {/* Scanner Data Section */}
             <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
               <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">Scanner Data</h2>
-              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 min-h-[120px] font-mono">
+              <div className="p-2 bg-slate-50 rounded border border-slate-200 min-h-[80px] font-mono text-xs">
                 {scannerData || 'Waiting for data...'}
               </div>
             </div>
           </div>
 
-          {/* Table Section */}
-          <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden">
+          {/* Table Section - Further spacing fixes */}
+          <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden -mt-1">
             <StyledTable data={csvData?.data} highlightNGRows />
           </div>
         </div>
