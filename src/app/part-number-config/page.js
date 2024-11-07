@@ -1,15 +1,4 @@
 'use client';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -285,18 +274,29 @@ export default function PartNumberConfig() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (configId) => {
     try {
-      const response = await fetch(`/api/part-number-config/${id}`, {
+      console.log('Attempting to delete config:', configId); // Debug log
+
+      // Make sure we're sending the correct MongoDB ObjectId
+      const response = await fetch(`/api/part-number-config/${configId}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete configuration');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete configuration');
+      }
 
-      await loadConfigs();
+      // Update local state immediately
+      setConfigs(prevConfigs => prevConfigs.filter(config => config._id !== configId));
       toast.success('Configuration deleted successfully');
+
+      // Refresh the data
+      await loadConfigs();
     } catch (error) {
-      toast.error(error.message);
+      console.error('Delete error:', error);
+      toast.error('Failed to delete configuration');
     }
   };
 
@@ -529,6 +529,12 @@ export default function PartNumberConfig() {
     }
   };
 
+  // First, let's add a debug function
+  const handleDeleteClick = (configId) => {
+    console.log('Delete button clicked for ID:', configId); // Debug log
+    handleDelete(configId);
+  };
+
   return (
     <main className="h-screen bg-gray-100 p-3 overflow-hidden">
       <div className="h-full grid grid-cols-2 gap-3">
@@ -693,27 +699,13 @@ export default function PartNumberConfig() {
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Configuration</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this configuration?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(config._id)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <button  // Changed to regular button for testing
+                          type="button"
+                          onClick={() => handleDeleteClick(config._id)}
+                          className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
