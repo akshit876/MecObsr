@@ -256,7 +256,7 @@ function Page() {
                   onClick={handleLigt}
                   className="bg-violet-600 hover:bg-violet-700 w-full text-xs py-1"
                 >
-                  LIGT
+                  LIGHT
                 </Button>
               </div>
             </div>
