@@ -370,63 +370,26 @@ export default function PartNumberConfig() {
     const julianDate = getJulianDate();
     const currentShift = getCurrentShift(shifts);
 
-    console.log('Updating fields with:', {
-      julianDate,
-      currentShift,
-      shifts, // Debug log
-    });
-
-    const updatedFields = fields.map((field) => {
-      switch (field.fieldName) {
-        case 'Year':
-          return {
-            ...field,
-            value: year,
-            order: 5,
-            isChecked: true,
-          };
-        case 'Month':
-          return {
-            ...field,
-            value: month,
-            order: 6,
-            isChecked: true,
-          };
-        case 'Date':
-          return {
-            ...field,
-            value: date,
-            order: 7,
-            isChecked: true,
-          };
-        case 'Julian Date':
-          return {
-            ...field,
-            value: julianDate,
-            order: 4,
-            isChecked: true,
-          };
-        case 'Shift':
-          return {
-            ...field,
-            value: currentShift,
-            order: 12,
-            isChecked: true,
-          };
-        case 'Serial Number':
-          return {
-            ...field,
-            value: '0001',
-            order: 8, // Adjust order as needed
-            isChecked: true,
-          };
-        default:
-          return field;
-      }
-    });
-
-    console.log('Updated fields:', updatedFields); // Debug log
-    setFields(updatedFields);
+    setFields((prevFields) =>
+      prevFields.map((field) => {
+        switch (field.fieldName) {
+          case 'Year':
+            return { ...field, value: year };
+          case 'Month':
+            return { ...field, value: month };
+          case 'Date':
+            return { ...field, value: date };
+          case 'Julian Date':
+            return { ...field, value: julianDate };
+          case 'Shift':
+            return { ...field, value: currentShift };
+          case 'Serial Number':
+            return { ...field, value: '0001' };
+          default:
+            return field;
+        }
+      }),
+    );
   };
 
   // Call updateDateFields on initial load and when yearFormat changes
@@ -504,31 +467,49 @@ export default function PartNumberConfig() {
     ));
   };
 
-  // Add refresh to reset operation
+  // Modify the handleReset function
   const handleReset = async () => {
-    const preservedFields = ['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'];
-
-    // Reset fields
+    // First, reset all fields to their default state with empty orders
     setFields((prevFields) =>
       DEFAULT_FIELDS.map((defaultField) => {
-        if (preservedFields.includes(defaultField.fieldName)) {
-          const currentField = prevFields.find((f) => f.fieldName === defaultField.fieldName);
+        // For date-related and shift fields, keep them checked but with empty orders
+        if (
+          ['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(
+            defaultField.fieldName,
+          )
+        ) {
           return {
             ...defaultField,
-            value: currentField?.value || defaultField.value,
+            order: '', // Explicitly clear order
             isChecked: true,
-            order: currentField?.order || defaultField.order,
+            value: prevFields.find((f) => f.fieldName === defaultField.fieldName)?.value || '', // Keep current value
           };
         }
+        // For all other fields, reset completely
         return {
           ...defaultField,
           value: '',
+          order: '', // Explicitly clear order
+          isChecked: false,
         };
       }),
     );
 
-    // Refresh data after reset
-    await refreshData();
+    // Fetch shifts but don't let it update orders
+    try {
+      const response = await fetch('/api/shift-config');
+      const data = await response.json();
+
+      if (data.shifts && Array.isArray(data.shifts)) {
+        setShifts(data.shifts);
+        // Don't call updateDateFields() here as it would reset orders
+      }
+    } catch (error) {
+      console.error('Shift fetch error:', error);
+      toast.error('Failed to refresh shifts');
+    }
+
+    toast.success('Form has been reset');
   };
 
   // Add a helper function to get Model Number
