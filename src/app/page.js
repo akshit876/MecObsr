@@ -28,6 +28,9 @@ function Page() {
   const { session, status } = useProtectedRoute();
   console.log({ startDate, endDate });
 
+  const [markingData, setMarkingData] = useState('');
+  const [scannerData, setScannerData] = useState('');
+
   useEffect(() => {
     const fetchCurrentModel = async () => {
       try {
@@ -66,14 +69,27 @@ function Page() {
       }
     };
 
+    // Add new socket event listeners
+    const handleMarkingData = (data) => {
+      setMarkingData(data);
+    };
+
+    const handleScannerData = (data) => {
+      setScannerData(data);
+    };
+
     // Register event listeners
     socket.on('scanner_trigger_response', handleScannerTriggerResponse);
     socket.on('mark_on_response', handleMarkOnResponse);
+    socket.on('marking_data', handleMarkingData);
+    socket.on('scanner_data', handleScannerData);
 
     // Cleanup listeners on unmount
     return () => {
       socket.off('scanner_trigger_response', handleScannerTriggerResponse);
       socket.off('mark_on_response', handleMarkOnResponse);
+      socket.off('marking_data', handleMarkingData);
+      socket.off('scanner_data', handleScannerData);
     };
   }, [socket]);
 
@@ -268,6 +284,22 @@ function Page() {
               LIGHT
             </Button>
           </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2 text-gray-700">Marking Data</h3>
+              <div className="p-3 bg-gray-100 rounded min-h-[50px] font-mono">
+                {markingData || 'Waiting for data...'}
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2 text-gray-700">Scanner Data</h3>
+              <div className="p-3 bg-gray-100 rounded min-h-[50px] font-mono">
+                {scannerData || 'Waiting for data...'}
+              </div>
+            </div>
+          </div>
+
           <div className="px-0 flex-1">
             <StyledTable data={csvData?.data} highlightNGRows />
           </div>
