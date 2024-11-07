@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useProtectedRoute } from '../../../hooks/useProtectedRoute.js';
 import React from 'react';
+import { useSocket } from '@/SocketContext';
 
 function SerialConfig() {
   const [serialConfig, setSerialConfig] = useState({
@@ -17,6 +18,7 @@ function SerialConfig() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { status } = useProtectedRoute();
+  const socket = useSocket();
 
   // Fetch current configuration on mount
   useEffect(() => {
@@ -70,6 +72,8 @@ function SerialConfig() {
       });
 
       if (!response.ok) throw new Error('Failed to reset serial number');
+
+      socket.emit('triggerManualReset');
 
       toast.success('Serial number reset successfully');
       fetchCurrentConfig(); // Refresh the displayed values
