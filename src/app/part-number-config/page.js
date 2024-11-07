@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Copy, Edit, Trash2 } from 'lucide-react';
+import { Copy, Edit, Trash2, RefreshCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { DEFAULT_FIELDS } from '../../db/models/partNumber.model';
@@ -47,11 +47,11 @@ export default function PartNumberConfig() {
     };
     initialize();
 
-    const interval = setInterval(() => {
-      updateDateFields();
-    }, 60000);
+    // const interval = setInterval(() => {
+    //   updateDateFields();
+    // }, 60000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   const fetchShifts = async () => {
@@ -180,6 +180,19 @@ export default function PartNumberConfig() {
     });
   };
 
+  // Add a refresh function that combines all refresh operations
+  const refreshData = async () => {
+    try {
+      await Promise.all([loadConfigs(), fetchShifts()]);
+      updateDateFields(); // Update fields after getting fresh data
+      toast.success('Data refreshed successfully');
+    } catch (error) {
+      console.error('Refresh error:', error);
+      toast.error('Failed to refresh data');
+    }
+  };
+
+  // Modify the save function to include shift refresh
   const saveConfig = async () => {
     try {
       let j = 0;
@@ -197,6 +210,25 @@ export default function PartNumberConfig() {
         toast.error(
           `The following checked fields cannot be empty: ${emptyCheckedFields.map((f) => f.fieldName).join(', ')}`,
         );
+        return;
+      }
+
+      const checkedFields = fields.filter((field) => field.isChecked);
+      const orders = checkedFields.map((field) => field.order);
+
+      // Check for duplicate orders
+      const uniqueOrders = new Set(orders);
+      if (uniqueOrders.size !== orders.length) {
+        toast.error('Order numbers must be unique for checked fields');
+        return;
+      }
+
+      // Check for empty or invalid orders
+      const hasInvalidOrder = checkedFields.some(
+        (field) => field.order === '' || field.order === 0 || isNaN(field.order),
+      );
+      if (hasInvalidOrder) {
+        toast.error('All checked fields must have a valid order number');
         return;
       }
 
@@ -235,7 +267,8 @@ export default function PartNumberConfig() {
         throw new Error(error.message || 'Failed to save configuration');
       }
 
-      await loadConfigs();
+      // Refresh all data after successful save
+      await refreshData();
       setIsEditing(false);
       setSelectedConfig(null);
       toast.success('Configuration saved successfully');
@@ -301,27 +334,12 @@ export default function PartNumberConfig() {
   };
 
   const updateOrder = (index, newOrder) => {
-    const numericOrder = parseInt(newOrder);
-
-    if (newOrder === '') {
-      return;
-    }
-
-    if (isNaN(numericOrder) || numericOrder < 1) {
-      toast.error('Please enter a number greater than 0');
-      return;
-    }
-
-    const orderExists = fields.some((field, i) => i !== index && field.order === numericOrder);
-
-    if (orderExists) {
-      toast.error('This order number is already in use');
-      return;
-    }
-
     setFields((prevFields) => {
       const newFields = [...prevFields];
-      newFields[index] = { ...newFields[index], order: numericOrder };
+      newFields[index] = {
+        ...newFields[index],
+        order: newOrder === '' ? '' : parseInt(newOrder, 10) || 0,
+      };
       return newFields;
     });
   };
@@ -423,21 +441,17 @@ export default function PartNumberConfig() {
 
   // Render fields separately from model number
   const renderFields = () => {
-    // Create a Set of unique field names that have already been rendered
     const renderedFields = new Set();
 
     const displayFields = fields
       .filter((field) => {
-        // Skip Model Number and already rendered fields
         if (field.fieldName === 'Model Number' || renderedFields.has(field.fieldName)) {
           return false;
         }
-        // Add field name to rendered set
         renderedFields.add(field.fieldName);
         return true;
       })
       .sort((a, b) => {
-        // Sort by order, putting empty orders at the end
         if (a.order === '') return 1;
         if (b.order === '') return -1;
         return a.order - b.order;
@@ -475,7 +489,7 @@ export default function PartNumberConfig() {
         </div>
         <div className="flex justify-center items-center">
           <Input
-            type="text"
+            type="number"
             value={field.order}
             onChange={(e) => {
               const index = fields.findIndex((f) => f.fieldName === field.fieldName);
@@ -483,10 +497,38 @@ export default function PartNumberConfig() {
             }}
             className="w-16 h-8 text-center"
             placeholder="#"
+            min="1"
           />
         </div>
       </div>
     ));
+  };
+
+  // Add refresh to reset operation
+  const handleReset = async () => {
+    const preservedFields = ['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'];
+
+    // Reset fields
+    setFields((prevFields) =>
+      DEFAULT_FIELDS.map((defaultField) => {
+        if (preservedFields.includes(defaultField.fieldName)) {
+          const currentField = prevFields.find((f) => f.fieldName === defaultField.fieldName);
+          return {
+            ...defaultField,
+            value: currentField?.value || defaultField.value,
+            isChecked: true,
+            order: currentField?.order || defaultField.order,
+          };
+        }
+        return {
+          ...defaultField,
+          value: '',
+        };
+      }),
+    );
+
+    // Refresh data after reset
+    await refreshData();
   };
 
   // Add a helper function to get Model Number
@@ -574,53 +616,7 @@ export default function PartNumberConfig() {
                 <div className="text-center">Check</div>
                 <div className="text-center">Order</div>
               </div>
-              <div className="p-2 space-y-1">
-                {fields
-                  .filter((field) => field.fieldName !== 'Model Number')
-                  .map((field) => (
-                    <div
-                      key={field.fieldName}
-                      className="grid grid-cols-[1fr,60px,60px] gap-2 items-center"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium min-w-[100px]">
-                          {field.fieldName.toUpperCase()}
-                          {field.isRequired && <span className="text-red-500 ml-0.5">*</span>}
-                        </span>
-                        <Input
-                          value={field.value}
-                          onChange={(e) => {
-                            const index = fields.findIndex((f) => f.fieldName === field.fieldName);
-                            updateFieldValue(index, e.target.value);
-                          }}
-                          className="h-7 text-sm"
-                          // placeholder={`Max ${field.maxLength}`}
-                          readOnly={['Year', 'Month', 'Date'].includes(field.fieldName)}
-                          // maxLength={field.maxLength}
-                        />
-                      </div>
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={field.isChecked}
-                          onCheckedChange={() => toggleField(field.fieldName)}
-                          className="h-4 w-4"
-                        />
-                      </div>
-                      <div className="flex justify-center">
-                        <Input
-                          type="text"
-                          value={field.order}
-                          onChange={(e) => {
-                            const index = fields.findIndex((f) => f.fieldName === field.fieldName);
-                            updateOrder(index, e.target.value);
-                          }}
-                          className="w-12 h-7 text-sm text-center"
-                          placeholder="#"
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </div>
+              <div className="p-2 space-y-1">{renderFields()}</div>
             </div>
 
             {/* Generated Part Number - Highlighted and Bigger */}
@@ -654,48 +650,21 @@ export default function PartNumberConfig() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={async () => {
-                  const preservedFields = [
-                    'Year',
-                    'Month',
-                    'Date',
-                    'Julian Date',
-                    'Shift',
-                    'Serial Number',
-                  ];
-
-                  // Reset fields
-                  setFields((prevFields) =>
-                    DEFAULT_FIELDS.map((defaultField) => {
-                      // For preserved fields, keep current values
-                      if (preservedFields.includes(defaultField.fieldName)) {
-                        const currentField = prevFields.find(
-                          (f) => f.fieldName === defaultField.fieldName,
-                        );
-                        return {
-                          ...defaultField,
-                          value: currentField?.value || defaultField.value,
-                          isChecked: true, // Keep these checked
-                          order: currentField?.order || defaultField.order,
-                        };
-                      }
-                      // For non-preserved fields, reset completely
-                      return {
-                        ...defaultField,
-                        value: '', // Clear the value
-                        // isChecked: false,  // Uncheck
-                        // order: ''  // Clear the order
-                      };
-                    }),
-                  );
-
-                  // Reinitialize data
-                  // await reinitialize();
-                }}
+                onClick={handleReset}
+                className="bg-gray-100 hover:bg-gray-200"
               >
                 Reset
               </Button>
-              <Button size="sm" onClick={saveConfig}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={refreshData}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-600"
+              >
+                <RefreshCcw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+              <Button size="sm" onClick={saveConfig} className="bg-blue-600 hover:bg-blue-700">
                 Save Configuration
               </Button>
             </div>
