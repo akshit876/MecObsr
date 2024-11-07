@@ -184,10 +184,20 @@ export default function PartNumberConfig() {
   // Modify the save function to include shift refresh
   const saveConfig = async () => {
     try {
-      let j = 0;
       const modelNumber = fields.find((f) => f.fieldName === 'Model Number');
       if (!modelNumber?.value) {
         toast.error('Model Number is required');
+        return;
+      }
+
+      // Check for duplicate model number in existing configs
+      const isDuplicate = configs.some((config) => {
+        const configModelNumber = config.fields.find((f) => f.fieldName === 'Model Number')?.value;
+        return configModelNumber === modelNumber.value && config._id !== selectedConfig?._id;
+      });
+
+      if (isDuplicate) {
+        toast.error('Model Number already exists. Please use a different Model Number.');
         return;
       }
 
@@ -289,7 +299,7 @@ export default function PartNumberConfig() {
       }
 
       // Update local state immediately
-      setConfigs(prevConfigs => prevConfigs.filter(config => config._id !== configId));
+      setConfigs((prevConfigs) => prevConfigs.filter((config) => config._id !== configId));
       toast.success('Configuration deleted successfully');
 
       // Refresh the data
@@ -699,7 +709,7 @@ export default function PartNumberConfig() {
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
-                        <button  // Changed to regular button for testing
+                        <button // Changed to regular button for testing
                           type="button"
                           onClick={() => handleDeleteClick(config._id)}
                           className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"

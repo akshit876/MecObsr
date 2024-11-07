@@ -206,54 +206,55 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="h-[calc(100vh-4rem)] bg-slate-50 p-6">
+    <div className="h-[calc(100vh-4rem)] bg-slate-50 p-4">
       {status === 'loading' ? (
         <LoadingSpinner />
       ) : (
-        <div className="h-full flex flex-col gap-4">
-          {/* Current Model Section - Using deep blue gradient */}
+        <div className="h-full flex flex-col gap-3">
+          {/* Compressed Current Model Section */}
           {currentModelNumber && (
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 shadow-lg rounded-lg">
-              <div className="container flex items-center justify-between px-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-medium">Current Model:</span>
-                  <code className="px-4 py-2 rounded-md bg-white/20 backdrop-blur-sm text-white font-mono text-lg font-bold">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-2 px-4 shadow-md rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Current Model:</span>
+                  <code className="px-2 py-1 rounded bg-white/20 backdrop-blur-sm text-white font-mono text-sm">
                     {currentModelNumber}
                   </code>
                 </div>
-                <div className="text-sm bg-blue-900/30 px-3 py-1 rounded-full">
+                <div className="text-xs bg-blue-900/30 px-2 py-0.5 rounded-full">
                   Last Updated: {new Date().toLocaleTimeString()}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Manual Mode and Report Download Row */}
-          <div className="grid grid-cols-2 gap-6">
+          {/* Compressed Four Sections Row */}
+          <div className="grid grid-cols-4 gap-3">
             {/* Manual Mode Section */}
-            <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
-                Manual Mode Controls
-              </h2>
-              <div className="flex items-center gap-4">
+            <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
+              <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">Manual Mode</h2>
+              <div className="flex flex-col gap-1.5">
                 <Button
+                  size="sm"
                   variant="default"
                   onClick={handleScannerTrigger}
-                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 w-full text-xs py-1"
                 >
                   Scanner Trigger
                 </Button>
                 <Button
+                  size="sm"
                   variant="default"
                   onClick={handleMarkOn}
-                  className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  className="bg-indigo-600 hover:bg-indigo-700 w-full text-xs py-1"
                 >
                   Mark On
                 </Button>
                 <Button
+                  size="sm"
                   variant="default"
                   onClick={handleLigt}
-                  className="bg-violet-600 hover:bg-violet-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  className="bg-violet-600 hover:bg-violet-700 w-full text-xs py-1"
                 >
                   LIGT
                 </Button>
@@ -261,31 +262,31 @@ function Page() {
             </div>
 
             {/* Report Download Section */}
-            <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+            <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
+              <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">
                 Report Download
               </h2>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-1.5">
                 <DatePicker
                   selected={startDate}
                   onSelect={setStartDate}
                   placeholder="Start Date"
-                  className="border-2 focus:border-blue-500"
+                  className="w-full text-xs"
                 />
                 <DatePicker
                   selected={endDate}
                   onSelect={setEndDate}
                   placeholder="End Date"
-                  className="border-2 focus:border-blue-500"
+                  className="w-full text-xs"
                 />
                 <Button
                   variant="default"
-                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 w-full"
                   onClick={handleDownloadExcel}
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Generating...
                     </>
                   ) : (
@@ -294,25 +295,25 @@ function Page() {
                 </Button>
               </div>
             </div>
-          </div>
 
-          {/* Real-time Data Section */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-600">
-              <h3 className="text-lg font-bold mb-3 text-gray-800">Marking Data</h3>
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[50px] font-mono text-gray-700">
+            {/* Marking Data Section */}
+            <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
+              <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">Marking Data</h2>
+              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 min-h-[120px] font-mono">
                 {markingData || 'Waiting for data...'}
               </div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-600">
-              <h3 className="text-lg font-bold mb-3 text-gray-800">Scanner Data</h3>
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[50px] font-mono text-gray-700">
+
+            {/* Scanner Data Section */}
+            <div className="bg-white p-3 rounded-lg shadow-sm border-t-2 border-blue-600">
+              <h2 className="text-sm font-bold mb-2 text-gray-800 border-b pb-1">Scanner Data</h2>
+              <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 min-h-[120px] font-mono">
                 {scannerData || 'Waiting for data...'}
               </div>
             </div>
           </div>
 
-          {/* Table Section - Removed heading */}
+          {/* Table Section */}
           <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden">
             <StyledTable data={csvData?.data} highlightNGRows />
           </div>
