@@ -206,12 +206,12 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gray-50 p-6">
+    <div className="h-[calc(100vh-4rem)] bg-slate-50 p-6">
       {status === 'loading' ? (
         <LoadingSpinner />
       ) : (
         <div className="h-full flex flex-col gap-4">
-          {/* Enhanced Current Model Section */}
+          {/* Current Model Section - Using deep blue gradient */}
           {currentModelNumber && (
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 shadow-lg rounded-lg">
               <div className="container flex items-center justify-between px-6">
@@ -230,8 +230,8 @@ function Page() {
 
           {/* Manual Mode and Report Download Row */}
           <div className="grid grid-cols-2 gap-6">
-            {/* Enhanced Manual Mode Section */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600">
+            {/* Manual Mode Section */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
               <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
                 Manual Mode Controls
               </h2>
@@ -239,29 +239,29 @@ function Page() {
                 <Button
                   variant="default"
                   onClick={handleScannerTrigger}
-                  className="bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
+                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
                 >
                   Scanner Trigger
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleMarkOn}
-                  className="bg-rose-600 hover:bg-rose-700 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
+                  className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
                 >
                   Mark On
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleLigt}
-                  className="bg-amber-500 hover:bg-amber-600 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
+                  className="bg-violet-600 hover:bg-violet-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
                 >
                   LIGT
                 </Button>
               </div>
             </div>
 
-            {/* Enhanced Report Download Section */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-600">
+            {/* Report Download Section */}
+            <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600">
               <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
                 Report Download
               </h2>
@@ -270,17 +270,17 @@ function Page() {
                   selected={startDate}
                   onSelect={setStartDate}
                   placeholder="Start Date"
-                  className="border-2 focus:border-purple-500"
+                  className="border-2 focus:border-blue-500"
                 />
                 <DatePicker
                   selected={endDate}
                   onSelect={setEndDate}
                   placeholder="End Date"
-                  className="border-2 focus:border-purple-500"
+                  className="border-2 focus:border-blue-500"
                 />
                 <Button
-                  variant="secondary"
-                  className="bg-purple-600 hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg text-white px-6 py-2 text-base"
+                  variant="default"
+                  className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
                   onClick={handleDownloadExcel}
                 >
                   {isLoading ? (
@@ -296,27 +296,24 @@ function Page() {
             </div>
           </div>
 
-          {/* Enhanced Real-time Data Section */}
+          {/* Real-time Data Section */}
           <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-cyan-600">
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-600">
               <h3 className="text-lg font-bold mb-3 text-gray-800">Marking Data</h3>
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px] font-mono text-gray-700">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[50px] font-mono text-gray-700">
                 {markingData || 'Waiting for data...'}
               </div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-600">
+            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-600">
               <h3 className="text-lg font-bold mb-3 text-gray-800">Scanner Data</h3>
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px] font-mono text-gray-700">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[50px] font-mono text-gray-700">
                 {scannerData || 'Waiting for data...'}
               </div>
             </div>
           </div>
 
-          {/* Enhanced Table Section */}
-          <div className="flex-1 bg-white rounded-xl shadow-lg border-b-4 border-gray-200 overflow-hidden">
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
-              <h3 className="text-lg font-bold text-gray-800">Data Table</h3>
-            </div>
+          {/* Table Section - Removed heading */}
+          <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden">
             <StyledTable data={csvData?.data} highlightNGRows />
           </div>
         </div>
