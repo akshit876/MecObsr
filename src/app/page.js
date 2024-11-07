@@ -206,101 +206,117 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gray-100 p-6">
+    <div className="h-[calc(100vh-4rem)] bg-gray-50 p-6">
       {status === 'loading' ? (
         <LoadingSpinner />
       ) : (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col gap-4">
+          {/* Enhanced Current Model Section */}
           {currentModelNumber && (
-            <>
-              <div className="bg-blue-600 text-white py-3 shadow-lg rounded-lg">
-                <div className="container flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-medium">Current Model:</span>
-                    <code className="px-3 py-1 rounded-md bg-blue-700 text-white font-mono text-lg font-bold">
-                      {currentModelNumber}
-                    </code>
-                  </div>
-                  <div className="text-sm">Last Updated: {new Date().toLocaleTimeString()}</div>
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 shadow-lg rounded-lg">
+              <div className="container flex items-center justify-between px-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-medium">Current Model:</span>
+                  <code className="px-4 py-2 rounded-md bg-white/20 backdrop-blur-sm text-white font-mono text-lg font-bold">
+                    {currentModelNumber}
+                  </code>
+                </div>
+                <div className="text-sm bg-blue-900/30 px-3 py-1 rounded-full">
+                  Last Updated: {new Date().toLocaleTimeString()}
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* <div className="flex items-center gap-4 mt-4">
+          {/* Manual Mode and Report Download Row */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Enhanced Manual Mode Section */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-600">
+              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                Manual Mode Controls
+              </h2>
+              <div className="flex items-center gap-4">
                 <Button
                   variant="default"
                   onClick={handleScannerTrigger}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
                 >
                   Scanner Trigger
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleMarkOn}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-rose-600 hover:bg-rose-700 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
                 >
                   Mark On
                 </Button>
-              </div> */}
-            </>
-          )}
+                <Button
+                  variant="default"
+                  onClick={handleLigt}
+                  className="bg-amber-500 hover:bg-amber-600 transition-all duration-200 shadow-md hover:shadow-lg px-6 py-2 text-base"
+                >
+                  LIGT
+                </Button>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-4 px-0 py-4">
-            <DatePicker selected={startDate} onSelect={setStartDate} placeholder="Start Date" />
-            <DatePicker selected={endDate} onSelect={setEndDate} placeholder="End Date" />
-            <Button
-              variant="secondary"
-              style={{ color: 'white' }}
-              className="[&]:!text-white [&>*]:!text-white [&]:hover:!text-white"
-              onClick={handleDownloadExcel}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
-                  Generating...
-                </>
-              ) : (
-                'Download CSV Report'
-              )}
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleScannerTrigger}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Scanner Trigger
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleMarkOn}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Mark On
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleLigt}
-              className="bg-yellow-600 hover:bg-yellow-700"
-            >
-              LIGHT
-            </Button>
+            {/* Enhanced Report Download Section */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-600">
+              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                Report Download
+              </h2>
+              <div className="flex items-center gap-4">
+                <DatePicker
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  placeholder="Start Date"
+                  className="border-2 focus:border-purple-500"
+                />
+                <DatePicker
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  placeholder="End Date"
+                  className="border-2 focus:border-purple-500"
+                />
+                <Button
+                  variant="secondary"
+                  className="bg-purple-600 hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg text-white px-6 py-2 text-base"
+                  onClick={handleDownloadExcel}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Download CSV Report'
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-2 text-gray-700">Marking Data</h3>
-              <div className="p-3 bg-gray-100 rounded min-h-[50px] font-mono">
+          {/* Enhanced Real-time Data Section */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-cyan-600">
+              <h3 className="text-lg font-bold mb-3 text-gray-800">Marking Data</h3>
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px] font-mono text-gray-700">
                 {markingData || 'Waiting for data...'}
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-2 text-gray-700">Scanner Data</h3>
-              <div className="p-3 bg-gray-100 rounded min-h-[50px] font-mono">
+            <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-600">
+              <h3 className="text-lg font-bold mb-3 text-gray-800">Scanner Data</h3>
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[50px] font-mono text-gray-700">
                 {scannerData || 'Waiting for data...'}
               </div>
             </div>
           </div>
 
-          <div className="px-0 flex-1">
+          {/* Enhanced Table Section */}
+          <div className="flex-1 bg-white rounded-xl shadow-lg border-b-4 border-gray-200 overflow-hidden">
+            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+              <h3 className="text-lg font-bold text-gray-800">Data Table</h3>
+            </div>
             <StyledTable data={csvData?.data} highlightNGRows />
           </div>
         </div>
