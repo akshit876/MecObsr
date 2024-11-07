@@ -73,7 +73,12 @@ function SerialConfig() {
 
       if (!response.ok) throw new Error('Failed to reset serial number');
 
-      socket.emit('triggerManualReset');
+      socket.emit('triggerManualReset', {
+        resetValue: serialConfig.resetValue,
+        currentValue: serialConfig.currentValue,
+        initialValue: serialConfig.initialValue,
+        resetInterval: serialConfig.resetInterval
+      });
 
       toast.success('Serial number reset successfully');
       fetchCurrentConfig(); // Refresh the displayed values
