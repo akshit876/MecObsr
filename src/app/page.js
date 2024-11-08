@@ -16,7 +16,7 @@ import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
 
 function Page() {
-  const { csvData } = useCsvData();
+  const { csvData, loading: isTableLoading } = useCsvData();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -315,8 +315,13 @@ function Page() {
 
           {/* Table Section - Further spacing fixes */}
           <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden -mt-1">
-            {/* <StyledTable data={csvData?.data} highlightNGRows /> */}
-            <StyledTable2 data={csvData?.data} highlightNGRows />
+            {isTableLoading ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <LoadingSpinner />
+              </div>
+            ) : (
+              <StyledTable2 data={csvData?.data || []} />
+            )}
           </div>
         </div>
       )}

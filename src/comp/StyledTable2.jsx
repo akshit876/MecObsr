@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   createColumnHelper,
   flexRender,
@@ -103,8 +104,16 @@ const columns = [
   }),
 ];
 
-const StyledTable = ({ data }) => {
+const StyledTable = ({ data = [] }) => {
   const [sorting, setSorting] = useState([]);
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full border border-gray-900 p-4 text-center text-gray-500">
+        No data available
+      </div>
+    )
+  }
 
   const table = useReactTable({
     data,
