@@ -206,93 +206,153 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="w-full min-h-screen p-6">
-      <div className="w-full bg-white rounded-lg shadow">
-        {/* Header Stats */}
-        <div className="bg-[#0a2942] text-white rounded-lg p-4 mb-6">
-          <h1 className="text-xl font-semibold mb-1">Production Monitoring</h1>
-          <p className="text-sm text-gray-400 mb-4">Real-time tracking and analysis</p>
+    <div className="w-full min-h-screen p-2">
+      <div className="w-full space-y-2">
+        <div
+          className="rounded-lg border border-gray-200/60 
+          bg-gradient-to-r from-[#0a2942]/95 to-[#0a2942]/90
+          backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+          hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] 
+          transition-all duration-300"
+        >
+          <div className="p-3">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h1 className="text-lg font-bold text-white/90 mb-0.5">Production Monitoring</h1>
+                <p className="text-sm text-gray-300/80">Real-time tracking and analysis</p>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[#1a3b55] p-4 rounded-lg">
-              <p className="text-sm text-gray-400">Total Production</p>
-              <h3 className="text-2xl font-bold">{csvData?.data?.length || 0}</h3>
-            </div>
-            <div className="bg-[#1a3b55] p-4 rounded-lg">
-              <p className="text-sm text-gray-400">Success Rate</p>
-              <h3 className="text-2xl font-bold">98.5%</h3>
-            </div>
-            <div className="bg-[#1a3b55] p-4 rounded-lg">
-              <p className="text-sm text-gray-400">Current Model</p>
-              <h3 className="text-2xl font-bold">{currentModelNumber || 'N/A'}</h3>
+            <div className="grid grid-cols-3 gap-3">
+              <div
+                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
+                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
+              >
+                <p className="text-xs text-gray-300/80 mb-1">Total Production</p>
+                <h3 className="text-2xl font-bold text-white">{csvData?.data?.length || 0}</h3>
+              </div>
+              <div
+                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
+                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
+              >
+                <p className="text-xs text-gray-300/80 mb-1">Success Rate</p>
+                <h3 className="text-2xl font-bold text-white">98.5%</h3>
+              </div>
+              <div
+                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
+                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
+              >
+                <p className="text-xs text-gray-300/80 mb-1">Current Model</p>
+                <h3 className="text-2xl font-bold text-white truncate">
+                  {currentModelNumber || 'N/A'}
+                </h3>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Control Panels */}
-        <div className="grid grid-cols-3 gap-6 mb-6">
-          {/* Manual Controls */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h2 className="text-sm font-semibold mb-3">Manual Controls</h2>
-            <div className="space-y-2">
+        <div className="grid grid-cols-12 gap-3">
+          <div
+            className="col-span-2 rounded-lg p-2.5 border border-gray-200/60 
+            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)] 
+            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
+            hover:border-blue-500/50 transition-all duration-300"
+          >
+            <h2 className="text-sm font-bold mb-2 text-gray-800 uppercase tracking-wide">
+              Manual Controls
+            </h2>
+            <div className="flex flex-col h-[calc(100%-2rem)] gap-1.5">
               <Button
-                className="w-full bg-blue-500 hover:bg-blue-600"
+                size="xs"
+                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
+                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
                 onClick={handleScannerTrigger}
               >
                 Scanner Trigger
               </Button>
-              <Button className="w-full bg-blue-500 hover:bg-blue-600" onClick={handleMarkOn}>
+              <Button
+                size="xs"
+                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
+                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
+                onClick={handleMarkOn}
+              >
                 Mark On
               </Button>
-              <Button className="w-full bg-blue-500 hover:bg-blue-600" onClick={handleLigt}>
+              <Button
+                size="xs"
+                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
+                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
+                onClick={handleLigt}
+              >
                 Light Control
               </Button>
             </div>
           </div>
 
-          {/* Current Data */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h2 className="text-sm font-semibold mb-3">Current Data</h2>
-            <div className="space-y-3">
+          <div
+            className="col-span-6 rounded-lg p-2.5 border border-gray-200/60 
+            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)]
+            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
+            hover:border-blue-500/50 transition-all duration-300"
+          >
+            <h2 className="text-sm font-bold mb-2 text-gray-800 uppercase tracking-wide">
+              Current Data
+            </h2>
+            <div className="space-y-2">
               <div>
-                <label className="text-xs text-gray-500">Marking Data</label>
-                <div className="mt-1 p-2 bg-gray-50 rounded border text-sm">
+                <label className="text-xs font-semibold text-gray-700">Marking Data</label>
+                <div
+                  className="mt-1 p-2 bg-white/50 rounded-md border border-gray-200/60 
+                  text-sm font-medium shadow-inner backdrop-blur-sm"
+                >
                   {markingData || 'Waiting for data...'}
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-500">Scanner Data</label>
-                <div className="mt-1 p-2 bg-gray-50 rounded border text-sm">
+                <label className="text-xs font-semibold text-gray-700">Scanner Data</label>
+                <div
+                  className="mt-1 p-2 bg-white/50 rounded-md border border-gray-200/60 
+                  text-sm font-medium shadow-inner backdrop-blur-sm"
+                >
                   {scannerData || 'Waiting for data...'}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Report Generation */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h2 className="text-sm font-semibold mb-3">Generate Report</h2>
-            <div className="space-y-3">
-              <DatePicker
-                selected={startDate}
-                onSelect={setStartDate}
-                placeholder="Start Date"
-                className="w-full"
-              />
-              <DatePicker
-                selected={endDate}
-                onSelect={setEndDate}
-                placeholder="End Date"
-                className="w-full"
-              />
+          <div
+            className="col-span-4 rounded-lg p-2.5 border border-gray-200/60 
+            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)] 
+            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
+            hover:border-blue-500/50 transition-all duration-300"
+          >
+            <h2 className="text-sm font-bold mb-1.5 text-gray-700 uppercase tracking-wide">
+              Generate Report
+            </h2>
+            <div className="flex flex-col h-[calc(100%-2rem)] justify-between">
+              <div className="space-y-1">
+                <DatePicker
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  placeholder="Start Date"
+                  className="w-full h-7 text-xs px-2 border-gray-200 focus:border-blue-500"
+                />
+                <DatePicker
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  placeholder="End Date"
+                  className="w-full h-7 text-xs px-2 border-gray-200 focus:border-blue-500"
+                />
+              </div>
               <Button
-                className="w-full bg-blue-500 hover:bg-blue-600"
+                size="sm"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-xs font-medium"
                 onClick={handleDownloadExcel}
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                     Generating...
                   </>
                 ) : (
@@ -303,19 +363,26 @@ function Page() {
           </div>
         </div>
 
-        {/* Table Section */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold">Production History</h2>
-            <p className="text-sm text-gray-500">Real-time production monitoring data</p>
+        <div
+          className="rounded-lg border border-gray-200/60 
+          bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)]
+          hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
+          transition-all duration-300"
+        >
+          <div className="p-4 border-b border-gray-200/60 bg-white/50 backdrop-blur-md rounded-t-lg">
+            <h2 className="text-lg font-bold text-gray-800 uppercase tracking-wide">
+              Production History
+            </h2>
+            <p className="text-sm text-gray-500/80">Real-time production monitoring data</p>
           </div>
-          <div className="p-4">
+
+          <div className="p-4 bg-white/40 backdrop-blur-sm rounded-b-lg">
             {isTableLoading ? (
-              <div className="h-[600px] flex items-center justify-center">
+              <div className="h-[700px] flex items-center justify-center">
                 <LoadingSpinner />
               </div>
             ) : (
-              <div className="h-[600px]">
+              <div className="h-[700px] bg-white/70 rounded-lg border border-gray-200/60 shadow-inner">
                 <StyledTable2 data={csvData?.data || []} />
               </div>
             )}
