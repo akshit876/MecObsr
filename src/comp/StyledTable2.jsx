@@ -15,70 +15,71 @@ const columnHelper = createColumnHelper();
 const columns = [
   columnHelper.accessor('SerialNumber', {
     header: 'SNO',
-    cell: info => (
-      <div className="font-medium">{info.getValue()}</div>
-    ),
+    cell: (info) => <div className="font-medium">{info.getValue()}</div>,
     size: 150,
   }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
-    cell: info => (
-      <div className="font-medium text-gray-600">{info.getValue()}</div>
-    ),
+    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
     size: 200,
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
-    cell: info => (
-      <div className="font-medium text-gray-600">{info.getValue()}</div>
-    ),
+    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
     size: 200,
   }),
 
   columnHelper.accessor('Result', {
     header: 'Result',
-    cell: info => {
-      const result = info.getValue()
-      const styles = result === 'OK'
-        ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold'
-        : result === 'NG'
-          ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-bold shadow-sm'
-          : ''
-      return <span className={styles}>{result}</span>
+    cell: (info) => {
+      const result = info.getValue();
+      const styles =
+        result === 'OK'
+          ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold'
+          : result === 'NG'
+            ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-bold shadow-sm'
+            : '';
+      return <span className={styles}>{result}</span>;
     },
     size: 100,
   }),
 
   columnHelper.accessor('User', {
     header: 'User',
-    cell: info => (
-      <div className="font-medium text-gray-600">{info.getValue()}</div>
-    ),
+    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
     size: 150,
   }),
 
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
-    cell: info => (
+    cell: (info) => (
       <div className="text-gray-600">
-        {new Date(info.getValue()).toLocaleDateString()}
+        {new Date(info.getValue()).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        })}
       </div>
     ),
-    size: 150,
+    size: 200,
   }),
-]
+];
 
 const StyledTable = ({ data = [] }) => {
-  const [sorting, setSorting] = useState([])
+  const [sorting, setSorting] = useState([]);
 
   if (!data || data.length === 0) {
     return (
       <div className="w-full border border-gray-200 rounded-lg p-4 text-center text-gray-500">
         No data available
       </div>
-    )
+    );
   }
 
   const table = useReactTable({
@@ -90,65 +91,66 @@ const StyledTable = ({ data = [] }) => {
     state: {
       sorting,
     },
-  })
+  });
 
   return (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
       <div className="w-full overflow-auto max-h-[calc(100vh-16rem)]">
         <table className="w-full border-collapse relative">
           <thead className="sticky top-0 z-10">
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-white border-b border-gray-200 shadow-sm">
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
                     className="text-left text-sm font-medium text-gray-600 p-3 bg-white"
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map(row => {
+            {table.getRowModel().rows.map((row) => {
               const result = row.original.Result;
               const rowClassName = `
                 border-b border-gray-200 last:border-0
-                ${result === 'NG' ? 'bg-red-50 hover:bg-red-100' : 
-                  result === 'OK' ? 'bg-green-50 hover:bg-green-100' : 
-                  'hover:bg-gray-50'}
+                ${
+                  result === 'NG'
+                    ? 'bg-red-50 hover:bg-red-100'
+                    : result === 'OK'
+                      ? 'bg-green-50 hover:bg-green-100'
+                      : 'hover:bg-gray-50'
+                }
               `;
 
               return (
                 <tr key={row.id} className={rowClassName}>
-                  {row.getVisibleCells().map(cell => (
+                  {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
                       className={`p-3 text-sm ${
-                        result === 'NG' ? 'text-red-900 font-medium' : 
-                        result === 'OK' ? 'text-green-900' : ''
+                        result === 'NG'
+                          ? 'text-red-900 font-medium'
+                          : result === 'OK'
+                            ? 'text-green-900'
+                            : ''
                       }`}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
-              )
+              );
             })}
           </tbody>
         </table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StyledTable
+export default StyledTable;
