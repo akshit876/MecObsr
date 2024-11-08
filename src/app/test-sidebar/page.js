@@ -1,35 +1,34 @@
+/* eslint-disable react/prop-types */
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Home,
   Settings,
-  ChevronRight,
-  MenuIcon,
   Hash,
-  ChevronDown,
   Clock,
-  TicketCheckIcon,
   RotateCcw,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 
-export default function TestSidebar() {
+export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
   const pathname = usePathname();
-  const [active, setActive] = useState('Dashboard');
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [openMenus, setOpenMenus] = useState({});
   const { session } = useProtectedRoute();
+  const [expandedSections, setExpandedSections] = useState({});
+  // const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const toggleMenu = (menuLabel) => {
-    setOpenMenus((prev) => ({
+  const toggleSection = (label) => {
+    setExpandedSections((prev) => ({
       ...prev,
-      [menuLabel]: !prev[menuLabel],
+      [label]: !prev[label],
     }));
   };
 
@@ -43,19 +42,14 @@ export default function TestSidebar() {
       ? [
           {
             label: 'Settings',
+            href: '/settings',
             icon: Settings,
-            isNested: true,
             children: [
               {
                 label: 'Part Number Config',
                 href: '/part-number-config',
                 icon: Hash,
               },
-              // {
-              //   label: 'Part Number Select',
-              //   href: '/part-number-select',
-              //   icon: TicketCheckIcon,
-              // },
               {
                 label: 'Shift Config',
                 href: '/shift-config',
@@ -63,9 +57,8 @@ export default function TestSidebar() {
               },
               {
                 label: 'Serial Configuration',
-                icon: RotateCcw,
-                color: 'text-green-700',
                 href: '/serial-config',
+                icon: RotateCcw,
               },
             ],
           },
@@ -74,106 +67,159 @@ export default function TestSidebar() {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <>
+      {/* Toggle Button - Updated positioning and styling */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={cn(
+          'fixed z-50 p-1.5 rounded-full shadow-lg border border-gray-800 bg-[#1e1b2c] transition-all duration-300',
+          isCollapsed ? 'left-[60px] -translate-x-1/2' : 'left-[240px] -translate-x-1/2',
+        )}
+        style={{ top: '20px' }}
+      >
+        <ChevronLeft
+          className={cn(
+            'h-4 w-4 text-gray-300 transition-transform duration-300',
+            isCollapsed && 'rotate-180',
+          )}
+        />
+      </button>
+
       <div
         className={cn(
-          'fixed top-0 left-0 h-screen bg-[#1E1E2D] transition-all duration-300 overflow-y-auto',
-          isCollapsed ? 'w-[80px]' : 'w-[280px]',
+          'fixed top-0 left-0 h-screen bg-[#1e1b2c] flex flex-col transition-all duration-300',
+          isCollapsed ? 'w-[60px]' : 'w-[240px]',
         )}
       >
-        <div className="flex flex-col h-full">
-          <div className="sticky top-0 h-[60px] flex items-center justify-between px-4 border-b border-[#2D2F3A] bg-[#1E1E2D] z-10">
-            {!isCollapsed && <h1 className="text-2xl font-semibold text-white">RICO</h1>}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-[#2D2F3A]"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              <MenuIcon className="h-5 w-5" />
-            </Button>
+        {/* Logo Section */}
+        <div className="h-[60px] flex items-center px-6 border-b border-gray-800">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-indigo-500 rounded flex items-center justify-center">
+              <span className="text-white text-sm font-semibold">R</span>
+            </div>
+            {!isCollapsed && <span className="font-semibold text-white">RICO</span>}
           </div>
-          <ScrollArea className="flex-1 h-[calc(100vh-60px)]">
-            <nav className="p-2 space-y-2">
-              {routes.map((route) => (
-                <React.Fragment key={route.label}>
-                  {route.isNested ? (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => !isCollapsed && toggleMenu(route.label)}
-                        className={cn(
-                          'w-full flex items-center gap-3 p-2 rounded-md transition-all',
-                          pathname.startsWith(route.href) || openMenus[route.label]
-                            ? 'bg-[#4B49AC] text-white'
-                            : 'text-[#7DA0FA] hover:bg-[#2D2F3A]',
-                        )}
-                      >
-                        <route.icon className="h-5 w-5 min-w-[20px]" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="font-medium">{route.label}</span>
-                            <ChevronDown
-                              className={cn(
-                                'ml-auto h-4 w-4 transition-transform duration-200',
-                                openMenus[route.label] && 'rotate-180',
-                              )}
-                            />
-                          </>
-                        )}
-                      </button>
-                      {!isCollapsed && openMenus[route.label] && (
-                        <div className="pl-4 space-y-1">
-                          {route.children.map((child) => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              onClick={() => setActive(child.label)}
-                              className={cn(
-                                'flex items-center gap-3 p-2 rounded-md transition-all text-sm',
-                                pathname === child.href
-                                  ? 'bg-[#4B49AC] text-white'
-                                  : 'text-[#7DA0FA] hover:bg-[#2D2F3A]',
-                              )}
-                            >
-                              <child.icon className="h-4 w-4 min-w-[16px]" />
-                              <span className="font-medium">{child.label}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link
-                      href={route.href}
-                      onClick={() => setActive(route.label)}
+        </div>
+
+        {/* Search Bar - Only show when expanded */}
+        {!isCollapsed && (
+          <div className="px-4 py-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-[#2d2a3d] text-gray-300 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 border border-gray-700"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <ScrollArea className={cn('flex-1', isCollapsed ? 'px-1' : 'px-2')}>
+          <nav className="space-y-1">
+            {routes.map((route) => (
+              <React.Fragment key={route.label}>
+                {route.children ? (
+                  <div>
+                    <button
+                      onClick={() => toggleSection(route.label)}
                       className={cn(
-                        'flex items-center gap-3 p-2 rounded-md transition-all',
-                        pathname === route.href
-                          ? 'bg-[#4B49AC] text-white'
-                          : 'text-[#7DA0FA] hover:bg-[#2D2F3A]',
+                        'w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                        expandedSections[route.label]
+                          ? 'bg-[#2d2a3d] text-indigo-400'
+                          : 'text-gray-300 hover:bg-[#2d2a3d]',
                       )}
                     >
-                      <route.icon className="h-5 w-5 min-w-[20px]" />
+                      <div className="flex items-center gap-3">
+                        <route.icon className="h-4 w-4" />
+                        {!isCollapsed && route.label}
+                      </div>
                       {!isCollapsed && (
-                        <>
-                          <span className="font-medium">{route.label}</span>
-                          <ChevronRight className="ml-auto h-4 w-4" />
-                        </>
+                        <ChevronDown
+                          className={cn(
+                            'h-4 w-4 transition-transform',
+                            expandedSections[route.label] ? 'transform rotate-180' : '',
+                          )}
+                        />
                       )}
-                    </Link>
-                  )}
-                </React.Fragment>
-              ))}
-            </nav>
-          </ScrollArea>
+                    </button>
+                    {expandedSections[route.label] && !isCollapsed && (
+                      <div className="mt-1 ml-4 space-y-1">
+                        {route.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={cn(
+                              'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+                              pathname === child.href
+                                ? 'bg-[#2d2a3d] text-indigo-400'
+                                : 'text-gray-300 hover:bg-[#2d2a3d]',
+                            )}
+                          >
+                            <child.icon className="h-4 w-4" />
+                            {!isCollapsed && child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={route.href}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      pathname === route.href
+                        ? 'bg-[#2d2a3d] text-indigo-400'
+                        : 'text-gray-300 hover:bg-[#2d2a3d]',
+                    )}
+                  >
+                    <route.icon className="h-4 w-4" />
+                    {!isCollapsed && route.label}
+                  </Link>
+                )}
+              </React.Fragment>
+            ))}
+          </nav>
+        </ScrollArea>
+
+        {/* User Section - Simplified when collapsed */}
+        <div className={cn('border-t border-gray-800', isCollapsed ? 'p-2' : 'p-4')}>
+          {isCollapsed ? (
+            <div className="w-8 h-8 rounded-full bg-[#2d2a3d] flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-300">
+                {session?.user?.name?.[0] || 'U'}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#2d2a3d] flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-300">
+                    {session?.user?.name?.[0] || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-200">
+                    {session?.user?.name || 'User Name'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {session?.user?.email || 'user@example.com'}
+                  </p>
+                </div>
+              </div>
+              <button
+                className="mt-2 flex items-center gap-2 text-sm text-gray-300 hover:text-white w-full px-2 py-2 rounded-md hover:bg-[#2d2a3d]"
+                onClick={() => {
+                  /* Add your logout logic */
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </button>
+            </>
+          )}
         </div>
       </div>
-      <div
-        className={cn(
-          'flex-shrink-0 transition-all duration-300',
-          isCollapsed ? 'w-[80px]' : 'w-[280px]',
-        )}
-      />
-    </div>
+    </>
   );
 }

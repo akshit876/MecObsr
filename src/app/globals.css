@@ -80,3 +80,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+body {
+  @apply bg-gray-50;
+}
+
+/* Add this to handle main content transitions */
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+  will-change: margin-left;
+}

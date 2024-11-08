@@ -14,102 +14,68 @@ const columnHelper = createColumnHelper();
 
 const columns = [
   columnHelper.accessor('SerialNumber', {
-    header: ({ column }) => (
-      <button
-        className="flex items-center gap-1 hover:text-gray-700"
-        onClick={() => column.toggleSorting()}
-      >
-        Serial Number
-        <ArrowUpDown className="h-4 w-4" />
-      </button>
+    header: 'SNO',
+    cell: info => (
+      <div className="font-medium">{info.getValue()}</div>
     ),
-    cell: (info) => <div className="font-medium">{info.getValue()}</div>,
     size: 150,
   }),
+
   columnHelper.accessor('MarkingData', {
-    header: ({ column }) => (
-      <button
-        className="flex items-center gap-1 hover:text-gray-700"
-        onClick={() => column.toggleSorting()}
-      >
-        Marking Data
-        <ArrowUpDown className="h-4 w-4" />
-      </button>
-    ),
-    cell: (info) => (
-      <div className="font-semibold text-gray-900 truncate" title={info.getValue()}>
-        {info.getValue()}
-      </div>
+    header: 'Marking Data',
+    cell: info => (
+      <div className="font-medium text-gray-600">{info.getValue()}</div>
     ),
     size: 200,
   }),
+
   columnHelper.accessor('ScannerData', {
-    header: ({ column }) => (
-      <button
-        className="flex items-center gap-1 hover:text-gray-700"
-        onClick={() => column.toggleSorting()}
-      >
-        Scanner Data
-        <ArrowUpDown className="h-4 w-4" />
-      </button>
-    ),
-    cell: (info) => (
-      <div className="font-semibold text-gray-900 truncate" title={info.getValue()}>
-        {info.getValue()}
-      </div>
+    header: 'Scanner Data',
+    cell: info => (
+      <div className="font-medium text-gray-600">{info.getValue()}</div>
     ),
     size: 200,
   }),
+
   columnHelper.accessor('Result', {
     header: 'Result',
-    cell: (info) => {
-      const result = info.getValue();
-      const styles =
-        result === 'OK'
-          ? 'bg-green-600 text-white font-bold px-3 py-1 rounded-full border-2 border-green-700 shadow-sm'
-          : result === 'NG'
-            ? 'bg-red-600 text-white font-bold px-4 py-1.5 rounded-full border-2 border-red-700 shadow-md'
-            : '';
-      return <span className={styles}>{result}</span>;
+    cell: info => {
+      const result = info.getValue()
+      const styles = result === 'OK'
+        ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold'
+        : result === 'NG'
+          ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-bold shadow-sm'
+          : ''
+      return <span className={styles}>{result}</span>
     },
     size: 100,
   }),
+
   columnHelper.accessor('User', {
-    header: ({ column }) => (
-      <button
-        className="flex items-center gap-1 hover:text-gray-700"
-        onClick={() => column.toggleSorting()}
-      >
-        User
-        <ArrowUpDown className="h-4 w-4" />
-      </button>
+    header: 'User',
+    cell: info => (
+      <div className="font-medium text-gray-600">{info.getValue()}</div>
     ),
-    cell: (info) => <div className="font-medium text-gray-700">{info.getValue()}</div>,
     size: 150,
   }),
+
   columnHelper.accessor('Timestamp', {
-    header: ({ column }) => (
-      <button
-        className="flex items-center gap-1 hover:text-gray-700"
-        onClick={() => column.toggleSorting()}
-      >
-        Timestamp
-        <ArrowUpDown className="h-4 w-4" />
-      </button>
-    ),
-    cell: (info) => (
-      <div className="text-gray-600">{new Date(info.getValue()).toLocaleString()}</div>
+    header: 'Created At',
+    cell: info => (
+      <div className="text-gray-600">
+        {new Date(info.getValue()).toLocaleDateString()}
+      </div>
     ),
     size: 150,
   }),
-];
+]
 
 const StyledTable = ({ data = [] }) => {
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState([])
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full border border-gray-900 p-4 text-center text-gray-500">
+      <div className="w-full border border-gray-200 rounded-lg p-4 text-center text-gray-500">
         No data available
       </div>
     )
@@ -124,63 +90,65 @@ const StyledTable = ({ data = [] }) => {
     state: {
       sorting,
     },
-  });
+  })
 
   return (
-    <div className="w-full border border-gray-900">
-      <div className="w-full">
-        <table className="w-full table-fixed border-collapse">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+    <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
+      <div className="w-full overflow-auto max-h-[calc(100vh-16rem)]">
+        <table className="w-full border-collapse relative">
+          <thead className="sticky top-0 z-10">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id} className="bg-white border-b border-gray-200 shadow-sm">
+                {headerGroup.headers.map(header => (
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
-                    className="bg-white text-left text-sm font-semibold text-gray-900 p-3 border border-gray-900"
+                    className="text-left text-sm font-medium text-gray-600 p-3 bg-white"
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
-        </table>
-      </div>
-
-      <div className="overflow-auto max-h-[calc(100vh-16rem)]">
-        <table className="w-full table-fixed border-collapse">
           <tbody>
-            {table.getRowModel().rows.map((row) => {
-              const isNG = row.original.Result === 'NG';
-              const isOK = row.original.Result === 'OK';
-              const rowBackgroundColor = isNG
-                ? 'bg-red-100'
-                : isOK
-                  ? 'bg-green-100'
-                  : row.index % 2 === 0
-                    ? 'bg-white'
-                    : 'bg-gray-50';
+            {table.getRowModel().rows.map(row => {
+              const result = row.original.Result;
+              const rowClassName = `
+                border-b border-gray-200 last:border-0
+                ${result === 'NG' ? 'bg-red-50 hover:bg-red-100' : 
+                  result === 'OK' ? 'bg-green-50 hover:bg-green-100' : 
+                  'hover:bg-gray-50'}
+              `;
 
               return (
-                <tr key={row.id} className={rowBackgroundColor}>
-                  {row.getVisibleCells().map((cell) => (
+                <tr key={row.id} className={rowClassName}>
+                  {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
-                      className={`p-3 border border-gray-900 text-sm ${isNG ? 'text-red-900' : ''}`}
+                      className={`p-3 text-sm ${
+                        result === 'NG' ? 'text-red-900 font-medium' : 
+                        result === 'OK' ? 'text-green-900' : ''
+                      }`}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default StyledTable;
+export default StyledTable
