@@ -17,9 +17,10 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
 
   const headers = [
     { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
-    { key: 'MarkingData', label: 'Marking Data', width: '35%' },
-    { key: 'ScannerData', label: 'Scanner Data', width: '35%' },
+    { key: 'MarkingData', label: 'Marking Data', width: '30%' },
+    { key: 'ScannerData', label: 'Scanner Data', width: '30%' },
     { key: 'Result', label: 'Result', width: '8%' },
+    { key: 'User', label: 'User', width: '10%' },
     { key: 'Timestamp', label: 'Timestamp', width: '10%' },
   ];
 
@@ -35,18 +36,23 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
   };
 
   const getCellStyles = (header, isNG) => {
-    let baseStyles = "p-3 border border-gray-900 text-sm";
-    
+    let baseStyles = 'p-3 border border-gray-900 text-sm';
+
     // Add bold styling for Marking and Scanner data
     if (header.key === 'MarkingData' || header.key === 'ScannerData') {
       baseStyles += ' font-semibold text-gray-900';
     }
-    
+
+    // Add User styling
+    if (header.key === 'User') {
+      baseStyles += ' font-medium text-gray-700';
+    }
+
     // Add NG text color if applicable
     if (isNG) {
       baseStyles += ' text-red-900';
     }
-    
+
     return baseStyles;
   };
 
@@ -85,10 +91,7 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                     : 'bg-gray-50';
 
               return (
-                <tr
-                  key={rowIndex}
-                  className={`${rowBackgroundColor}`}
-                >
+                <tr key={rowIndex} className={`${rowBackgroundColor}`}>
                   {headers.map((header) => (
                     <td
                       key={header.key}
@@ -96,18 +99,16 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                       className={getCellStyles(header, isNG)}
                     >
                       {header.key === 'Result' ? (
-                        <span className={getResultStyles(row[header.key])}>
-                          {row[header.key]}
-                        </span>
+                        <span className={getResultStyles(row[header.key])}>{row[header.key]}</span>
                       ) : header.key === 'Timestamp' ? (
                         new Date(row[header.key]).toLocaleString()
                       ) : (
-                        <div 
+                        <div
                           className={`truncate ${
-                            (header.key === 'MarkingData' || header.key === 'ScannerData') 
-                              ? 'font-semibold text-gray-900' 
+                            header.key === 'MarkingData' || header.key === 'ScannerData'
+                              ? 'font-semibold text-gray-900'
                               : ''
-                          }`} 
+                          }`}
                           title={row[header.key]}
                         >
                           {row[header.key]}

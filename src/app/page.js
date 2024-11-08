@@ -1,5 +1,5 @@
 'use client';
-import StyledTable from '@/comp/StyledTable';
+import StyledTable2 from '@/comp/StyledTable2';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -315,7 +315,8 @@ function Page() {
 
           {/* Table Section - Further spacing fixes */}
           <div className="flex-1 bg-white rounded-xl shadow-md border-b-4 border-blue-600 overflow-hidden -mt-1">
-            <StyledTable data={csvData?.data} highlightNGRows />
+            {/* <StyledTable data={csvData?.data} highlightNGRows /> */}
+            <StyledTable2 data={csvData?.data} highlightNGRows />
           </div>
         </div>
       )}
