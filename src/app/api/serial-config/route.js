@@ -43,6 +43,7 @@ export async function POST(request) {
     if (existingConfig) {
       // Update existing config - remove _id from the update data
       const updateData = { ...config };
+      console.log(updateData);
       delete updateData._id; // Remove _id if it exists in the input
 
       const updateResult = await mainDataDB.collection('serialNoconfig').findOneAndUpdate(

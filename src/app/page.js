@@ -1,7 +1,7 @@
 'use client';
 import StyledTable2 from '@/comp/StyledTable2';
 import { format } from 'date-fns';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks/useSocket';
@@ -28,6 +28,10 @@ function Page() {
   const { session, status } = useProtectedRoute();
   console.log({ startDate, endDate });
 
+  // Move useRef declarations to component level
+  const markingTimeoutRef = useRef(null);
+  const scannerTimeoutRef = useRef(null);
+
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
 
@@ -51,45 +55,48 @@ function Page() {
   useEffect(() => {
     if (!socket) return;
 
-    // Scanner trigger response handler
-    const handleScannerTriggerResponse = (response) => {
-      if (response.success) {
-        toast.success(response.message);
-      } else {
-        toast.error(response.message);
-      }
-    };
-
-    // Mark on response handler
-    const handleMarkOnResponse = (response) => {
-      if (response.success) {
-        toast.success(response.message);
-      } else {
-        toast.error(response.message);
-      }
-    };
-
-    // Add new socket event listeners
     const handleMarkingData = (data) => {
-      setMarkingData(data);
+      if (markingTimeoutRef.current) {
+        clearTimeout(markingTimeoutRef.current);
+      }
+
+      setMarkingData(data.data);
+
+      // Clear data after 300ms
+      markingTimeoutRef.current = setTimeout(() => {
+        setMarkingData('');
+      }, 300);
     };
 
     const handleScannerData = (data) => {
-      setScannerData(data);
+      if (scannerTimeoutRef.current) {
+        clearTimeout(scannerTimeoutRef.current);
+      }
+
+      setScannerData(data.data);
+
+      // Clear data after 300ms
+      scannerTimeoutRef.current = setTimeout(() => {
+        setScannerData('');
+      }, 300);
     };
 
-    // Register event listeners
-    socket.on('scanner_trigger_response', handleScannerTriggerResponse);
-    socket.on('mark_on_response', handleMarkOnResponse);
     socket.on('marking_data', handleMarkingData);
-    socket.on('scanner_data', handleScannerData);
+    socket.on('scanner_read', handleScannerData);
 
-    // Cleanup listeners on unmount
+    // Cleanup function
     return () => {
-      socket.off('scanner_trigger_response', handleScannerTriggerResponse);
-      socket.off('mark_on_response', handleMarkOnResponse);
+      // Clear socket listeners
       socket.off('marking_data', handleMarkingData);
-      socket.off('scanner_data', handleScannerData);
+      socket.off('scanner_read', handleScannerData);
+
+      // Clear any pending timeouts
+      if (markingTimeoutRef.current) {
+        clearTimeout(markingTimeoutRef.current);
+      }
+      if (scannerTimeoutRef.current) {
+        clearTimeout(scannerTimeoutRef.current);
+      }
     };
   }, [socket]);
 
@@ -127,12 +134,13 @@ function Page() {
       }
 
       // Format the data as per the requirements
-      const formattedData = data.map((row) => ({
-        SerialNumber: row.SerialNumber,
-        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'), // Format date to dd/mm/yyyy hh:mm:ss
+      const formattedData = data.map((row, index) => ({
+        SerialNumber: index + 1, // Auto-increment starting from 1
+        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
         MarkingData: row.MarkingData,
         ScannerData: row.ScannerData,
         Result: row.Result,
+        User: row.User,
       }));
 
       // Create a worksheet from the formatted data
@@ -295,26 +303,42 @@ function Page() {
             hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
             hover:border-blue-500/50 transition-all duration-300"
           >
-            <h2 className="text-sm font-bold mb-2 text-gray-800 uppercase tracking-wide">
+            <h2 className="text-sm font-bold mb-4 text-gray-800 uppercase tracking-wide">
               Current Data
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-700">Marking Data</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Marking Data</label>
                 <div
-                  className="mt-1 p-2 bg-white/50 rounded-md border border-gray-200/60 
-                  text-sm font-medium shadow-inner backdrop-blur-sm"
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 text-center
+                  ${
+                    markingData
+                      ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-500/20'
+                      : 'bg-white/50 border-gray-200/60'
+                  }`}
                 >
-                  {markingData || 'Waiting for data...'}
+                  <span
+                    className={`text-xl font-bold ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
+                  >
+                    {markingData || 'Waiting for data...'}
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-700">Scanner Data</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Scanner Data</label>
                 <div
-                  className="mt-1 p-2 bg-white/50 rounded-md border border-gray-200/60 
-                  text-sm font-medium shadow-inner backdrop-blur-sm"
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 text-center
+                  ${
+                    scannerData
+                      ? 'bg-green-50 border-green-500 shadow-lg shadow-green-500/20'
+                      : 'bg-white/50 border-gray-200/60'
+                  }`}
                 >
-                  {scannerData || 'Waiting for data...'}
+                  <span
+                    className={`text-xl font-bold ${scannerData ? 'text-green-700' : 'text-gray-500'}`}
+                  >
+                    {scannerData || 'Waiting for data...'}
+                  </span>
                 </div>
               </div>
             </div>
