@@ -65,7 +65,7 @@ function Page() {
       // Clear data after 300ms
       markingTimeoutRef.current = setTimeout(() => {
         setMarkingData('');
-      }, 300);
+      }, 10 * 1000);
     };
 
     const handleScannerData = (data) => {
@@ -78,7 +78,7 @@ function Page() {
       // Clear data after 300ms
       scannerTimeoutRef.current = setTimeout(() => {
         setScannerData('');
-      }, 300);
+      }, 5 * 1000);
     };
 
     socket.on('marking_data', handleMarkingData);
