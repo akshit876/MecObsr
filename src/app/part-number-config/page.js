@@ -183,6 +183,7 @@ export default function PartNumberConfig() {
 
   // Modify the save function to include shift refresh
   const saveConfig = async () => {
+    let j = 0;
     try {
       const modelNumber = fields.find((f) => f.fieldName === 'Model Number');
       if (!modelNumber?.value) {
