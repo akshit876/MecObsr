@@ -13,7 +13,7 @@ export async function POST(request) {
     const { userAgent } = await request.json();
 
     // Get user from the database
-    const mainDataDB = mongoose.connection.useDb('laserU');
+    const mainDataDB = mongoose.connection.useDb('main-data');
     const user = await mainDataDB.collection('users').findOne({ email: session.user.email });
 
     if (!user) {
