@@ -53,6 +53,15 @@ function SerialConfig() {
     setIsLoading(true);
 
     try {
+      // Extract hour from resetTime (format: "HH:00")
+      const hour = parseInt(serialConfig.resetTime.split(':')[0]);
+
+      // Emit socket event for reset time update
+      socket.emit('updateResetTime', {
+        hour: hour,
+        minute: 0, // Since we only use hour:00 format
+      });
+
       const response = await fetch('/api/serial-config', {
         method: 'POST',
         headers: {
@@ -120,6 +129,19 @@ function SerialConfig() {
     const displayHour = hourNum > 12 ? hourNum - 12 : hourNum === 0 ? 12 : hourNum;
     return `${displayHour}:00 ${getAmPm(time)}`;
   };
+
+  // Add socket listener for reset time response
+  useEffect(() => {
+    socket.on('resetTimeComplete', (response) => {
+      if (!response.success) {
+        toast.error(`Failed to update reset time: ${response.error}`);
+      }
+    });
+
+    return () => {
+      socket.off('resetTimeComplete');
+    };
+  }, [socket]);
 
   if (status === 'loading') {
     return <LoadingSpinner />;

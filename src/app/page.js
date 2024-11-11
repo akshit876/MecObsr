@@ -214,203 +214,121 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="w-full min-h-screen p-2">
-      <div className="w-full space-y-2">
-        <div
-          className="rounded-lg border border-gray-200/60 
-          bg-gradient-to-r from-[#0a2942]/95 to-[#0a2942]/90
-          backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
-          hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] 
-          transition-all duration-300"
-        >
-          <div className="p-3">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h1 className="text-lg font-bold text-white/90 mb-0.5">Production Monitoring</h1>
-                <p className="text-sm text-gray-300/80">Real-time tracking and analysis</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div
-                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
-                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
-              >
-                <p className="text-xs text-gray-300/80 mb-1">Total Production</p>
-                <h3 className="text-2xl font-bold text-white">{csvData?.data?.length || 0}</h3>
-              </div>
-              <div
-                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
-                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
-              >
-                <p className="text-xs text-gray-300/80 mb-1">Success Rate</p>
-                <h3 className="text-2xl font-bold text-white">98.5%</h3>
-              </div>
-              <div
-                className="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/10 
-                hover:border-blue-500/30 transition-all duration-300 shadow-lg"
-              >
-                <p className="text-xs text-gray-300/80 mb-1">Current Model</p>
-                <h3 className="text-2xl font-bold text-white truncate">
-                  {currentModelNumber || 'N/A'}
-                </h3>
-              </div>
-            </div>
-          </div>
+    <div className="h-screen w-full p-4 flex flex-col gap-4 bg-slate-50">
+      {/* Top Cards - Modern design */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+          <p className="text-sm text-gray-300 mb-1">Current Model</p>
+          <h3 className="text-xl font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
         </div>
-
-        <div className="grid grid-cols-12 gap-3">
-          <div
-            className="col-span-2 rounded-lg p-2.5 border border-gray-200/60 
-            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)] 
-            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
-            hover:border-blue-500/50 transition-all duration-300"
-          >
-            <h2 className="text-sm font-bold mb-2 text-gray-800 uppercase tracking-wide">
-              Manual Controls
-            </h2>
-            <div className="flex flex-col h-[calc(100%-2rem)] gap-1.5">
-              <Button
-                size="xs"
-                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
-                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
-                onClick={handleScannerTrigger}
-              >
-                Scanner Trigger
-              </Button>
-              <Button
-                size="xs"
-                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
-                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
-                onClick={handleMarkOn}
-              >
-                Mark On
-              </Button>
-              <Button
-                size="xs"
-                className="flex-1 bg-blue-500/90 hover:bg-blue-600 text-xs flex items-center justify-center
-                  shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
-                onClick={handleLigt}
-              >
-                Light Control
-              </Button>
+        <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-gray-300 mb-1">Start Date</p>
+              <DatePicker
+                selected={startDate}
+                onSelect={setStartDate}
+                placeholder="Start Date"
+                className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
+              />
             </div>
-          </div>
-
-          <div
-            className="col-span-6 rounded-lg p-2.5 border border-gray-200/60 
-            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)]
-            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
-            hover:border-blue-500/50 transition-all duration-300"
-          >
-            <h2 className="text-sm font-bold mb-4 text-gray-800 uppercase tracking-wide">
-              Current Data
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 block">Marking Data</label>
-                <div
-                  className={`p-4 rounded-lg border-2 transition-all duration-300 text-center
-                  ${
-                    markingData
-                      ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-500/20'
-                      : 'bg-white/50 border-gray-200/60'
-                  }`}
-                >
-                  <span
-                    className={`text-xl font-bold ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
-                  >
-                    {markingData || 'Waiting for data...'}
-                  </span>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 block">Scanner Data</label>
-                <div
-                  className={`p-4 rounded-lg border-2 transition-all duration-300 text-center
-                  ${
-                    scannerData
-                      ? 'bg-green-50 border-green-500 shadow-lg shadow-green-500/20'
-                      : 'bg-white/50 border-gray-200/60'
-                  }`}
-                >
-                  <span
-                    className={`text-xl font-bold ${scannerData ? 'text-green-700' : 'text-gray-500'}`}
-                  >
-                    {scannerData || 'Waiting for data...'}
-                  </span>
-                </div>
-              </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-300 mb-1">End Date</p>
+              <DatePicker
+                selected={endDate}
+                onSelect={setEndDate}
+                placeholder="End Date"
+                className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
+              />
             </div>
-          </div>
-
-          <div
-            className="col-span-4 rounded-lg p-2.5 border border-gray-200/60 
-            bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)] 
-            hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
-            hover:border-blue-500/50 transition-all duration-300"
-          >
-            <h2 className="text-sm font-bold mb-1.5 text-gray-700 uppercase tracking-wide">
-              Generate Report
-            </h2>
-            <div className="flex flex-col h-[calc(100%-2rem)] justify-between">
-              <div className="space-y-1">
-                <DatePicker
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  placeholder="Start Date"
-                  className="w-full h-7 text-xs px-2 border-gray-200 focus:border-blue-500"
-                />
-                <DatePicker
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  placeholder="End Date"
-                  className="w-full h-7 text-xs px-2 border-gray-200 focus:border-blue-500"
-                />
-              </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-300 mb-1">Export</p>
               <Button
-                size="sm"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-xs font-medium"
+                size="default"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-sm h-9 rounded-lg"
                 onClick={handleDownloadExcel}
-                disabled={isLoading}
+                disabled={isLoading || !startDate || !endDate}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  'Download Report'
-                )}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Download'}
               </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div
-          className="rounded-lg border border-gray-200/60 
-          bg-white/30 backdrop-blur-lg shadow-[0_8px_30px_rgb(0,0,0,0.05)]
-          hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] 
-          transition-all duration-300"
-        >
-          <div className="p-4 border-b border-gray-200/60 bg-white/50 backdrop-blur-md rounded-t-lg">
-            <h2 className="text-lg font-bold text-gray-800 uppercase tracking-wide">
-              Production History
-            </h2>
-            <p className="text-sm text-gray-500/80">Real-time production monitoring data</p>
+      {/* Data Display & Controls Row */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Marking Data */}
+        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+          <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
+          <div
+            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
+            ${markingData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
+          >
+            <span
+              className={`text-sm font-medium ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
+            >
+              {markingData || 'Waiting for data...'}
+            </span>
           </div>
+        </div>
 
-          <div className="p-4 bg-white/40 backdrop-blur-sm rounded-b-lg">
-            {isTableLoading ? (
-              <div className="h-[700px] flex items-center justify-center">
-                <LoadingSpinner />
-              </div>
-            ) : (
-              <div className="h-[700px] bg-white/70 rounded-lg border border-gray-200/60 shadow-inner">
-                <StyledTable2 data={csvData?.data || []} />
-              </div>
-            )}
+        {/* Scanner Data */}
+        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+          <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
+          <div
+            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
+            ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
+          >
+            <span
+              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
+            >
+              {scannerData || 'Waiting for data...'}
+            </span>
           </div>
+        </div>
+
+        {/* Control Buttons - Fixed layout */}
+        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
+          <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
+          <div className="flex gap-1.5">
+            <Button
+              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
+              onClick={handleScannerTrigger}
+            >
+              Scanner
+            </Button>
+            <Button
+              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
+              onClick={handleMarkOn}
+            >
+              Mark
+            </Button>
+            <Button
+              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
+              onClick={handleLigt}
+            >
+              Light
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Table section remains unchanged */}
+      <div className="flex-grow rounded-xl bg-white shadow-sm">
+        <div className="p-2.5 border-b border-gray-200/60 bg-white/60">
+          <h2 className="text-sm font-semibold text-gray-800">Production History</h2>
+        </div>
+        <div className="flex-grow p-2 min-h-0">
+          {isTableLoading ? (
+            <div className="h-full flex items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <div className="h-full bg-white/80 rounded-lg border border-gray-200/60 shadow-sm">
+              <StyledTable2 data={csvData?.data || []} />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -547,16 +547,16 @@ export default function PartNumberConfig() {
   };
 
   return (
-    <main className="h-screen bg-gray-100 p-3 overflow-hidden">
-      <div className="h-full grid grid-cols-2 gap-3">
+    <main className="h-screen bg-gray-100 p-2 overflow-hidden">
+      <div className="grid grid-cols-2 gap-2 h-full">
         {/* Left Side - Create Form */}
-        <Card className="h-full">
-          <CardHeader className="py-2">
-            <CardTitle className="text-center text-lg">CREATE PART NO</CardTitle>
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="py-0.5 flex-none">
+            <CardTitle className="text-center text-base">CREATE PART NO</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 p-3">
+          <CardContent className="space-y-1 p-1 flex-1 overflow-hidden">
             {/* Year Format and Model Number in same row */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {/* Year Format Selector - More compact */}
               <div className="bg-gray-50 rounded-lg border p-2">
                 <div className="text-xs font-medium mb-1">Year Format</div>
@@ -608,61 +608,35 @@ export default function PartNumberConfig() {
             </div>
 
             {/* Fields Grid - More compact */}
-            <div className="border rounded-lg">
-              <div className="grid grid-cols-[1fr,60px,60px] gap-2 text-xs font-medium bg-gray-50 p-2 border-b">
+            <div className="border rounded-lg flex-1 overflow-hidden flex flex-col">
+              <div className="grid grid-cols-[1fr,50px,50px] gap-1 text-xs font-medium bg-gray-50 p-1 border-b">
                 <div>Description</div>
                 <div className="text-center">Check</div>
                 <div className="text-center">Order</div>
               </div>
-              <div className="p-2 space-y-1">{renderFields()}</div>
+              <div className="p-1 space-y-0.5 flex-1 overflow-auto">{renderFields()}</div>
             </div>
 
             {/* Generated Part Number - Highlighted and Bigger */}
-            <div className="bg-blue-50 rounded-lg border-2 border-blue-200 p-3 space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-blue-700">Generated Part No:</span>
-                <code className="bg-white px-4 py-2 rounded-md text-lg font-bold font-mono tracking-wider text-blue-800 shadow-sm">
+            <div className="bg-blue-50 rounded-lg border border-blue-200 p-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-blue-700">Generated Part No:</span>
+                <code className="bg-white px-2 py-1 rounded-md text-sm font-bold font-mono">
                   {generatePartNumber(sortedFields)}
                 </code>
-              </div>
-              <div className="text-xs text-blue-600">
-                Order:{' '}
-                {sortedFields
-                  .filter((f) => f.isChecked && f.order !== '')
-                  .map((f) => (
-                    <span key={f.fieldName} className="inline-flex items-center">
-                      <span className="font-medium">{f.fieldName}</span>
-                      <span className="mx-1 text-blue-400">({f.order})</span>
-                      {/* Add arrow except for last item */}
-                      {f !==
-                        sortedFields.filter((f) => f.isChecked && f.order !== '').slice(-1)[0] && (
-                        <span className="mx-1 text-blue-400">→</span>
-                      )}
-                    </span>
-                  ))}
               </div>
             </div>
 
             {/* Buttons - More compact */}
-            <div className="flex justify-end gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleReset}
-                className="bg-gray-100 hover:bg-gray-200"
-              >
+            <div className="flex justify-end gap-1">
+              <Button size="sm" variant="outline" onClick={handleReset} className="text-xs py-1">
                 Reset
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={refreshData}
-                className="bg-blue-50 hover:bg-blue-100 text-blue-600"
-              >
-                <RefreshCcw className="w-4 h-4 mr-2" />
+              <Button size="sm" variant="outline" onClick={refreshData} className="text-xs py-1">
+                <RefreshCcw className="w-3 h-3 mr-1" />
                 Refresh
               </Button>
-              <Button size="sm" onClick={saveConfig} className="bg-blue-600 hover:bg-blue-700">
+              <Button size="sm" onClick={saveConfig} className="text-xs py-1">
                 Save Configuration
               </Button>
             </div>
@@ -670,21 +644,21 @@ export default function PartNumberConfig() {
         </Card>
 
         {/* Right Side - Saved Configurations */}
-        <Card className="h-full">
-          <CardHeader className="py-2">
-            <CardTitle className="text-lg">Saved Configurations</CardTitle>
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="py-0.5 flex-none">
+            <CardTitle className="text-base">Saved Configurations</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 flex-1 overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="py-2">Created At</TableHead>
-                  <TableHead className="py-2">Model Number</TableHead>
-                  <TableHead className="py-2">Part Number</TableHead>
-                  <TableHead className="w-[100px] py-2">Actions</TableHead>
+                  <TableHead className="py-1 text-xs">Created At</TableHead>
+                  <TableHead className="py-1 text-xs">Model Number</TableHead>
+                  <TableHead className="py-1 text-xs">Part Number</TableHead>
+                  <TableHead className="w-[90px] py-1 text-xs">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="text-xs">
                 {configs.map((config) => (
                   <TableRow key={config._id}>
                     <TableCell>{new Date(config.createdAt).toLocaleDateString()}</TableCell>
