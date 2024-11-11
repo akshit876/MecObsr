@@ -14,11 +14,11 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 
