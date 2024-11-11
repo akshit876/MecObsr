@@ -18,9 +18,13 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { signOut } from 'next-auth/react';
 
 export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { session } = useProtectedRoute();
   const [expandedSections, setExpandedSections] = useState({});
   // const [isCollapsed, setIsCollapsed] = useState(false);
@@ -209,8 +213,38 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
               </div>
               <button
                 className="mt-2 flex items-center gap-2 text-sm text-gray-300 hover:text-white w-full px-2 py-2 rounded-md hover:bg-[#2d2a3d]"
-                onClick={() => {
-                  /* Add your logout logic */
+                onClick={async () => {
+                  try {
+                    // First, call the logout API to log the session end
+                    const response = await fetch('/api/auth/logout', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to log logout');
+                    }
+
+                    // Clear any local state
+                    // clearModel();
+
+                    // Then perform NextAuth signOut
+                    await signOut({ redirect: false });
+
+                    // Finally redirect to login page
+                    router.push('/login');
+                    toast.success('Logged out successfully');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    toast.error('Error during logout');
+
+                    // Still attempt to sign out and redirect even if logging fails
+                    // clearModel();
+                    await signOut({ redirect: false });
+                    router.push('/login');
+                  }
                 }}
               >
                 <LogOut className="h-4 w-4" />
