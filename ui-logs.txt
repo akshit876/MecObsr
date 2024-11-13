@@ -6,4 +6,26 @@
    - Local:        http://localhost:3000
 
  ✓ Ready in 1948ms
-^C^C
+^C^C# Build the Docker image
+docker build -t authapp .
+
+# Run the container
+docker run -p 3000:3000 authapp
+
+
+
+docker run -p 3000:3000 --env-file .env authapp
+
+
+
+# Start all services
+docker-compose up
+
+# Start in detached mode
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes
+docker-compose down -v

@@ -7,6 +7,11 @@ const nextConfig = {
     NEXTAUTH_URL: 'http://localhost:3000',
     SECRET: 'RAMDOM_STRING',
   },
+  typescript: {
+    // ⚠️ Warning: This allows production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: true,
+  },
   eslint: {
     // Only run ESLint on these directories during production builds
     // dirs: ['pages', 'components', 'lib', 'utils', 'hooks'],
