@@ -14,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
+import { usePulseSignal } from '@/hooks/usePulseSignal';
 
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
@@ -220,6 +221,9 @@ function Page() {
     }
     socket.emit('light_on');
   };
+
+  // Use the pulse signal hook
+  usePulseSignal(socket);
 
   // console.log({ csvData });
   return (
