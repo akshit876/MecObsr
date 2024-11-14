@@ -145,7 +145,7 @@ function Page() {
 
       // Format the data as per the requirements
       const formattedData = data.map((row, index) => ({
-        SerialNumber: index + 1, // Auto-increment starting from 1
+        SerialNumber: index + 1,
         Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
         MarkingData: row.MarkingData,
         ScannerData: row.ScannerData,
@@ -156,23 +156,44 @@ function Page() {
       // Create a worksheet from the formatted data
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-      // Calculate and set column widths based on the content of each column
+      // Calculate column widths with additional 50px (approximately 7 characters)
       const columnWidths = Object.keys(formattedData[0]).map((key) => ({
-        wch: Math.max(
-          key.length, // Column header width
-          ...formattedData.map((row) => (row[key] ? row[key].toString().length : 10)), // Content width
-        ),
+        wch:
+          Math.max(
+            key.length,
+            ...formattedData.map((row) => (row[key] ? row[key].toString().length : 10)),
+          ) + 7, // Add approximately 50px worth of characters
       }));
       worksheet['!cols'] = columnWidths;
+
+      // Freeze the header row
+      worksheet['!freeze'] = { pos: { r: 1, c: 0 } };
+
+      // Add conditional formatting for Result column
+      const resultColumnIndex = Object.keys(formattedData[0]).findIndex((key) => key === 'Result');
+
+      // Apply colors to all rows (excluding header)
+      for (let i = 1; i <= formattedData.length; i++) {
+        const cellRef = XLSX.utils.encode_cell({ r: i, c: resultColumnIndex });
+        if (!worksheet[cellRef]) continue;
+
+        const result = worksheet[cellRef].v;
+        worksheet[cellRef].s = {
+          fill: {
+            fgColor: { rgb: result === 'OK' ? '90EE90' : result === 'NG' ? 'FFB6C1' : 'FFFFFF' },
+          },
+        };
+      }
 
       // Create a new workbook and append the worksheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
 
-      // Write the workbook to a binary string
+      // Write the workbook with style options
       const excelBuffer = XLSX.write(workbook, {
         bookType: 'xlsx',
         type: 'array',
+        cellStyles: true,
       });
 
       // Create a Blob from the Excel binary and trigger download
