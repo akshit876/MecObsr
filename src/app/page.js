@@ -227,7 +227,7 @@ function Page() {
               <p className="text-sm text-gray-300 mb-1">Start Date</p>
               <DatePicker
                 selected={startDate}
-                onSelect={setStartDate}
+                onChange={(date) => setStartDate(date)}
                 placeholder="Start Date"
                 className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
@@ -236,7 +236,7 @@ function Page() {
               <p className="text-sm text-gray-300 mb-1">End Date</p>
               <DatePicker
                 selected={endDate}
-                onSelect={setEndDate}
+                onChange={(date) => setEndDate(date)}
                 placeholder="End Date"
                 className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
