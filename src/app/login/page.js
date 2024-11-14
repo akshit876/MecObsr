@@ -74,6 +74,7 @@ const Login = () => {
 
       if (result?.error) {
         toast.error(result.error);
+        setIsLoading(false);
         return;
       }
 
@@ -106,7 +107,7 @@ const Login = () => {
         },
         body: JSON.stringify({
           modelConfig: selectedModelData,
-          selectedBy: username, // Use the username that just logged in
+          selectedBy: username,
           selectedAt: new Date().toISOString(),
         }),
       });
@@ -125,11 +126,17 @@ const Login = () => {
       });
 
       toast.success('Login successful');
-      router.push('/'); // Redirect after everything is done
+
+      // Use replace instead of push for more reliable redirection
+      router.replace('/');
+
+      // Force a hard reload after a brief delay to ensure all states are updated
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error) {
       console.error('Error:', error);
       toast.error(error.message || 'Login process failed');
-    } finally {
       setIsLoading(false);
     }
   };
