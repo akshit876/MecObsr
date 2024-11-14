@@ -21,7 +21,7 @@ const Login = () => {
     if (session?.user) {
       const role = session.user.role;
       if (role === 'operator') {
-        router.push('/part-number-select');
+        router.push('/');
       } else {
         router.push('/');
       }
