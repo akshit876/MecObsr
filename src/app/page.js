@@ -81,14 +81,23 @@ function Page() {
       }, 5 * 1000);
     };
 
+    const handleFirstScanOk = (data) => {
+      toast.warning('Part already marked!', {
+        description: data.message,
+        duration: 3000,
+      });
+    };
+
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
+    socket.on('first_scan_ok', handleFirstScanOk);
 
     // Cleanup function
     return () => {
       // Clear socket listeners
       socket.off('marking_data', handleMarkingData);
       socket.off('scanner_read', handleScannerData);
+      socket.off('first_scan_ok', handleFirstScanOk);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
