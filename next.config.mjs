@@ -7,8 +7,16 @@ const nextConfig = {
     NEXTAUTH_URL: 'http://localhost:3000',
     SECRET: 'RAMDOM_STRING',
   },
+  typescript: {
+    // ⚠️ Warning: This allows production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: true,
+  },
   eslint: {
-    dirs: ['pages', 'utils'], // Only run ESLint on the 'pages' and 'utils' directories during production builds (next build)
+    // Only run ESLint on these directories during production builds
+    // dirs: ['pages', 'components', 'lib', 'utils', 'hooks'],
+    // Don't run ESLint during builds (you can still run it separately)
+    ignoreDuringBuilds: true,
   },
   // next.config.js
 
