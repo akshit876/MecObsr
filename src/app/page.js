@@ -15,6 +15,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
+import { useMachineEvents } from '../../hooks/useMachineEvents';
 
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
@@ -245,6 +246,9 @@ function Page() {
 
   // Use the pulse signal hook
   usePulseSignal(socket);
+
+  // Add this line to use the machine events hook
+  useMachineEvents();
 
   // console.log({ csvData });
   return (
