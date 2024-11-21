@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
-import socket from '../socket'; // Adjust path as needed
+// import socket from '../socket'; // Adjust path as needed
 
 const toastConfig = {
   position: "top-center",
@@ -13,8 +13,10 @@ const toastConfig = {
   }
 };
 
-export const useMachineEvents = () => {
+export const useMachineEvents = (socket) => {
   useEffect(() => {
+    if (!socket) return;
+
     const eventHandlers = {
       'part-presence': (data) => {
         toast(data.message || "Part Presence signal detected", {
@@ -56,5 +58,5 @@ export const useMachineEvents = () => {
         socket.off(event);
       });
     };
-  }, []);
+  }, [socket]);
 }; 

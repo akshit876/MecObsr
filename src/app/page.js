@@ -248,7 +248,7 @@ function Page() {
   usePulseSignal(socket);
 
   // Add this line to use the machine events hook
-  useMachineEvents();
+  useMachineEvents(socket);
 
   // console.log({ csvData });
   return (
