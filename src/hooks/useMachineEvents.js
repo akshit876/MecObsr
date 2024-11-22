@@ -24,7 +24,7 @@ export const useMachineEvents = (socket) => {
       'part-presence': (data) => {
         // Check if toast already exists
         if (!activeToasts.current['part-presence']) {
-          const toastId = toast(data.message || "Part Presence signal detected", {
+          const toastId = toast(data.message || "Part not present", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -41,7 +41,7 @@ export const useMachineEvents = (socket) => {
       },
       'emergency-stop': (data) => {
         if (!activeToasts.current['emergency-stop']) {
-          const toastId = toast(data.message || "Emergency Stop signal detected", {
+          const toastId = toast(data.message || "Emergency button pressed", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -56,7 +56,7 @@ export const useMachineEvents = (socket) => {
       },
       'light-curtation': (data) => {
         if (!activeToasts.current['light-curtation']) {
-          const toastId = toast(data.message || "Light Curtation signal detected", {
+          const toastId = toast(data.message || "Light curtain error", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
