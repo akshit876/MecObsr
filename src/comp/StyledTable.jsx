@@ -17,11 +17,12 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
 
   const headers = [
     { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
-    { key: 'MarkingData', label: 'Marking Data', width: '30%' },
-    { key: 'ScannerData', label: 'Scanner Data', width: '30%' },
+    { key: 'MarkingData', label: 'Marking Data', width: '25%' },
+    { key: 'ScannerData', label: 'Scanner Data', width: '25%' },
+    { key: 'Grade', label: 'Grade', width: '8%' },
     { key: 'Result', label: 'Result', width: '8%' },
     { key: 'User', label: 'User', width: '10%' },
-    { key: 'Timestamp', label: 'Timestamp', width: '10%' },
+    { key: 'Timestamp', label: 'Timestamp', width: '12%' },
   ];
 
   const getResultStyles = (result) => {
@@ -102,12 +103,17 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                         <span className={getResultStyles(row[header.key])}>{row[header.key]}</span>
                       ) : header.key === 'Timestamp' ? (
                         new Date(row[header.key]).toLocaleString()
+                      ) : header.key === 'ScannerData' ? (
+                        <div
+                          className="truncate font-semibold text-gray-900"
+                          title={`${row[header.key]} (Grade: ${row['Grade']})`}
+                        >
+                          {row[header.key]} (Grade: {row['Grade']})
+                        </div>
                       ) : (
                         <div
                           className={`truncate ${
-                            header.key === 'MarkingData' || header.key === 'ScannerData'
-                              ? 'font-semibold text-gray-900'
-                              : ''
+                            header.key === 'MarkingData' ? 'font-semibold text-gray-900' : ''
                           }`}
                           title={row[header.key]}
                         >
