@@ -52,6 +52,31 @@ const columns = [
     size: 150,
   }),
 
+  columnHelper.accessor('Grade', {
+    header: ({ column }) => {
+      return (
+        <div className="flex items-center cursor-pointer">
+          Grade
+        </div>
+      );
+    },
+    cell: (info) => {
+      const grade = info.getValue();
+      const gradeStyles = {
+        'A': 'bg-emerald-100 text-emerald-800',
+        'B': 'bg-blue-100 text-blue-800',
+        'C': 'bg-amber-100 text-amber-800',
+        'D': 'bg-red-100 text-red-800'
+      };
+      
+      const baseStyles = 'text-xs px-3 py-1 rounded-full font-semibold';
+      const colorStyles = gradeStyles[grade] || 'bg-gray-100 text-gray-800';
+      
+      return <span className={`${baseStyles} ${colorStyles}`}>{grade}</span>;
+    },
+    size: 100,
+  }),
+
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
     cell: (info) => (
