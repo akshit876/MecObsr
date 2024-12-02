@@ -106,9 +106,13 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                       ) : header.key === 'ScannerData' ? (
                         <div
                           className="truncate font-semibold text-gray-900"
-                          title={`${row[header.key]} (Grade: ${row['Grade']})`}
+                          title={row[header.key]}
                         >
-                          {row[header.key]} (Grade: {row['Grade']})
+                          {row[header.key]}
+                        </div>
+                      ) : header.key === 'Grade' ? (
+                        <div className="truncate font-semibold text-gray-900">
+                          {row[header.key]}
                         </div>
                       ) : (
                         <div
