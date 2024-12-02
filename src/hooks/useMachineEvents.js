@@ -21,52 +21,64 @@ export const useMachineEvents = (socket) => {
     if (!socket) return;
 
     const eventHandlers = {
-      'part-presence': (data) => {
-        // Check if toast already exists
-        if (!activeToasts.current['part-presence']) {
-          const toastId = toast(data.message || "Part not present", {
+      'emergency-button': (data) => {
+        if (!activeToasts.current['emergency-button']) {
+          const toastId = toast(data.message || "Emergency push button pressed", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
-              color: '#2563eb',
+              color: '#dc2626', // Red color for emergency
             },
             onClose: () => {
-              // Remove from tracking when toast closes
-              delete activeToasts.current['part-presence'];
+              delete activeToasts.current['emergency-button'];
             }
           });
-          // Track the active toast
-          activeToasts.current['part-presence'] = toastId;
+          activeToasts.current['emergency-button'] = toastId;
         }
       },
-      'emergency-stop': (data) => {
-        if (!activeToasts.current['emergency-stop']) {
-          const toastId = toast(data.message || "Emergency button pressed", {
+      'safety-curtain': (data) => {
+        if (!activeToasts.current['safety-curtain']) {
+          const toastId = toast(data.message || "Safety curtain error", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
-              color: '#dc2626',
+              color: '#dc2626', // Red for safety issues
             },
             onClose: () => {
-              delete activeToasts.current['emergency-stop'];
+              delete activeToasts.current['safety-curtain'];
             }
           });
-          activeToasts.current['emergency-stop'] = toastId;
+          activeToasts.current['safety-curtain'] = toastId;
         }
       },
-      'light-curtation': (data) => {
-        if (!activeToasts.current['light-curtation']) {
-          const toastId = toast(data.message || "Light curtain error", {
+      'servo-position': (data) => {
+        if (!activeToasts.current['servo-position']) {
+          const toastId = toast(data.message || "Servo not home position", {
             ...toastConfig,
             style: {
               ...toastConfig.style,
-              color: '#2563eb',
+              color: '#2563eb', // Blue for informational
             },
             onClose: () => {
-              delete activeToasts.current['light-curtation'];
+              delete activeToasts.current['servo-position'];
             }
           });
-          activeToasts.current['light-curtation'] = toastId;
+          activeToasts.current['servo-position'] = toastId;
+        }
+      },
+      'reject-bin': (data) => {
+        if (!activeToasts.current['reject-bin']) {
+          const toastId = toast(data.message || "Put the part in the rejection bin", {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#f59e0b', // Amber/orange for warnings
+            },
+            onClose: () => {
+              delete activeToasts.current['reject-bin'];
+            }
+          });
+          activeToasts.current['reject-bin'] = toastId;
         }
       }
     };
