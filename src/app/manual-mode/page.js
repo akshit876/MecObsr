@@ -68,7 +68,7 @@ const ManualMode = () => {
     setIsJogging(false);
     setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: false }));
     if (socket) {
-      socket.emit('manual-run', 'stopJog');
+      // socket.emit('manual-run', 'stopJog');
     }
   };
 
