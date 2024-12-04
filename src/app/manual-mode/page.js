@@ -27,16 +27,16 @@ const ManualMode = () => {
   const handleButtonClick = (buttonId) => {
     if (socket) {
       const operations = {
-        'D14020.0': 'position1Home',
-        'D14020.1': 'position2Scanner',
-        'D14020.2': 'position3Marking',
-        'D14020.3': 'position4',
-        'D14020.4': 'position5',
-        'D14020.5': 'jogFwd',
-        'D14020.6': 'jogRev',
-        'D14020.7': 'scannerTrigger',
-        'D14020.8': 'marking',
-        'D14020.9': 'lightOn',
+        'D1420.0': 'position1Home',
+        'D1420.1': 'position2Scanner',
+        'D1420.2': 'position3Marking',
+        'D1420.3': 'position4',
+        'D1420.4': 'position5',
+        'D1420.5': 'jogFwd',
+        'D1420.6': 'jogRev',
+        'D1420.7': 'scannerTrigger',
+        'D1420.8': 'marking',
+        'D1420.9': 'lightOn',
       };
 
       const operation = operations[buttonId] || buttonId;
@@ -44,7 +44,7 @@ const ManualMode = () => {
     }
 
     // For JOG FWD and JOG REV, we'll simulate the "on till pressing" behavior
-    if (buttonId === 'D14020.5' || buttonId === 'D14020.6') {
+    if (buttonId === 'D1420.5' || buttonId === 'D1420.6') {
       setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
 
       const timeoutId = setTimeout(() => {
@@ -59,7 +59,7 @@ const ManualMode = () => {
     setIsJogging(true);
     setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
     if (socket) {
-      const operation = buttonId === 'D14020.5' ? 'jogFwd' : 'jogRev';
+      const operation = buttonId === 'D1420.5' ? 'jogFwd' : 'jogRev';
       socket.emit('manual-run', operation);
     }
   };
@@ -73,16 +73,16 @@ const ManualMode = () => {
   };
 
   const buttons = [
-    { id: 'D14020.0', label: 'POSITION 1 (HOME)' },
-    { id: 'D14020.1', label: 'POSITION 2 (SCANNER)' },
-    { id: 'D14020.2', label: 'POSITION 3 (MARKING)' },
-    { id: 'D14020.3', label: 'POSITION 4' },
-    { id: 'D14020.4', label: 'POSITION 5' },
-    { id: 'D14020.5', label: 'JOG FWD' },
-    { id: 'D14020.6', label: 'JOG REV' },
-    { id: 'D14020.7', label: 'SCANNER TRIGGER' },
-    { id: 'D14020.8', label: 'MARKING' },
-    { id: 'D14020.9', label: 'LIGHT ON' },
+    { id: 'D1420.0', label: 'POSITION 1 (HOME)' },
+    { id: 'D1420.1', label: 'POSITION 2 (SCANNER)' },
+    { id: 'D1420.2', label: 'POSITION 3 (MARKING)' },
+    { id: 'D1420.3', label: 'POSITION 4' },
+    { id: 'D1420.4', label: 'POSITION 5' },
+    { id: 'D1420.5', label: 'JOG FWD' },
+    { id: 'D1420.6', label: 'JOG REV' },
+    { id: 'D1420.7', label: 'SCANNER TRIGGER' },
+    { id: 'D1420.8', label: 'MARKING' },
+    { id: 'D1420.9', label: 'LIGHT ON' },
   ];
 
   return (
@@ -94,7 +94,7 @@ const ManualMode = () => {
       </CardHeader>
       <CardContent className="grid grid-cols-3 gap-4">
         {buttons.map((button) => {
-          const isJogButton = button.id === 'D14020.5' || button.id === 'D14020.6';
+          const isJogButton = button.id === 'D1420.5' || button.id === 'D1420.6';
 
           return (
             <Button
