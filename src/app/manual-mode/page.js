@@ -86,10 +86,10 @@ const ManualMode = () => {
   ];
 
   return (
-    <Card className="w-full max-w-4xl bg-black text-white">
-      <CardHeader>
-        <CardTitle className="text-3xl font-bold text-center text-yellow-300">
-          MANUAL MODE
+    <Card className="w-full h-screen p-4 bg-slate-50">
+      <CardHeader className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm mb-4">
+        <CardTitle className="text-xl font-semibold">
+          Manual Mode Controls
         </CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-3 gap-4">
@@ -99,9 +99,11 @@ const ManualMode = () => {
           return (
             <Button
               key={button.id}
-              className={`h-20 text-lg font-semibold ${
-                buttonStates[button.id] ? 'bg-purple-600' : 'bg-purple-300'
-              } text-black border-2 border-green-500 hover:bg-purple-400`}
+              className={`h-20 text-sm font-medium rounded-lg shadow-sm
+                ${buttonStates[button.id] 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-[#012B41] hover:bg-[#023855] text-white'
+                }`}
               {...(isJogButton
                 ? {
                     onMouseDown: () => startJog(button.id),
@@ -113,7 +115,7 @@ const ManualMode = () => {
                   })}
             >
               {button.label}
-              <div className="text-xs mt-1">{button.id}</div>
+              <div className="text-xs mt-1 text-gray-300">{button.id}</div>
             </Button>
           );
         })}
