@@ -18,6 +18,17 @@ export default function ImageSearch() {
       return;
     }
 
+    if (serialNumber.length !== 26) {
+      toast.error('Serial number must be 26 characters long');
+      return;
+    }
+
+    const serialPattern = /^R\d{8}M\d{2}L\d{8}A\d{4}$/;
+    if (!serialPattern.test(serialNumber)) {
+      toast.error('Invalid serial number format');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/image-search', {
