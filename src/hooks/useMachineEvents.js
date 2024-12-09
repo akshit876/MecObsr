@@ -21,6 +21,21 @@ export const useMachineEvents = (socket) => {
     if (!socket) return;
 
     const eventHandlers = {
+      'part-present': (data) => {
+        if (!activeToasts.current['part-present']) {
+          const toastId = toast(data.message || "Part not present", {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#f59e0b', // Amber/orange for warnings
+            },
+            onClose: () => {
+              delete activeToasts.current['part-present'];
+            }
+          });
+          activeToasts.current['part-present'] = toastId;
+        }
+      },
       'emergency-button': (data) => {
         if (!activeToasts.current['emergency-button']) {
           const toastId = toast(data.message || "Emergency push button pressed", {
