@@ -32,11 +32,11 @@ const ManualMode = () => {
         'D1420.2': 'position3Marking',
         'D1420.3': 'position4',
         'D1420.4': 'position5',
-        'D1420.5': 'jogFwd',
-        'D1420.6': 'jogRev',
-        'D1420.7': 'scannerTrigger',
-        'D1420.8': 'marking',
-        'D1420.9': 'lightOn',
+        'D1418.8': 'jogFwd',
+        'D1418.9': 'jogRev',
+        'D1414.1': 'scannerTrigger',
+        'D1414.0': 'markOn',
+        'D1414.3': 'lightOn',
       };
 
       const operation = operations[buttonId] || buttonId;
