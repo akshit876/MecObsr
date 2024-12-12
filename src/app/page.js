@@ -336,12 +336,12 @@ function Page() {
             >
               Scanner
             </Button>
-            <Button
+            {/* <Button
               className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
               onClick={handleMarkOn}
             >
               Mark
-            </Button>
+            </Button> */}
             <Button
               className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
               onClick={handleLigt}
