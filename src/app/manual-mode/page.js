@@ -44,7 +44,7 @@ const ManualMode = () => {
     }
 
     // For JOG FWD and JOG REV, we'll simulate the "on till pressing" behavior
-    if (buttonId === 'D1420.5' || buttonId === 'D1420.6') {
+    if (buttonId === 'D1418.8' || buttonId === 'D1418.9') {
       setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
 
       const timeoutId = setTimeout(() => {
@@ -59,7 +59,7 @@ const ManualMode = () => {
     setIsJogging(true);
     setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
     if (socket) {
-      const operation = buttonId === 'D1420.5' ? 'jogFwd' : 'jogRev';
+      const operation = buttonId === 'D1418.8' ? 'jogFwd' : 'jogRev';
       socket.emit('manual-run', operation);
     }
   };
@@ -94,7 +94,7 @@ const ManualMode = () => {
       </CardHeader>
       <CardContent className="grid grid-cols-3 gap-4">
         {buttons.map((button) => {
-          const isJogButton = button.id === 'D1420.5' || button.id === 'D1420.6';
+          const isJogButton = button.id === 'D1418.8' || button.id === 'D1418.9';
 
           return (
             <Button
