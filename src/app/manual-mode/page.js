@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useSocket } from '@/SocketContext';
 
 const ManualMode = () => {
+  const [buttonStates, setButtonStates] = useState({});
   const socket = useSocket();
+  const [isJogging, setIsJogging] = useState(false);
 
   useEffect(() => {
     // if (socket) {
@@ -62,19 +64,6 @@ const ManualMode = () => {
     }
   };
 
-  const buttons = [
-    { id: 'D1420.0', label: 'POSITION 1 (HOME)' },
-    { id: 'D1420.1', label: 'POSITION 2 (SCANNER)' },
-    { id: 'D1420.2', label: 'POSITION 3 (MARKING)' },
-    { id: 'D1420.3', label: 'POSITION 4' },
-    { id: 'D1420.4', label: 'POSITION 5' },
-    { id: 'D1418.8', label: 'JOG FWD' },
-    { id: 'D1418.9', label: 'JOG REV' },
-    { id: 'D1414.1', label: 'SCANNER TRIGGER' },
-    { id: 'D1414.0', label: 'MARK ON' },
-    { id: 'D1414.3', label: 'LIGHT ON' },
-  ];
-
   return (
     <Card className="w-full h-screen p-4 bg-slate-50">
       <CardHeader className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm mb-4">
@@ -82,36 +71,101 @@ const ManualMode = () => {
           Manual Mode Controls
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-3 gap-4">
-        {buttons.map((button) => {
-          const isJogButton = button.id === 'D1418.8' || button.id === 'D1418.9';
+      <CardContent className="flex gap-8">
+        {/* Column 1 - Position Buttons */}
+        <div className="flex flex-col gap-4 flex-1">
+          <h3 className="font-semibold text-center mb-2">Position Controls</h3>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1420.0')}
+          >
+            POSITION 1 (HOME)
+            <div className="text-xs mt-1 text-gray-300">D1420.0</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1420.1')}
+          >
+            POSITION 2 (SCANNER)
+            <div className="text-xs mt-1 text-gray-300">D1420.1</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1420.2')}
+          >
+            POSITION 3 (MARKING)
+            <div className="text-xs mt-1 text-gray-300">D1420.2</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1420.3')}
+          >
+            POSITION 4
+            <div className="text-xs mt-1 text-gray-300">D1420.3</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1420.4')}
+          >
+            POSITION 5
+            <div className="text-xs mt-1 text-gray-300">D1420.4</div>
+          </Button>
+        </div>
 
-          return (
-            <Button
-              key={button.id}
-              className={`h-20 text-sm font-medium rounded-lg shadow-sm
-                ${buttonStates[button.id] 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-[#012B41] hover:bg-[#023855] text-white'
-                }`}
-              {...(isJogButton
-                ? {
-                    onMouseDown: () => {
-                      const intervalId = startJog(button.id);
-                      button._intervalId = intervalId;
-                    },
-                    onMouseUp: () => stopJog(button._intervalId),
-                    onMouseLeave: () => stopJog(button._intervalId),
-                  }
-                : {
-                    onClick: () => handleButtonClick(button.id),
-                  })}
-            >
-              {button.label}
-              <div className="text-xs mt-1 text-gray-300">{button.id}</div>
-            </Button>
-          );
-        })}
+        {/* Column 2 - Jog Buttons */}
+        <div className="flex flex-col gap-4 flex-1">
+          <h3 className="font-semibold text-center mb-2">Jog Controls</h3>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onMouseDown={(e) => {
+              const intervalId = startJog('D1418.8');
+              e.currentTarget._intervalId = intervalId;
+            }}
+            onMouseUp={(e) => stopJog(e.currentTarget._intervalId)}
+            onMouseLeave={(e) => stopJog(e.currentTarget._intervalId)}
+          >
+            JOG FWD
+            <div className="text-xs mt-1 text-gray-300">D1418.8</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onMouseDown={(e) => {
+              const intervalId = startJog('D1418.9');
+              e.currentTarget._intervalId = intervalId;
+            }}
+            onMouseUp={(e) => stopJog(e.currentTarget._intervalId)}
+            onMouseLeave={(e) => stopJog(e.currentTarget._intervalId)}
+          >
+            JOG REV
+            <div className="text-xs mt-1 text-gray-300">D1418.9</div>
+          </Button>
+        </div>
+
+        {/* Column 3 - Action Buttons */}
+        <div className="flex flex-col gap-4 flex-1">
+          <h3 className="font-semibold text-center mb-2">Action Controls</h3>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1414.1')}
+          >
+            SCANNER TRIGGER
+            <div className="text-xs mt-1 text-gray-300">D1414.1</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1414.0')}
+          >
+            MARK ON
+            <div className="text-xs mt-1 text-gray-300">D1414.0</div>
+          </Button>
+          <Button
+            className="h-20 text-sm font-medium rounded-lg shadow-sm bg-[#012B41] hover:bg-[#023855] text-white"
+            onClick={() => handleButtonClick('D1414.3')}
+          >
+            LIGHT ON
+            <div className="text-xs mt-1 text-gray-300">D1414.3</div>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
