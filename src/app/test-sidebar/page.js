@@ -22,6 +22,7 @@ import React, { useState } from 'react';
 
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
+import { CgShapeZigzag } from 'react-icons/cg';
 
 export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
   const pathname = usePathname();
@@ -83,7 +84,8 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
               {
                 label: 'Grade Config',
                 href: '/grade-config',
-                icon: RotateCcw,
+                icon: CgShapeZigzag,
+
               }
             ],
           },

@@ -1,11 +1,11 @@
+'use client'
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import React from 'react';
-import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { useRouter } from 'next/navigation';
+import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
 
 const GradeConfig = () => {
   const { session, status } = useProtectedRoute();
@@ -13,6 +13,8 @@ const GradeConfig = () => {
   const [gradeData, setGradeData] = useState({ grade: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unsavedGrade, setUnsavedGrade] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchGradeConfig();
@@ -21,8 +23,9 @@ const GradeConfig = () => {
   const fetchGradeConfig = async () => {
     try {
       const response = await axios.get('/api/grade-config');
-      if (response.data && response.data.length > 0) {
-        setGradeData(response.data[0]);
+      console.log({response});
+      if (response && response.data) {
+        setGradeData(response.data);
       }
       setIsLoading(false);
     } catch (err) {
@@ -31,20 +34,33 @@ const GradeConfig = () => {
     }
   };
 
-  const handleGradeChange = async (newGrade) => {
+  const handleGradeChange = (newGrade) => {
+    if (newGrade === "none" || newGrade === gradeData.grade) {
+      setUnsavedGrade('');
+    } else {
+      setUnsavedGrade(newGrade);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!unsavedGrade) return;
+    setIsSaving(true);
     try {
       await axios.put('/api/grade-config', {
-        grade: newGrade,
+        grade: unsavedGrade,
         updatedAt: new Date().toISOString(),
         updatedBy: session?.user?.email || 'unknown'
       });
       setGradeData(prev => ({ 
         ...prev, 
-        grade: newGrade,
+        grade: unsavedGrade,
         updatedBy: session?.user?.email || 'unknown'
       }));
+      setUnsavedGrade('');
     } catch (err) {
       setError('Failed to update grade');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -70,20 +86,32 @@ const GradeConfig = () => {
             <label className="block text-sm font-medium text-gray-600 mb-2">
               Current Grade
             </label>
-            <Select value={gradeData.grade} onValueChange={handleGradeChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Grade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Select Grade</SelectItem>
-                <SelectItem value="A">Grade A</SelectItem>
-                <SelectItem value="B">Grade B</SelectItem>
-                <SelectItem value="C">Grade C</SelectItem>
-                <SelectItem value="D">Grade D</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={unsavedGrade || gradeData.grade}
+              onChange={(e) => handleGradeChange(e.target.value)}
+              className="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Select Grade</option>
+              <option value="A">Grade A</option>
+              <option value="B">Grade B</option>
+              <option value="C">Grade C</option>
+              <option value="D">Grade D</option>
+            </select>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleSave}
+              disabled={!unsavedGrade || isSaving}
+              className={`px-4 py-2 rounded-md text-white ${
+                !unsavedGrade || isSaving
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+              }`}
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+          <div className="text-sm text-gray-500 mt-4">
             Last updated: {new Date(gradeData.updatedAt).toLocaleString()}
             <br />
             Updated by: {gradeData.updatedBy}
