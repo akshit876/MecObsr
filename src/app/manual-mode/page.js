@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useSocket } from '@/SocketContext';
 
 const ManualMode = () => {
-  const [buttonStates, setButtonStates] = useState({});
   const socket = useSocket();
-  const [isJogging, setIsJogging] = useState(false);
 
   useEffect(() => {
     // if (socket) {
@@ -42,40 +40,22 @@ const ManualMode = () => {
       const operation = operations[buttonId] || buttonId;
       socket.emit('manual-run', operation);
     }
-
-    // For JOG FWD and JOG REV, we'll simulate the "on till pressing" behavior
-    if (buttonId === 'D1418.8' || buttonId === 'D1418.9') {
-      setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
-
-      const timeoutId = setTimeout(() => {
-        setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: false }));
-      }, 200);
-
-      return () => clearTimeout(timeoutId);
-    }
   };
 
   const startJog = (buttonId) => {
-    setIsJogging(true);
-    setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: true }));
     if (socket) {
       const operation = buttonId === 'D1418.8' ? 'jogFwd' : 'jogRev';
       socket.emit('manual-run', operation);
       const intervalId = setInterval(() => {
         socket.emit('manual-run', operation);
-      }, 100);
-      setButtonStates((prevStates) => ({ 
-        ...prevStates, 
-        [`${buttonId}_interval`]: intervalId 
-      }));
+      }, 1);
+      return intervalId;
     }
   };
 
-  const stopJog = (buttonId) => {
-    setIsJogging(false);
-    setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: false }));
-    if (buttonStates[`${buttonId}_interval`]) {
-      clearInterval(buttonStates[`${buttonId}_interval`]);
+  const stopJog = (intervalId) => {
+    if (intervalId) {
+      clearInterval(intervalId);
     }
     if (socket) {
       // socket.emit('manual-run', 'stopJog');
@@ -116,9 +96,12 @@ const ManualMode = () => {
                 }`}
               {...(isJogButton
                 ? {
-                    onMouseDown: () => startJog(button.id),
-                    onMouseUp: () => stopJog(button.id),
-                    onMouseLeave: () => stopJog(button.id),
+                    onMouseDown: () => {
+                      const intervalId = startJog(button.id);
+                      button._intervalId = intervalId;
+                    },
+                    onMouseUp: () => stopJog(button._intervalId),
+                    onMouseLeave: () => stopJog(button._intervalId),
                   }
                 : {
                     onClick: () => handleButtonClick(button.id),
