@@ -78,11 +78,11 @@ const ManualMode = () => {
     { id: 'D1420.2', label: 'POSITION 3 (MARKING)' },
     { id: 'D1420.3', label: 'POSITION 4' },
     { id: 'D1420.4', label: 'POSITION 5' },
-    { id: 'D1420.5', label: 'JOG FWD' },
-    { id: 'D1420.6', label: 'JOG REV' },
-    { id: 'D1420.7', label: 'SCANNER TRIGGER' },
-    { id: 'D1420.8', label: 'MARKING' },
-    { id: 'D1420.9', label: 'LIGHT ON' },
+    { id: 'D1418.8', label: 'JOG FWD' },
+    { id: 'D1418.9', label: 'JOG REV' },
+    { id: 'D1414.1', label: 'SCANNER TRIGGER' },
+    { id: 'D1414.0', label: 'MARK ON' },
+    { id: 'D1414.3', label: 'LIGHT ON' },
   ];
 
   return (

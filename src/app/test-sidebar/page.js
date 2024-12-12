@@ -70,11 +70,11 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
                 href: '/serial-config',
                 icon: RotateCcw,
               },
-              {
-                label: 'Servo Settings',
-                href: '/servo-settings',
-                icon: RotateCcw,
-              },
+              // {
+              //   label: 'Servo Settings',
+              //   href: '/servo-settings',
+              //   icon: RotateCcw,
+              // },
               {
                 label: 'Manual Run',
                 href: '/manual-mode',
