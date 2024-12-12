@@ -80,6 +80,11 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
                 href: '/manual-mode',
                 icon: RotateCcw,
               },
+              {
+                label: 'Grade Config',
+                href: '/grade-config',
+                icon: RotateCcw,
+              }
             ],
           },
         ]
