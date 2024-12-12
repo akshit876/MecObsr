@@ -61,12 +61,22 @@ const ManualMode = () => {
     if (socket) {
       const operation = buttonId === 'D1418.8' ? 'jogFwd' : 'jogRev';
       socket.emit('manual-run', operation);
+      const intervalId = setInterval(() => {
+        socket.emit('manual-run', operation);
+      }, 100);
+      setButtonStates((prevStates) => ({ 
+        ...prevStates, 
+        [`${buttonId}_interval`]: intervalId 
+      }));
     }
   };
 
   const stopJog = (buttonId) => {
     setIsJogging(false);
     setButtonStates((prevStates) => ({ ...prevStates, [buttonId]: false }));
+    if (buttonStates[`${buttonId}_interval`]) {
+      clearInterval(buttonStates[`${buttonId}_interval`]);
+    }
     if (socket) {
       // socket.emit('manual-run', 'stopJog');
     }
