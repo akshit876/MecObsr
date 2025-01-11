@@ -310,13 +310,46 @@ function Page() {
   // console.log({ csvData });
   return (
     <div className="h-screen w-full p-4 flex flex-col gap-4 bg-slate-50">
-      {/* Top Cards - Modern design */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+      {/* Top Cards - Single row with all elements */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Current Model */}
+        <div className="col-span-4 p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
           <p className="text-sm text-gray-300 mb-1">Current Model</p>
           <h3 className="text-xl font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
         </div>
-        <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+
+        {/* OK Count Card */}
+        <div className="col-span-1 p-3 rounded-xl bg-white border-2 border-emerald-300 shadow-sm hover:border-emerald-400 transition-colors">
+          <p className="text-sm font-bold text-emerald-700 mb-1">OK</p>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-emerald-700">
+              {isLoadingCounts ? '-' : todayCounts.okCount}
+            </h3>
+          </div>
+        </div>
+
+        {/* NG Count Card */}
+        <div className="col-span-1 p-3 rounded-xl bg-white border-2 border-red-300 shadow-sm hover:border-red-400 transition-colors">
+          <p className="text-sm font-bold text-red-700 mb-1">NG</p>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-red-100 flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-red-700">
+              {isLoadingCounts ? '-' : todayCounts.ngCount}
+            </h3>
+          </div>
+        </div>
+
+        {/* Date Range and Export */}
+        <div className="col-span-6 p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <p className="text-sm text-gray-300 mb-1">Start Date</p>
@@ -347,72 +380,6 @@ function Page() {
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Download'}
               </Button>
             </div>
-          </div>
-        </div>
-      </div>
-      {/* New counts row */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* OK Count Card */}
-        <div className="p-4 rounded-xl bg-white border border-emerald-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600">Today's OK Count</p>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Since 6:00</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900">
-              {isLoadingCounts ? (
-                <span className="text-gray-400">-</span>
-              ) : (
-                <span className="text-emerald-600">{todayCounts.okCount}</span>
-              )}
-            </h3>
-          </div>
-        </div>
-
-        {/* NG Count Card */}
-        <div className="p-4 rounded-xl bg-white border border-red-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600">Today's NG Count</p>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Since 6:00</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900">
-              {isLoadingCounts ? (
-                <span className="text-gray-400">-</span>
-              ) : (
-                <span className="text-red-600">{todayCounts.ngCount}</span>
-              )}
-            </h3>
           </div>
         </div>
       </div>
