@@ -76,7 +76,7 @@ function Page() {
     };
 
     fetchTodayCounts();
-    const intervalId = setInterval(fetchTodayCounts, 60000);
+    const intervalId = setInterval(fetchTodayCounts, 5*1000);
 
     return () => clearInterval(intervalId);
   }, []);
