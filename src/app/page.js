@@ -36,6 +36,50 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [todayCounts, setTodayCounts] = useState({ okCount: 0, ngCount: 0 });
+  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
+
+  useEffect(() => {
+    const fetchTodayCounts = async () => {
+      try {
+        // Get today's date at 6 AM
+        const today = new Date();
+        today.setHours(6, 0, 0, 0);
+
+        const response = await fetch('/api/reports/counts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startDate: today.toISOString(),
+            endDate: new Date().toISOString(),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch counts');
+        }
+
+        const data = await response.json();
+        setTodayCounts({
+          okCount: data.okCount || 0,
+          ngCount: data.ngCount || 0,
+        });
+      } catch (error) {
+        // logger.error('Error fetching counts:', error);
+        console.log({ error });
+        toast.error("Failed to fetch today's counts");
+      } finally {
+        setIsLoadingCounts(false);
+      }
+    };
+
+    fetchTodayCounts();
+    const intervalId = setInterval(fetchTodayCounts, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -145,14 +189,27 @@ function Page() {
       }
 
       // Format the data as per the requirements
-      const formattedData = data.map((row, index) => ({
-        SerialNumber: index + 1,
-        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
-        MarkingData: row.MarkingData,
-        ScannerData: row.ScannerData,
-        Result: row.Result,
-        User: row.User,
-      }));
+      const formattedData = data.map((row, index) => {
+        let scannerDataWithoutGrade = row.ScannerData || '';
+        let grade = '';
+
+        // Only process grade if Result is not NG
+        if (row.ScannerData !== 'NG' && row.ScannerData) {
+          // const scannerDataArray = row.ScannerData.split(' ');
+          grade = row.ScannerData.slice(-1);
+          scannerDataWithoutGrade = row.ScannerData.slice(0, -1);
+        }
+
+        return {
+          SerialNumber: index + 1,
+          Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
+          MarkingData: row.MarkingData || '',
+          ScannerData: scannerDataWithoutGrade,
+          Grade: grade,
+          Result: row.Result || '',
+          User: row.User || '',
+        };
+      });
 
       // Create a worksheet from the formatted data
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
@@ -290,6 +347,72 @@ function Page() {
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Download'}
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+      {/* New counts row */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* OK Count Card */}
+        <div className="p-4 rounded-xl bg-white border border-emerald-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium text-gray-600">Today's OK Count</p>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Since 6:00</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h3 className="text-3xl font-bold text-gray-900">
+              {isLoadingCounts ? (
+                <span className="text-gray-400">-</span>
+              ) : (
+                <span className="text-emerald-600">{todayCounts.okCount}</span>
+              )}
+            </h3>
+          </div>
+        </div>
+
+        {/* NG Count Card */}
+        <div className="p-4 rounded-xl bg-white border border-red-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium text-gray-600">Today's NG Count</p>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Since 6:00</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
+            <h3 className="text-3xl font-bold text-gray-900">
+              {isLoadingCounts ? (
+                <span className="text-gray-400">-</span>
+              ) : (
+                <span className="text-red-600">{todayCounts.ngCount}</span>
+              )}
+            </h3>
           </div>
         </div>
       </div>

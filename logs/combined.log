@@ -74,3 +74,46 @@
 2024-11-03 17:37:23 [info]  : Connected successfully to MongoDB database: main-data
 2024-11-03 17:39:10 [info]  : Connected successfully to MongoDB database: main-data
 2024-11-03 17:39:30 [info]  : Connected successfully to MongoDB database: main-data
+2024-12-13 10:04:40 [info]  : Connected successfully to MongoDB database: main-data
+2024-12-13 10:04:40 [info]  : Fetched JSON report for date range: 2024-11-30T18:30:00.000Z to 2024-12-11T18:30:00.000Z
+2024-12-13 12:17:50 [info]  : Fetched JSON report for date range: 2024-11-30T18:30:00.000Z to 2024-12-10T18:30:00.000Z
+2025-01-09 14:15:31 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-09 14:15:31 [info]  : Fetched JSON report for date range: 2024-12-31T18:30:00.000Z to 2025-01-08T18:30:00.000Z
+2025-01-11 09:39:31 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 09:39:31 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 09:41:10 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 11:23:18 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 11:23:18 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 12:24:22 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:24:22 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 12:51:43 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:51:43 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 12:53:29 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:53:29 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:23:28.517Z. OK: 93, NG: 8
+2025-01-11 12:54:29 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:24:28.997Z. OK: 93, NG: 8
+2025-01-11 12:55:28 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:55:28 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:25:28.518Z. OK: 93, NG: 8
+2025-01-11 12:56:06 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:56:06 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:26:06.877Z. OK: 93, NG: 8
+2025-01-11 12:57:06 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 12:57:06 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:27:06.881Z. OK: 93, NG: 8
+2025-01-11 12:58:07 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:28:06.997Z. OK: 93, NG: 8
+2025-01-11 12:59:07 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:29:07.000Z. OK: 93, NG: 8
+2025-01-11 13:00:07 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:30:06.996Z. OK: 93, NG: 8
+2025-01-11 13:01:32 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:31:31.993Z. OK: 93, NG: 8
+2025-01-11 13:02:29 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:02:29 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:32:29.717Z. OK: 93, NG: 8
+2025-01-11 13:03:15 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:03:15 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 13:03:30 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:33:29.991Z. OK: 93, NG: 8
+2025-01-11 13:04:29 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:34:29.988Z. OK: 93, NG: 8
+2025-01-11 13:05:30 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:05:30 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:35:30.344Z. OK: 93, NG: 8
+2025-01-11 13:05:34 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:05:34 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:35:34.404Z. OK: 93, NG: 8
+2025-01-11 13:05:45 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:05:45 [info]  : Fetched JSON report for date range: 2025-01-09T18:30:00.000Z to 2025-01-10T18:30:00.000Z
+2025-01-11 13:06:35 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:36:34.992Z. OK: 93, NG: 8
+2025-01-11 13:07:34 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:37:34.986Z. OK: 93, NG: 8
+2025-01-11 13:08:35 [info]  : Connected successfully to MongoDB database: main-data
+2025-01-11 13:08:35 [info]  : Fetched counts for date range: 2025-01-11T00:30:00.000Z to 2025-01-11T07:38:34.987Z. OK: 93, NG: 8
