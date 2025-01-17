@@ -13,6 +13,11 @@ import React from 'react';
 const columnHelper = createColumnHelper();
 
 const columns = [
+  columnHelper.accessor('Id', {
+    header: 'ID',
+    cell: (info) => <div className="font-medium">{info.getValue()}</div>,
+    size: 80,
+  }),
   columnHelper.accessor('SerialNumber', {
     header: 'SNO',
     cell: (info) => <div className="font-medium">{info.getValue()}</div>,

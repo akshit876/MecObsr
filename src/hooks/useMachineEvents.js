@@ -12,6 +12,36 @@ const toastConfig = {
     textAlign: 'center',
   }
 };
+/**
+ * 
+ * @param {export const REGISTERS_TO_MONITOR = [
+  {
+    register: 1490,
+    bits: {
+      0: { eventName: "part-present", message: "Part not present" },
+      1: {
+        eventName: "emergency-button",
+        message: "Emergency push button pressed",
+      },
+      2: { eventName: "safety-curtain", message: "Safety curtain error" },
+      3: { eventName: "servo-position", message: "Servo not home position" },
+      4: {
+        eventName: "reject-bin",
+        message: "Put the part in the rejection bin",
+      },
+    },
+  },
+  {
+    register: 1600,
+    bits: {
+      9: {
+        eventName: "ftp",
+        message: "Image not getting saved , please run ftp server",
+      },
+    },
+  },
+];} socket 
+ */
 
 export const useMachineEvents = (socket) => {
   // Add ref to track active toasts
@@ -94,6 +124,21 @@ export const useMachineEvents = (socket) => {
             }
           });
           activeToasts.current['reject-bin'] = toastId;
+        }
+      },
+      'ftp': (data) => {
+        if (!activeToasts.current['ftp']) {
+          const toastId = toast(data.message || "Image not getting saved , please run ftp server", {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#f59e0b', // Amber/orange for warnings
+            },
+            onClose: () => {
+              delete activeToasts.current['ftp'];
+            }
+          });
+          activeToasts.current['ftp'] = toastId;
         }
       }
     };
