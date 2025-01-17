@@ -16,7 +16,7 @@ export async function POST(request) {
       startDateTime.setDate(startDateTime.getDate() - 1);
     }
     startDateTime.setHours(6, 0, 0, 0);
-    
+
     // End time is always start date + 1 day at 6 AM
     const endDateTime = new Date(startDateTime);
     endDateTime.setDate(endDateTime.getDate() + 1);
@@ -33,53 +33,30 @@ export async function POST(request) {
         $match: {
           Timestamp: {
             $gte: startDateTime,
-            $lt: endDateTime
-          }
-        }
+            $lt: endDateTime,
+          },
+        },
       },
       {
         $group: {
           _id: '$Result',
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ];
 
     const counts = await mongoDbService.collection.aggregate(pipeline).toArray();
-    
+
     // Transform the results
-    const okCount = counts.find(item => item._id === 'OK')?.count || 0;
-    const ngCount = counts.find(item => item._id === 'NG')?.count || 0;
+    const okCount = counts.find((item) => item._id === 'OK')?.count || 0;
+    const ngCount = counts.find((item) => item._id === 'NG')?.count || 0;
 
-    logger.info(`Fetched counts from ${startDateTime.toISOString()} to ${endDateTime.toISOString()}. OK: ${okCount}, NG: ${ngCount}`);
+    logger.info(
+      `Fetched counts from ${startDateTime.toISOString()} to ${endDateTime.toISOString()}. OK: ${okCount}, NG: ${ngCount}`,
+    );
     return NextResponse.json({ okCount, ngCount });
-
   } catch (error) {
     logger.error('Error fetching counts:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch counts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch counts' }, { status: 500 });
   }
 }
-
-@echo off
-
-REM Start the Node.js server in silent mode
-cd /d "D:\lsr-be"
-powershell -WindowStyle Hidden -Command "Start-Process cmd -ArgumentList '/c npm run start' -NoNewWindow"
-
-REM Wait for Node.js server to initialize
-timeout /t 3 /nobreak >nul
-
-REM Start the Next.js app in silent mode
-cd /d "D:\Laser-UI"
-powershell -WindowStyle Hidden -Command "Start-Process cmd -ArgumentList '/c npm run start' -NoNewWindow"
-
-REM Wait for Next.js app to initialize
-timeout /t 5 /nobreak >nul
-
-REM Open Chrome in incognito mode at localhost:3000
-start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --incognito http://localhost:3000
-
-pause
