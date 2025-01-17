@@ -4,7 +4,15 @@ import logger from '../../../../../logger';
 
 export async function POST(request) {
   try {
-    const { startDate, endDate } = await request.json();
+    const { startDate } = await request.json();
+
+    // Create date objects for 6 AM of start date and next day
+    const startDateTime = new Date(startDate);
+    startDateTime.setHours(6, 0, 0, 0);
+    
+    const endDateTime = new Date(startDate);
+    endDateTime.setDate(endDateTime.getDate() + 1);  // Add one day
+    endDateTime.setHours(6, 0, 0, 0);
 
     // Connect to MongoDB if not already connected
     if (!mongoDbService.collection) {
@@ -16,8 +24,8 @@ export async function POST(request) {
       {
         $match: {
           Timestamp: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
+            $gte: startDateTime,
+            $lt: endDateTime
           }
         }
       },
@@ -35,7 +43,7 @@ export async function POST(request) {
     const okCount = counts.find(item => item._id === 'OK')?.count || 0;
     const ngCount = counts.find(item => item._id === 'NG')?.count || 0;
 
-    logger.info(`Fetched counts for date range: ${startDate} to ${endDate}. OK: ${okCount}, NG: ${ngCount}`);
+    logger.info(`Fetched counts from ${startDateTime.toISOString()} to ${endDateTime.toISOString()}. OK: ${okCount}, NG: ${ngCount}`);
     return NextResponse.json({ okCount, ngCount });
 
   } catch (error) {
