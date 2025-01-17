@@ -9,11 +9,14 @@ export async function POST(request) {
     // Create date object for current time
     const currentDate = new Date(startDate);
     const currentHour = currentDate.getHours();
+    logger.info(`Current hour: ${currentHour}`);
 
-    // If current time is before 6 AM, use previous day's 6 AM as start
+    // If current time is before 6 AM OR it's midnight (hour 0), use previous day's 6 AM as start
     const startDateTime = new Date(startDate);
-    if (currentHour < 6) {
+    if (currentHour < 6 || currentHour === 0) {
+      // Added explicit check for midnight
       startDateTime.setDate(startDateTime.getDate() - 1);
+      logger.info('Adjusted to previous day due to time before 6 AM or midnight');
     }
     startDateTime.setHours(6, 0, 0, 0);
 
@@ -21,6 +24,8 @@ export async function POST(request) {
     const endDateTime = new Date(startDateTime);
     endDateTime.setDate(endDateTime.getDate() + 1);
     endDateTime.setHours(6, 0, 0, 0);
+
+    logger.info(`Query time range: ${startDateTime.toISOString()} to ${endDateTime.toISOString()}`);
 
     // Connect to MongoDB if not already connected
     if (!mongoDbService.collection) {
