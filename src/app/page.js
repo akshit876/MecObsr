@@ -44,7 +44,7 @@ function Page() {
       try {
         // Get today's date at 6 AM
         const today = new Date();
-        today.setHours(6, 0, 0, 0);
+        // today.setHours(6, 0, 0, 0);
 
         const response = await fetch('/api/reports/counts', {
           method: 'POST',
