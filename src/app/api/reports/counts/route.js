@@ -6,12 +6,20 @@ export async function POST(request) {
   try {
     const { startDate } = await request.json();
 
-    // Create date objects for 6 AM of start date and next day
+    // Create date object for current time
+    const currentDate = new Date(startDate);
+    const currentHour = currentDate.getHours();
+
+    // If current time is before 6 AM, use previous day's 6 AM as start
     const startDateTime = new Date(startDate);
+    if (currentHour < 6) {
+      startDateTime.setDate(startDateTime.getDate() - 1);
+    }
     startDateTime.setHours(6, 0, 0, 0);
     
-    const endDateTime = new Date(startDate);
-    endDateTime.setDate(endDateTime.getDate() + 1);  // Add one day
+    // End time is always start date + 1 day at 6 AM
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setDate(endDateTime.getDate() + 1);
     endDateTime.setHours(6, 0, 0, 0);
 
     // Connect to MongoDB if not already connected
@@ -54,3 +62,24 @@ export async function POST(request) {
     );
   }
 }
+
+@echo off
+
+REM Start the Node.js server in silent mode
+cd /d "D:\lsr-be"
+powershell -WindowStyle Hidden -Command "Start-Process cmd -ArgumentList '/c npm run start' -NoNewWindow"
+
+REM Wait for Node.js server to initialize
+timeout /t 3 /nobreak >nul
+
+REM Start the Next.js app in silent mode
+cd /d "D:\Laser-UI"
+powershell -WindowStyle Hidden -Command "Start-Process cmd -ArgumentList '/c npm run start' -NoNewWindow"
+
+REM Wait for Next.js app to initialize
+timeout /t 5 /nobreak >nul
+
+REM Open Chrome in incognito mode at localhost:3000
+start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --incognito http://localhost:3000
+
+pause
