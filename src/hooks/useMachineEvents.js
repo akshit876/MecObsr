@@ -95,7 +95,28 @@ export const useMachineEvents = (socket) => {
           });
           activeToasts.current['reject-bin'] = toastId;
         }
-      }
+      },
+      'ftp': (data) => {
+        if (!activeToasts.current['ftp']) {
+          const toastId = toast(data.message || "⚠️ FTP CONNECTION ERROR ⚠️", {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#ef4444', // Bright red
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              backgroundColor: '#fee2e2', // Light red background
+              border: '2px solid #ef4444',
+            },
+            duration: 0, // Toast stays until manually closed
+            icon: '🚨',
+            onClose: () => {
+              delete activeToasts.current['ftp'];
+            }
+          });
+          activeToasts.current['ftp'] = toastId;
+        }
+      },
     };
 
     // Register all event handlers
