@@ -13,6 +13,11 @@ import React from 'react';
 const columnHelper = createColumnHelper();
 
 const columns = [
+  columnHelper.accessor('Id', {
+    header: 'ID',
+    cell: (info) => <div className="font-medium">{info.getValue()}</div>,
+    size: 80,
+  }),
   columnHelper.accessor('SerialNumber', {
     header: 'SNO',
     cell: (info) => <div className="font-medium">{info.getValue()}</div>,
@@ -29,9 +34,7 @@ const columns = [
     header: 'Scanner Data',
     cell: (info) => (
       <div className="font-medium text-gray-600">
-        {info.getValue() === 'NG' 
-          ? info.getValue() 
-          : info.getValue()?.slice(0, -1)}
+        {info.getValue() === 'NG' ? info.getValue() : info.getValue()?.slice(0, -1)}
       </div>
     ),
     size: 200,
@@ -60,24 +63,20 @@ const columns = [
 
   columnHelper.accessor('Grade', {
     header: ({ column }) => {
-      return (
-        <div className="flex items-center cursor-pointer">
-          Grade
-        </div>
-      );
+      return <div className="flex items-center cursor-pointer">Grade</div>;
     },
     cell: (info) => {
       const grade = info.getValue();
       const gradeStyles = {
-        'A': 'bg-emerald-100 text-emerald-800',
-        'B': 'bg-blue-100 text-blue-800',
-        'C': 'bg-amber-100 text-amber-800',
-        'D': 'bg-red-100 text-red-800'
+        A: 'bg-emerald-100 text-emerald-800',
+        B: 'bg-blue-100 text-blue-800',
+        C: 'bg-amber-100 text-amber-800',
+        D: 'bg-red-100 text-red-800',
       };
-      
+
       const baseStyles = 'text-xs px-3 py-1 rounded-full font-semibold';
       const colorStyles = gradeStyles[grade] || 'bg-gray-100 text-gray-800';
-      
+
       return <span className={`${baseStyles} ${colorStyles}`}>{grade}</span>;
     },
     size: 100,
