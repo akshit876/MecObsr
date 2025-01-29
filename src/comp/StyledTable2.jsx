@@ -34,7 +34,9 @@ const columns = [
     header: 'Scanner Data',
     cell: (info) => (
       <div className="font-medium text-gray-600">
-        {info.getValue() === 'NG' ? info.getValue() : info.getValue()?.slice(0, -1)}
+        {info.getValue() === 'NG' || info.getValue() === 'N/A'
+          ? info.getValue()
+          : info.getValue()?.slice(0, -1)}
       </div>
     ),
     size: 200,
