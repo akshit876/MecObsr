@@ -76,7 +76,7 @@ function Page() {
     };
 
     fetchTodayCounts();
-    const intervalId = setInterval(fetchTodayCounts, 5*1000);
+    const intervalId = setInterval(fetchTodayCounts, 5 * 1000);
 
     return () => clearInterval(intervalId);
   }, []);
@@ -183,6 +183,8 @@ function Page() {
 
       const data = await response.json();
 
+      console.log({ data });
+
       if (data.length === 0) {
         toast.error('No data found for the specified date range.');
         return;
@@ -193,9 +195,13 @@ function Page() {
         let scannerDataWithoutGrade = row.ScannerData || '';
         let grade = '';
 
-        // Only process grade if Result is not NG
-        if (row.ScannerData !== 'NG' && row.ScannerData) {
-          // const scannerDataArray = row.ScannerData.split(' ');
+        // Handle N/A case first
+        if (row.ScannerData === 'N/A') {
+          scannerDataWithoutGrade = 'N/A';
+          grade = 'N/A';
+        }
+        // Only process grade if Result is not NG and ScannerData is not N/A
+        else if (row.ScannerData !== 'NG' && row.ScannerData) {
           grade = row.ScannerData.slice(-1);
           scannerDataWithoutGrade = row.ScannerData.slice(0, -1);
         }
@@ -323,8 +329,18 @@ function Page() {
           <p className="text-sm font-bold text-emerald-700 mb-1">OK</p>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-4 h-4 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <h3 className="text-xl font-bold text-emerald-700">
@@ -338,8 +354,18 @@ function Page() {
           <p className="text-sm font-bold text-red-700 mb-1">NG</p>
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-red-100 flex items-center justify-center">
-              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </div>
             <h3 className="text-xl font-bold text-red-700">
