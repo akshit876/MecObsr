@@ -14,9 +14,17 @@ export function HourlyDataDisplayWidget() {
   const getHourRange = (hour) => {
     const now = new Date();
     const start = new Date(now);
-    start.setHours(hour, 0, 0, 0);
 
-    // If the hour is less than 6, it's from next day
+    // Set to today 6 AM as the base
+    start.setHours(6, 0, 0, 0);
+
+    // Calculate hours since 6 AM
+    const hoursSince6AM = (hour - 6 + 24) % 24;
+
+    // Add the hours to the base time
+    start.setHours(start.getHours() + hoursSince6AM);
+
+    // If the hour is less than current 6 AM, it means it's for tomorrow
     if (hour < 6) {
       start.setDate(start.getDate() + 1);
     }
@@ -41,32 +49,35 @@ export function HourlyDataDisplayWidget() {
   // Function to fetch data for all hours
   const fetchAllHourlyData = async () => {
     try {
-      // Create array of hours from 6 AM to next day 6 AM
-      const hours = Array.from({ length: 24 }, (_, i) => (i + 6) % 24);
+      const { start, end } = getHourRange(6); // Get full day range from 6 AM to next 6 AM
 
-      const promises = hours.map(async (hour) => {
-        const { start, end } = getHourRange(hour);
-        const response = await fetch('/api/reports/counts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            startDate: start.toISOString(),
-            endDate: end.toISOString(),
-          }),
-        });
+      const response = await fetch('/api/reports/hourly-counts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+        }),
+      });
 
-        if (!response.ok) throw new Error('Failed to fetch counts');
-        const data = await response.json();
+      if (!response.ok) throw new Error('Failed to fetch counts');
+      const { hourlyData } = await response.json();
+
+      // Transform the data to match our component's format
+      const formattedData = Array.from({ length: 24 }, (_, i) => (i + 6) % 24).map((hour) => {
+        const hourData = hourlyData.find((data) => data.hour === hour) || {
+          okCount: 0,
+          ngCount: 0,
+        };
         return {
           hour,
-          okCount: data.okCount || 0,
-          ngCount: data.ngCount || 0,
-          total: (data.okCount || 0) + (data.ngCount || 0),
+          okCount: hourData.okCount || 0,
+          ngCount: hourData.ngCount || 0,
+          total: (hourData.okCount || 0) + (hourData.ngCount || 0),
         };
       });
 
-      const results = await Promise.all(promises);
-      setHourlyData(results);
+      setHourlyData(formattedData);
     } catch (error) {
       console.error('Error fetching hourly data:', error);
     }
@@ -79,7 +90,7 @@ export function HourlyDataDisplayWidget() {
     const { start, end } = getHourRange(currentHour);
 
     try {
-      const response = await fetch('/api/reports/counts', {
+      const response = await fetch('/api/reports/hourly-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,12 +100,18 @@ export function HourlyDataDisplayWidget() {
       });
 
       if (!response.ok) throw new Error('Failed to fetch counts');
-      const data = await response.json();
+      const { hourlyData } = await response.json();
+
+      const currentHourData = hourlyData.find((data) => data.hour === currentHour) || {
+        okCount: 0,
+        ngCount: 0,
+      };
+
       setCurrentHourData({
         hour: currentHour,
-        okCount: data.okCount || 0,
-        ngCount: data.ngCount || 0,
-        total: (data.okCount || 0) + (data.ngCount || 0),
+        okCount: currentHourData.okCount || 0,
+        ngCount: currentHourData.ngCount || 0,
+        total: (currentHourData.okCount || 0) + (currentHourData.ngCount || 0),
       });
     } catch (error) {
       console.error('Error fetching current hour data:', error);
