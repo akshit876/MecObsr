@@ -19,18 +19,15 @@ export async function POST(request) {
       await mongoDbService.connect('main-data', 'records');
     }
 
-    // First, let's log some sample data to verify
-    const sampleData = await mongoDbService.collection
-      .find({
-        Timestamp: {
-          $gte: startDateTime,
-          $lt: endDateTime,
-        },
-      })
-      .limit(5)
-      .toArray();
+    // First, let's verify we have data in the time range
+    const sampleCount = await mongoDbService.collection.countDocuments({
+      Timestamp: {
+        $gte: startDateTime,
+        $lt: endDateTime,
+      },
+    });
 
-    logger.info(`Sample data: ${JSON.stringify(sampleData)}`);
+    logger.info(`Found ${sampleCount} records in the time range`);
 
     // Aggregate counts from MongoDB with simpler pipeline
     const pipeline = [
@@ -43,8 +40,9 @@ export async function POST(request) {
         },
       },
       {
-        $addFields: {
+        $project: {
           hour: { $hour: '$Timestamp' },
+          Result: 1,
         },
       },
       {
@@ -59,7 +57,7 @@ export async function POST(request) {
       {
         $group: {
           _id: '$_id.hour',
-          data: {
+          results: {
             $push: {
               result: '$_id.result',
               count: '$count',
@@ -75,9 +73,9 @@ export async function POST(request) {
               $map: {
                 input: {
                   $filter: {
-                    input: '$data',
-                    as: 'item',
-                    cond: { $eq: ['$$item.result', 'OK'] },
+                    input: '$results',
+                    as: 'r',
+                    cond: { $eq: ['$$r.result', 'OK'] },
                   },
                 },
                 as: 'filtered',
@@ -90,9 +88,9 @@ export async function POST(request) {
               $map: {
                 input: {
                   $filter: {
-                    input: '$data',
-                    as: 'item',
-                    cond: { $eq: ['$$item.result', 'NG'] },
+                    input: '$results',
+                    as: 'r',
+                    cond: { $eq: ['$$r.result', 'NG'] },
                   },
                 },
                 as: 'filtered',
@@ -102,20 +100,42 @@ export async function POST(request) {
           },
         },
       },
+      {
+        $addFields: {
+          total: { $add: ['$okCount', '$ngCount'] },
+        },
+      },
     ];
 
-    const hourlyData = await mongoDbService.collection.aggregate(pipeline).toArray();
+    let hourlyData = await mongoDbService.collection.aggregate(pipeline).toArray();
 
-    // Log the results for debugging
-    logger.info(`Pipeline results: ${JSON.stringify(hourlyData)}`);
+    // Log raw aggregation results
+    logger.info(`Raw aggregation results: ${JSON.stringify(hourlyData)}`);
 
-    // If no data found, return empty array with proper structure
-    if (!hourlyData.length) {
-      logger.info('No data found for the specified time range');
-      return NextResponse.json({ hourlyData: [] });
-    }
+    // Create a full 24-hour array with zeros for missing hours
+    const fullHourlyData = Array.from({ length: 24 }, (_, i) => {
+      const hour = i;
+      const existingData = hourlyData.find((data) => data.hour === hour) || {
+        hour,
+        okCount: 0,
+        ngCount: 0,
+        total: 0,
+      };
+      return existingData;
+    });
 
-    return NextResponse.json({ hourlyData });
+    logger.info(`Returning data with ${fullHourlyData.length} hours`);
+
+    return NextResponse.json({
+      hourlyData: fullHourlyData,
+      debug: {
+        timeRange: {
+          start: startDateTime,
+          end: endDateTime,
+        },
+        recordCount: sampleCount,
+      },
+    });
   } catch (error) {
     logger.error('Error fetching hourly counts:', error);
     return NextResponse.json({ error: 'Failed to fetch hourly counts' }, { status: 500 });
