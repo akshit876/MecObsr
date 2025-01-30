@@ -51,6 +51,11 @@ export function HourlyDataDisplayWidget() {
     try {
       const { start, end } = getHourRange(6); // Get full day range from 6 AM to next 6 AM
 
+      console.log('Fetching data for range:', {
+        start: start.toISOString(),
+        end: end.toISOString(),
+      });
+
       const response = await fetch('/api/reports/hourly-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,20 +68,25 @@ export function HourlyDataDisplayWidget() {
       if (!response.ok) throw new Error('Failed to fetch counts');
       const { hourlyData } = await response.json();
 
+      console.log('Raw API response:', hourlyData);
+
+      // Create a map of existing data
+      const hourDataMap = new Map(hourlyData.map((data) => [data.hour, data]));
+
       // Transform the data to match our component's format
-      const formattedData = Array.from({ length: 24 }, (_, i) => (i + 6) % 24).map((hour) => {
-        const hourData = hourlyData.find((data) => data.hour === hour) || {
-          okCount: 0,
-          ngCount: 0,
-        };
+      const formattedData = Array.from({ length: 24 }, (_, i) => {
+        const hour = (i + 6) % 24;
+        const hourData = hourDataMap.get(hour) || { okCount: 0, ngCount: 0 };
+
         return {
           hour,
-          okCount: hourData.okCount || 0,
-          ngCount: hourData.ngCount || 0,
-          total: (hourData.okCount || 0) + (hourData.ngCount || 0),
+          okCount: parseInt(hourData.okCount || 0),
+          ngCount: parseInt(hourData.ngCount || 0),
+          total: parseInt(hourData.okCount || 0) + parseInt(hourData.ngCount || 0),
         };
       });
 
+      console.log('Formatted data:', formattedData);
       setHourlyData(formattedData);
     } catch (error) {
       console.error('Error fetching hourly data:', error);
@@ -102,16 +112,18 @@ export function HourlyDataDisplayWidget() {
       if (!response.ok) throw new Error('Failed to fetch counts');
       const { hourlyData } = await response.json();
 
+      // Find the current hour data or use default values
       const currentHourData = hourlyData.find((data) => data.hour === currentHour) || {
+        hour: currentHour,
         okCount: 0,
         ngCount: 0,
       };
 
       setCurrentHourData({
         hour: currentHour,
-        okCount: currentHourData.okCount || 0,
-        ngCount: currentHourData.ngCount || 0,
-        total: (currentHourData.okCount || 0) + (currentHourData.ngCount || 0),
+        okCount: parseInt(currentHourData.okCount || 0),
+        ngCount: parseInt(currentHourData.ngCount || 0),
+        total: parseInt(currentHourData.okCount || 0) + parseInt(currentHourData.ngCount || 0),
       });
     } catch (error) {
       console.error('Error fetching current hour data:', error);
