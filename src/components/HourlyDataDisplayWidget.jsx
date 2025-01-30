@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
 export function HourlyDataDisplayWidget() {
   const [hourlyData, setHourlyData] = useState([]);
@@ -122,71 +122,87 @@ export function HourlyDataDisplayWidget() {
     };
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50">
-        <div className="bg-white rounded-r-lg shadow-lg p-4">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed left-0 top-1/2 -translate-y-1/2 flex items-start z-50">
-      {/* Main Panel */}
-      <div
-        className={`bg-white rounded-r-lg shadow-lg transition-all duration-300 ease-in-out ${
-          isExpanded ? 'w-[400px]' : 'w-0 overflow-hidden'
-        }`}
-      >
-        <div className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Hourly Production Data</h3>
-
-          {/* Current Hour Highlight */}
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="text-sm font-medium text-blue-800">
-              Current Hour ({format(new Date(), 'hh:mm a')})
-            </h4>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              <div className="text-center">
-                <span className="text-sm text-green-600">OK: {currentHourData.okCount}</span>
-              </div>
-              <div className="text-center">
-                <span className="text-sm text-red-600">NG: {currentHourData.ngCount}</span>
-              </div>
-              <div className="text-center">
-                <span className="text-sm text-gray-600">Total: {currentHourData.total}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Hourly Data Grid */}
-          <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto">
-            {hourlyData.map((data) => (
-              <div
-                key={data.hour}
-                className="p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{formatHour(data.hour)}</span>
-                  <div className="flex gap-3">
-                    <span className="text-sm text-green-600">OK: {data.okCount}</span>
-                    <span className="text-sm text-red-600">NG: {data.ngCount}</span>
-                    <span className="text-sm text-gray-600">Total: {data.total}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Toggle Button */}
+    <>
+      {/* Toggle Button - Fixed on the side */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="bg-[#012B41] text-white p-2 rounded-r-lg hover:bg-[#023855] transition-colors shadow-lg"
+        className="fixed left-0 top-[20%] z-50 bg-[#012B41] text-white p-3 rounded-r-lg hover:bg-[#023855] transition-colors shadow-lg flex flex-col items-center gap-2"
       >
-        {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        <Plus className="h-6 w-6" />
+        <span className="text-xs font-medium">Hourly Data</span>
       </button>
-    </div>
+
+      {/* Main Panel */}
+      {(isExpanded || isLoading) && (
+        <div className="fixed left-0 top-1/2 -translate-y-1/2 flex items-start z-40">
+          <div
+            className={`bg-white rounded-r-lg shadow-lg transition-all duration-300 ease-in-out w-[400px]`}
+          >
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Hourly Production Data</h3>
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              </div>
+
+              {isLoading ? (
+                <div className="p-4 text-center">Loading...</div>
+              ) : (
+                <>
+                  {/* Current Hour Highlight */}
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="text-sm font-medium text-blue-800">
+                      Current Hour ({format(new Date(), 'hh:mm a')})
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      <div className="text-center">
+                        <span className="text-sm text-green-600">
+                          OK: {currentHourData.okCount}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm text-red-600">NG: {currentHourData.ngCount}</span>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm text-gray-600">
+                          Total: {currentHourData.total}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hourly Data Grid */}
+                  <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto">
+                    {hourlyData.map((data) => (
+                      <div
+                        key={data.hour}
+                        className="p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">
+                            {format(new Date().setHours(data.hour), 'hh:mm a')} -{' '}
+                            {format(new Date().setHours(data.hour + 1), 'hh:mm a')}
+                          </span>
+                          <div className="flex gap-3">
+                            <span className="text-sm text-green-600">OK: {data.okCount}</span>
+                            <span className="text-sm text-red-600">NG: {data.ngCount}</span>
+                            <span className="text-sm text-gray-600">Total: {data.total}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
