@@ -16,7 +16,7 @@ export function HourlyDataDisplayWidget() {
     const start = new Date(now);
     start.setHours(hour, 0, 0, 0);
 
-    // If the hour is less than current hour, it's from next day
+    // If the hour is less than 6, it's from next day
     if (hour < 6) {
       start.setDate(start.getDate() + 1);
     }
@@ -33,7 +33,7 @@ export function HourlyDataDisplayWidget() {
     const hour12 = hour % 12 || 12;
     const nextHour = (hour + 1) % 24;
     const nextHour12 = nextHour % 12 || 12;
-    const nextPeriod = hour + 1 >= 12 ? 'PM' : 'AM';
+    const nextPeriod = nextHour >= 12 ? 'PM' : 'AM';
 
     return `${hour12}${period} - ${nextHour12}${nextPeriod}`;
   };
@@ -41,9 +41,8 @@ export function HourlyDataDisplayWidget() {
   // Function to fetch data for all hours
   const fetchAllHourlyData = async () => {
     try {
-      const hours = [];
-      for (let i = 6; i < 24; i++) hours.push(i);
-      for (let i = 0; i < 6; i++) hours.push(i);
+      // Create array of hours from 6 AM to next day 6 AM
+      const hours = Array.from({ length: 24 }, (_, i) => (i + 6) % 24);
 
       const promises = hours.map(async (hour) => {
         const { start, end } = getHourRange(hour);
@@ -186,10 +185,7 @@ export function HourlyDataDisplayWidget() {
                         className="p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">
-                            {format(new Date().setHours(data.hour), 'hh:mm a')} -{' '}
-                            {format(new Date().setHours(data.hour + 1), 'hh:mm a')}
-                          </span>
+                          <span className="text-sm font-medium">{formatHour(data.hour)}</span>
                           <div className="flex gap-3">
                             <span className="text-sm text-green-600">OK: {data.okCount}</span>
                             <span className="text-sm text-red-600">NG: {data.ngCount}</span>
