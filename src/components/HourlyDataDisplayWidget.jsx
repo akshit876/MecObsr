@@ -124,14 +124,16 @@ export function HourlyDataDisplayWidget() {
 
   return (
     <>
-      {/* Toggle Button - Fixed on the side */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="fixed left-0 top-[20%] z-50 bg-[#012B41] text-white p-3 rounded-r-lg hover:bg-[#023855] transition-colors shadow-lg flex flex-col items-center gap-2"
-      >
-        <Plus className="h-6 w-6" />
-        <span className="text-xs font-medium">Hourly Data</span>
-      </button>
+      {/* Toggle Button - Only show when panel is not expanded */}
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="fixed left-[1%] top-[76%] z-50 bg-[#012B41] text-white p-3 rounded-r-lg hover:bg-[#023855] transition-colors shadow-lg flex flex-col items-center gap-2"
+        >
+          <Plus className="h-6 w-6" />
+          <span className="text-xs font-medium">Hourly Data</span>
+        </button>
+      )}
 
       {/* Main Panel */}
       {(isExpanded || isLoading) && (
