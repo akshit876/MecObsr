@@ -8,61 +8,33 @@ export async function POST(request) {
       await mongoDbService.connect('main-data', 'records');
     }
 
-    // Get current date at midnight in local time (UTC+7)
-    const now = new Date();
     const utcOffset = 7; // UTC+7 for Jakarta/Bangkok
 
-    // Adjust the timestamps for local time
-    const today = new Date(now);
-    today.setHours(0, 0, 0, 0);
-
-    // Get today's 6 AM in local time
-    const today6AM = new Date(today);
-    today6AM.setHours(6, 0, 0, 0);
-
-    // Convert to UTC for MongoDB query
-    const today6AMUTC = new Date(today6AM.getTime() - utcOffset * 60 * 60 * 1000);
-
-    // Get next 6 AM
-    const next6AM = new Date(today6AM);
-    next6AM.setDate(next6AM.getDate() + 1);
-    const next6AMUTC = new Date(next6AM.getTime() - utcOffset * 60 * 60 * 1000);
-
-    logger.info(`Querying from ${today6AMUTC.toISOString()} to ${next6AMUTC.toISOString()}`);
+    // Get a sample record to check actual timestamps
+    const sampleRecord = await mongoDbService.collection.findOne({}, { sort: { Timestamp: 1 } });
+    if (sampleRecord) {
+      const localTime = new Date(sampleRecord.Timestamp);
+      logger.info(`Sample record timestamp: ${sampleRecord.Timestamp}`);
+      logger.info(`Local hour: ${localTime.getHours()}`);
+    }
 
     const pipeline = [
       {
-        $match: {
-          Timestamp: {
-            $gte: today6AMUTC,
-            $lt: next6AMUTC,
-          },
-        },
-      },
-      {
         $addFields: {
-          // Convert UTC hour to local hour
-          localHour: {
-            $add: [
-              { $hour: '$Timestamp' },
-              utcOffset,
-              {
-                $cond: {
-                  if: {
-                    $lt: [{ $add: [{ $hour: '$Timestamp' }, utcOffset] }, 24],
-                  },
-                  then: 0,
-                  else: -24,
-                },
-              },
-            ],
+          // Convert timestamp to local time for grouping
+          localTimestamp: {
+            $dateAdd: {
+              startDate: '$Timestamp',
+              unit: 'hour',
+              amount: utcOffset,
+            },
           },
         },
       },
       {
         $group: {
           _id: {
-            hour: '$localHour',
+            hour: { $hour: '$localTimestamp' },
             result: '$Result',
           },
           count: { $sum: 1 },
@@ -125,18 +97,21 @@ export async function POST(request) {
           total: { $add: ['$okCount', '$ngCount'] },
         },
       },
+      {
+        $sort: { hour: 1 },
+      },
     ];
 
     const rawResults = await mongoDbService.collection.aggregate(pipeline).toArray();
 
-    // Log the raw results with local time
+    // Log the raw results with actual local time
     rawResults.forEach((result) => {
-      const localFirstTime = new Date(result.firstRecord.getTime() + utcOffset * 60 * 60 * 1000);
-      const localLastTime = new Date(result.lastRecord.getTime() + utcOffset * 60 * 60 * 1000);
+      const localFirstTime = new Date(result.firstRecord);
+      const localLastTime = new Date(result.lastRecord);
       logger.info(
-        `Local Hour ${result.hour}: OK=${result.okCount}, NG=${result.ngCount}, Total=${result.total}`,
+        `Hour ${result.hour}: OK=${result.okCount}, NG=${result.ngCount}, Total=${result.total}`,
       );
-      logger.info(`Local time range: ${localFirstTime} to ${localLastTime}`);
+      logger.info(`Time range: ${localFirstTime} to ${localLastTime}`);
     });
 
     // Initialize the 24-hour array with zeros
@@ -161,12 +136,6 @@ export async function POST(request) {
     return NextResponse.json({
       hourlyData,
       debug: {
-        timeRange: {
-          start: today6AMUTC,
-          end: next6AMUTC,
-          localStart: today6AM,
-          localEnd: next6AM,
-        },
         recordCount: rawResults.length,
         rawResults: rawResults.map((r) => ({
           hour: r.hour,
@@ -176,6 +145,7 @@ export async function POST(request) {
             end: r.lastRecord,
           },
         })),
+        sampleData: sampleRecord,
       },
     });
   } catch (error) {
