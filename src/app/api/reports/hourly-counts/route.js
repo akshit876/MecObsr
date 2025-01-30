@@ -4,7 +4,23 @@ import logger from '../../../../../logger';
 
 export async function POST(request) {
   try {
-    const { startDate, endDate } = await request.json();
+    // First, ensure MongoDB is connected
+    try {
+      if (!mongoDbService.collection) {
+        logger.info('Connecting to MongoDB...');
+        await mongoDbService.connect('main-data', 'records');
+      }
+      
+      if (!mongoDbService.collection) {
+        throw new Error('Failed to establish MongoDB connection');
+      }
+    } catch (connError) {
+      logger.error('MongoDB connection error:', connError);
+      return NextResponse.json({ 
+        error: 'Database connection failed', 
+        details: connError.message 
+      }, { status: 500 });
+    }
 
     // Get current date at midnight
     const now = new Date();
@@ -25,125 +41,87 @@ export async function POST(request) {
 
     logger.info(`Querying from ${today6AM.toISOString()} to ${next6AM.toISOString()}`);
 
+    // Verify collection access
+    const testCount = await mongoDbService.collection.countDocuments({});
+    logger.info(`Total documents in collection: ${testCount}`);
+
     const pipeline = [
       {
         $match: {
           Timestamp: {
             $gte: today6AM,
             $lt: next6AM,
-          },
-        },
+          }
+        }
       },
       {
-        $addFields: {
-          originalHour: { $hour: '$Timestamp' },
-        },
+        $project: {
+          hour: { $hour: "$Timestamp" },
+          Result: 1
+        }
       },
       {
         $group: {
           _id: {
-            hour: '$originalHour',
-            result: '$Result',
+            hour: "$hour",
+            result: "$Result"
           },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $group: {
-          _id: '$_id.hour',
-          results: {
-            $push: {
-              result: '$_id.result',
-              count: '$count',
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          hour: '$_id',
-          okCount: {
-            $sum: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: '$results',
-                    as: 'r',
-                    cond: { $eq: ['$$r.result', 'OK'] },
-                  },
-                },
-                as: 'filtered',
-                in: '$$filtered.count',
-              },
-            },
-          },
-          ngCount: {
-            $sum: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: '$results',
-                    as: 'r',
-                    cond: { $eq: ['$$r.result', 'NG'] },
-                  },
-                },
-                as: 'filtered',
-                in: '$$filtered.count',
-              },
-            },
-          },
-        },
-      },
-      {
-        $addFields: {
-          total: { $add: ['$okCount', '$ngCount'] },
-        },
-      },
+          count: { $sum: 1 }
+        }
+      }
     ];
 
-    let hourlyData = await mongoDbService.collection.aggregate(pipeline).toArray();
+    const rawResults = await mongoDbService.collection.aggregate(pipeline).toArray();
+    logger.info('Raw results:', rawResults);
 
-    logger.info('Raw aggregation results:', hourlyData);
+    // Initialize all hours with zero counts
+    const hourlyData = Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      okCount: 0,
+      ngCount: 0,
+      total: 0
+    }));
 
-    // Create a full 24-hour array starting from 6 AM
-    const fullHourlyData = Array.from({ length: 24 }, (_, i) => {
-      const hour = (i + 6) % 24;
-      const existingData = hourlyData.find((data) => data.hour === hour) || {
-        hour,
-        okCount: 0,
-        ngCount: 0,
-        total: 0,
-      };
-      return {
-        ...existingData,
-        hour: hour, // Ensure hour is set correctly
-      };
+    // Update counts from actual results
+    rawResults.forEach(result => {
+      const hour = result._id.hour;
+      const hourData = hourlyData[hour];
+      
+      if (result._id.result === 'OK') {
+        hourData.okCount = result.count;
+      } else if (result._id.result === 'NG') {
+        hourData.ngCount = result.count;
+      }
+      hourData.total = hourData.okCount + hourData.ngCount;
     });
 
-    // Sort by the display order (6 AM to 5 AM next day)
-    fullHourlyData.sort((a, b) => {
+    // Sort by display order (6 AM to 5 AM next day)
+    hourlyData.sort((a, b) => {
       const hourA = a.hour < 6 ? a.hour + 24 : a.hour;
       const hourB = b.hour < 6 ? b.hour + 24 : b.hour;
       return hourA - hourB;
     });
 
-    return NextResponse.json({
-      hourlyData: fullHourlyData,
+    return NextResponse.json({ 
+      hourlyData,
       debug: {
         timeRange: {
           start: today6AM,
-          end: next6AM,
+          end: next6AM
         },
-        recordCount: await mongoDbService.collection.countDocuments({
-          Timestamp: {
-            $gte: today6AM,
-            $lt: next6AM,
-          },
-        }),
-      },
+        recordCount: rawResults.length,
+        totalDocuments: testCount
+      }
     });
+
   } catch (error) {
-    logger.error('Error fetching hourly counts:', error);
-    return NextResponse.json({ error: 'Failed to fetch hourly counts' }, { status: 500 });
+    logger.error('Error in hourly-counts API:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch hourly counts',
+        details: error.message 
+      }, 
+      { status: 500 }
+    );
   }
 }

@@ -2,114 +2,77 @@
 
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, Plus } from 'lucide-react';
 
 export function HourlyDataDisplayWidget() {
   const [hourlyData, setHourlyData] = useState([]);
-  const [currentHourData, setCurrentHourData] = useState({ okCount: 0, ngCount: 0 });
+  const [currentHourData, setCurrentHourData] = useState({ okCount: 0, ngCount: 0, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Function to get the start and end time for a specific hour
-  const getHourRange = (hour) => {
-    const now = new Date();
-    const start = new Date(now);
-
-    // Set to today 6 AM as the base
-    start.setHours(6, 0, 0, 0);
-
-    // Calculate hours since 6 AM
-    const hoursSince6AM = (hour - 6 + 24) % 24;
-
-    // Add the hours to the base time
-    start.setHours(start.getHours() + hoursSince6AM);
-
-    // If the hour is less than current 6 AM, it means it's for tomorrow
-    if (hour < 6) {
-      start.setDate(start.getDate() + 1);
-    }
-
-    const end = new Date(start);
-    end.setHours(end.getHours() + 1);
-
-    return { start, end };
-  };
-
-  // Function to format hour to 12-hour format
-  const formatHour = (hour) => {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    const nextHour = (hour + 1) % 24;
-    const nextHour12 = nextHour % 12 || 12;
-    const nextPeriod = nextHour >= 12 ? 'PM' : 'AM';
-
-    return `${hour12}${period} - ${nextHour12}${nextPeriod}`;
-  };
+  const [error, setError] = useState(null);
 
   // Function to fetch data for all hours
   const fetchAllHourlyData = async () => {
     try {
-      const now = new Date();
-      const today6AM = new Date(now);
-      today6AM.setHours(6, 0, 0, 0);
-
-      const tomorrow6AM = new Date(today6AM);
-      tomorrow6AM.setDate(tomorrow6AM.getDate() + 1);
-
+      setError(null);
       const response = await fetch('/api/reports/hourly-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          startDate: today6AM.toISOString(),
-          endDate: tomorrow6AM.toISOString(),
+          startDate: new Date().toISOString(),
+          endDate: new Date().toISOString(),
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to fetch counts');
-      const { hourlyData } = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to fetch data');
+      }
 
-      console.log('Raw API response:', hourlyData);
+      const { hourlyData: data } = await response.json();
+      console.log('Received hourly data:', data);
 
-      // Data is already in the correct format from the API
-      setHourlyData(hourlyData);
-      setIsLoading(false);
+      if (Array.isArray(data)) {
+        setHourlyData(data);
+      } else {
+        throw new Error('Invalid data format received');
+      }
     } catch (error) {
       console.error('Error fetching hourly data:', error);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
   };
 
   // Function to fetch current hour data
   const fetchCurrentHourData = async () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const start = new Date(now);
-    start.setMinutes(0, 0, 0);
-
-    const end = new Date(start);
-    end.setHours(end.getHours() + 1);
-
     try {
+      const now = new Date();
       const response = await fetch('/api/reports/hourly-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          startDate: start.toISOString(),
-          endDate: end.toISOString(),
+          startDate: now.toISOString(),
+          endDate: now.toISOString(),
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to fetch counts');
-      const { hourlyData } = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to fetch current hour data');
+      }
 
-      const currentHourData = hourlyData.find((data) => data.hour === currentHour) || {
+      const { hourlyData: data } = await response.json();
+      const currentHour = now.getHours();
+      const currentData = data.find((d) => d.hour === currentHour) || {
         hour: currentHour,
         okCount: 0,
         ngCount: 0,
         total: 0,
       };
 
-      setCurrentHourData(currentHourData);
+      setCurrentHourData(currentData);
     } catch (error) {
       console.error('Error fetching current hour data:', error);
     }
@@ -119,14 +82,11 @@ export function HourlyDataDisplayWidget() {
     const initialize = async () => {
       await fetchAllHourlyData();
       await fetchCurrentHourData();
-      setIsLoading(false);
     };
 
     initialize();
 
-    // Update current hour data every second
     const currentHourInterval = setInterval(fetchCurrentHourData, 1000);
-    // Update all data every 5 minutes
     const allDataInterval = setInterval(fetchAllHourlyData, 5 * 60 * 1000);
 
     return () => {
@@ -135,9 +95,19 @@ export function HourlyDataDisplayWidget() {
     };
   }, []);
 
+  // Format hour display (e.g., "6AM - 7AM")
+  const formatHourDisplay = (hour) => {
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    const nextHour = (hour + 1) % 24;
+    const nextHour12 = nextHour % 12 || 12;
+    const nextPeriod = nextHour >= 12 ? 'PM' : 'AM';
+    return `${hour12}${period} - ${nextHour12}${nextPeriod}`;
+  };
+
   return (
     <>
-      {/* Toggle Button - Only show when panel is not expanded */}
+      {/* Toggle Button */}
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
@@ -149,11 +119,9 @@ export function HourlyDataDisplayWidget() {
       )}
 
       {/* Main Panel */}
-      {(isExpanded || isLoading) && (
+      {isExpanded && (
         <div className="fixed left-0 top-1/2 -translate-y-1/2 flex items-start z-40">
-          <div
-            className={`bg-white rounded-r-lg shadow-lg transition-all duration-300 ease-in-out w-[400px]`}
-          >
+          <div className="bg-white rounded-r-lg shadow-lg transition-all duration-300 ease-in-out w-[400px]">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Hourly Production Data</h3>
@@ -165,8 +133,12 @@ export function HourlyDataDisplayWidget() {
                 </button>
               </div>
 
+              {error && <div className="p-4 mb-4 text-red-500 bg-red-50 rounded-lg">{error}</div>}
+
               {isLoading ? (
-                <div className="p-4 text-center">Loading...</div>
+                <div className="p-4 text-center">
+                  <div className="animate-pulse">Loading data...</div>
+                </div>
               ) : (
                 <>
                   {/* Current Hour Highlight */}
@@ -199,7 +171,9 @@ export function HourlyDataDisplayWidget() {
                         className="p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">{formatHour(data.hour)}</span>
+                          <span className="text-sm font-medium">
+                            {formatHourDisplay(data.hour)}
+                          </span>
                           <div className="flex gap-3">
                             <span className="text-sm text-green-600">OK: {data.okCount}</span>
                             <span className="text-sm text-red-600">NG: {data.ngCount}</span>
