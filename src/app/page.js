@@ -488,7 +488,7 @@ function Page() {
       </div>
 
       {/* Add the HourlyDataDisplayWidget at the end */}
-      <HourlyDataDisplayWidget />
+      {/* <HourlyDataDisplayWidget /> */}
     </div>
   );
 }
