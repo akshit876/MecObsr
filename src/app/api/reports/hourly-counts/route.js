@@ -5,24 +5,9 @@ import logger from '../../../../../logger';
 export async function POST(request) {
   try {
     // First, ensure MongoDB is connected
-    try {
-      if (!mongoDbService.collection) {
-        logger.info('Connecting to MongoDB...');
-        await mongoDbService.connect('main-data', 'records');
-      }
-
-      if (!mongoDbService.collection) {
-        throw new Error('Failed to establish MongoDB connection');
-      }
-    } catch (connError) {
-      logger.error('MongoDB connection error:', connError);
-      return NextResponse.json(
-        {
-          error: 'Database connection failed',
-          details: connError.message,
-        },
-        { status: 500 },
-      );
+    if (!mongoDbService.collection) {
+      logger.info('Connecting to MongoDB...');
+      await mongoDbService.connect('main-data', 'records');
     }
 
     // Get current date at midnight
@@ -44,6 +29,24 @@ export async function POST(request) {
 
     logger.info(`Querying from ${today6AM.toISOString()} to ${next6AM.toISOString()}`);
 
+    // First get a sample to verify the actual time of records
+    const sample = await mongoDbService.collection
+      .find({
+        Timestamp: {
+          $gte: today6AM,
+          $lt: next6AM,
+        },
+      })
+      .sort({ Timestamp: 1 })
+      .limit(1)
+      .toArray();
+
+    if (sample.length > 0) {
+      logger.info(
+        `Sample record timestamp: ${sample[0].Timestamp}, Hour: ${new Date(sample[0].Timestamp).getHours()}`,
+      );
+    }
+
     const pipeline = [
       {
         $match: {
@@ -55,23 +58,18 @@ export async function POST(request) {
       },
       {
         $addFields: {
-          localHour: { $hour: '$Timestamp' },
-          adjustedHour: {
-            $cond: {
-              if: { $lt: [{ $hour: '$Timestamp' }, 6] },
-              then: { $add: [{ $hour: '$Timestamp' }, 24] },
-              else: { $hour: '$Timestamp' },
-            },
-          },
+          recordHour: { $hour: '$Timestamp' },
         },
       },
       {
         $group: {
           _id: {
-            hour: '$localHour',
+            hour: '$recordHour',
             result: '$Result',
           },
           count: { $sum: 1 },
+          firstRecord: { $first: '$Timestamp' },
+          lastRecord: { $last: '$Timestamp' },
         },
       },
       {
@@ -83,11 +81,15 @@ export async function POST(request) {
               count: '$count',
             },
           },
+          firstRecord: { $first: '$firstRecord' },
+          lastRecord: { $last: '$lastRecord' },
         },
       },
       {
         $project: {
           hour: '$_id',
+          firstRecord: 1,
+          lastRecord: 1,
           okCount: {
             $sum: {
               $map: {
@@ -125,27 +127,43 @@ export async function POST(request) {
           total: { $add: ['$okCount', '$ngCount'] },
         },
       },
+      {
+        $sort: { hour: 1 },
+      },
     ];
 
     const rawResults = await mongoDbService.collection.aggregate(pipeline).toArray();
-    logger.info('Raw aggregation results:', rawResults);
 
-    // Create a map for the results
-    const resultsMap = new Map(rawResults.map((r) => [r.hour, r]));
-
-    // Create the full 24-hour array starting from 6 AM
-    const hourlyData = Array.from({ length: 24 }, (_, index) => {
-      const hour = (index + 6) % 24; // Convert index to hour (6 AM to 5 AM)
-      const data = resultsMap.get(hour) || {
-        hour,
-        okCount: 0,
-        ngCount: 0,
-        total: 0,
-      };
-      return data;
+    // Log the raw results for debugging
+    rawResults.forEach((result) => {
+      logger.info(
+        `Hour ${result.hour}: OK=${result.okCount}, NG=${result.ngCount}, Total=${result.total}`,
+      );
+      logger.info(`First record: ${result.firstRecord}, Last record: ${result.lastRecord}`);
     });
 
-    logger.info('Processed hourly data:', hourlyData);
+    // Initialize the 24-hour array with zeros
+    const hourlyData = Array.from({ length: 24 }, (_, index) => {
+      const hour = (index + 6) % 24; // Start from 6 AM
+      const result = rawResults.find((r) => r.hour === hour);
+
+      if (result) {
+        logger.info(`Found data for hour ${hour}: OK=${result.okCount}, NG=${result.ngCount}`);
+      }
+
+      return {
+        hour,
+        okCount: result?.okCount || 0,
+        ngCount: result?.ngCount || 0,
+        total: result?.total || 0,
+        timeRange: result
+          ? {
+              start: result.firstRecord,
+              end: result.lastRecord,
+            }
+          : null,
+      };
+    });
 
     return NextResponse.json({
       hourlyData,
@@ -155,6 +173,15 @@ export async function POST(request) {
           end: next6AM,
         },
         recordCount: rawResults.length,
+        sampleData: sample[0] || null,
+        rawResults: rawResults.map((r) => ({
+          hour: r.hour,
+          total: r.total,
+          timeRange: {
+            start: r.firstRecord,
+            end: r.lastRecord,
+          },
+        })),
       },
     });
   } catch (error) {
