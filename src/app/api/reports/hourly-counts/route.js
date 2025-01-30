@@ -19,23 +19,22 @@ export async function POST(request) {
       await mongoDbService.connect('main-data', 'records');
     }
 
-    // First, let's verify we have data in the time range
-    const sampleCount = await mongoDbService.collection.countDocuments({
-      Timestamp: {
-        $gte: startDateTime,
-        $lt: endDateTime,
-      },
-    });
+    // Get today's 6 AM
+    const today6AM = new Date();
+    today6AM.setHours(6, 0, 0, 0);
 
-    logger.info(`Found ${sampleCount} records in the time range`);
+    // Get tomorrow's 6 AM
+    const tomorrow6AM = new Date(today6AM);
+    tomorrow6AM.setDate(tomorrow6AM.getDate() + 1);
 
-    // Aggregate counts from MongoDB with simpler pipeline
+    logger.info(`Querying from ${today6AM.toISOString()} to ${tomorrow6AM.toISOString()}`);
+
     const pipeline = [
       {
         $match: {
           Timestamp: {
-            $gte: startDateTime,
-            $lt: endDateTime,
+            $gte: today6AM,
+            $lt: tomorrow6AM,
           },
         },
       },
@@ -109,12 +108,9 @@ export async function POST(request) {
 
     let hourlyData = await mongoDbService.collection.aggregate(pipeline).toArray();
 
-    // Log raw aggregation results
-    logger.info(`Raw aggregation results: ${JSON.stringify(hourlyData)}`);
-
-    // Create a full 24-hour array with zeros for missing hours
+    // Create a full 24-hour array starting from 6 AM
     const fullHourlyData = Array.from({ length: 24 }, (_, i) => {
-      const hour = i;
+      const hour = (i + 6) % 24; // Start from 6 AM
       const existingData = hourlyData.find((data) => data.hour === hour) || {
         hour,
         okCount: 0,
@@ -124,16 +120,19 @@ export async function POST(request) {
       return existingData;
     });
 
-    logger.info(`Returning data with ${fullHourlyData.length} hours`);
-
     return NextResponse.json({
       hourlyData: fullHourlyData,
       debug: {
         timeRange: {
-          start: startDateTime,
-          end: endDateTime,
+          start: today6AM,
+          end: tomorrow6AM,
         },
-        recordCount: sampleCount,
+        recordCount: await mongoDbService.collection.countDocuments({
+          Timestamp: {
+            $gte: today6AM,
+            $lt: tomorrow6AM,
+          },
+        }),
       },
     });
   } catch (error) {
