@@ -39,15 +39,21 @@ export async function POST(request) {
         },
       },
       {
-        $project: {
+        $addFields: {
           hour: { $hour: '$Timestamp' },
-          Result: 1,
+          adjustedHour: {
+            $cond: {
+              if: { $lt: [{ $hour: '$Timestamp' }, 6] },
+              then: { $add: [{ $hour: '$Timestamp' }, 24] },
+              else: { $hour: '$Timestamp' },
+            },
+          },
         },
       },
       {
         $group: {
           _id: {
-            hour: '$hour',
+            hour: '$adjustedHour',
             result: '$Result',
           },
           count: { $sum: 1 },
@@ -66,7 +72,13 @@ export async function POST(request) {
       },
       {
         $project: {
-          hour: '$_id',
+          hour: {
+            $cond: {
+              if: { $gte: ['$_id', 24] },
+              then: { $subtract: ['$_id', 24] },
+              else: '$_id',
+            },
+          },
           okCount: {
             $sum: {
               $map: {
@@ -104,13 +116,16 @@ export async function POST(request) {
           total: { $add: ['$okCount', '$ngCount'] },
         },
       },
+      {
+        $sort: { hour: 1 },
+      },
     ];
 
     let hourlyData = await mongoDbService.collection.aggregate(pipeline).toArray();
 
     // Create a full 24-hour array starting from 6 AM
     const fullHourlyData = Array.from({ length: 24 }, (_, i) => {
-      const hour = (i + 6) % 24; // Start from 6 AM
+      const hour = (i + 6) % 24;
       const existingData = hourlyData.find((data) => data.hour === hour) || {
         hour,
         okCount: 0,
