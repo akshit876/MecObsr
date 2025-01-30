@@ -16,6 +16,7 @@ import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
+import { HourlyDataDisplayWidget } from '@/components/HourlyDataDisplayWidget';
 
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
@@ -485,6 +486,9 @@ function Page() {
           )}
         </div>
       </div>
+
+      {/* Add the HourlyDataDisplayWidget at the end */}
+      <HourlyDataDisplayWidget />
     </div>
   );
 }
