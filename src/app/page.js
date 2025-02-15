@@ -215,6 +215,7 @@ function Page() {
           Grade: grade,
           Result: row.Result || '',
           User: row.User || '',
+          remark: row.remark || '',
         };
       });
 
