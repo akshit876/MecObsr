@@ -3,14 +3,14 @@ import { toast } from 'react-toastify';
 // import socket from '../socket'; // Adjust path as needed
 
 const toastConfig = {
-  position: "top-center",
-  className: "machine-event-toast",
+  position: 'top-center',
+  className: 'machine-event-toast',
   autoClose: 3000,
   style: {
     fontSize: '1.25rem',
     fontWeight: 'bold',
     textAlign: 'center',
-  }
+  },
 };
 
 export const useMachineEvents = (socket) => {
@@ -23,7 +23,7 @@ export const useMachineEvents = (socket) => {
     const eventHandlers = {
       'part-present': (data) => {
         if (!activeToasts.current['part-present']) {
-          const toastId = toast(data.message || "Part not present", {
+          const toastId = toast(data.message || 'Part not present', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -31,14 +31,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['part-present'];
-            }
+            },
           });
           activeToasts.current['part-present'] = toastId;
         }
       },
       'emergency-button': (data) => {
         if (!activeToasts.current['emergency-button']) {
-          const toastId = toast(data.message || "Emergency push button pressed", {
+          const toastId = toast(data.message || 'Emergency push button pressed', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -46,14 +46,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['emergency-button'];
-            }
+            },
           });
           activeToasts.current['emergency-button'] = toastId;
         }
       },
       'safety-curtain': (data) => {
         if (!activeToasts.current['safety-curtain']) {
-          const toastId = toast(data.message || "Safety curtain error", {
+          const toastId = toast(data.message || 'Safety curtain error', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -61,14 +61,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['safety-curtain'];
-            }
+            },
           });
           activeToasts.current['safety-curtain'] = toastId;
         }
       },
       'servo-position': (data) => {
         if (!activeToasts.current['servo-position']) {
-          const toastId = toast(data.message || "Servo not home position", {
+          const toastId = toast(data.message || 'Servo not home position', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -76,14 +76,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['servo-position'];
-            }
+            },
           });
           activeToasts.current['servo-position'] = toastId;
         }
       },
       'reject-bin': (data) => {
         if (!activeToasts.current['reject-bin']) {
-          const toastId = toast(data.message || "Put the part in the rejection bin", {
+          const toastId = toast(data.message || 'Put the part in the rejection bin', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -91,14 +91,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['reject-bin'];
-            }
+            },
           });
           activeToasts.current['reject-bin'] = toastId;
         }
       },
-      'ftp': (data) => {
+      ftp: (data) => {
         if (!activeToasts.current['ftp']) {
-          const toastId = toast(data.message || "⚠️ FTP CONNECTION ERROR ⚠️", {
+          const toastId = toast(data.message || '⚠️ FTP CONNECTION ERROR ⚠️', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -112,9 +112,28 @@ export const useMachineEvents = (socket) => {
             icon: '🚨',
             onClose: () => {
               delete activeToasts.current['ftp'];
-            }
+            },
           });
           activeToasts.current['ftp'] = toastId;
+        }
+      },
+      image_save_error: (data) => {
+        if (!activeToasts.current['image_save_error']) {
+          const toastId = toast(data.message || 'Failed to save image', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626', // Red for errors
+              backgroundColor: '#fef2f2', // Light red background
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000, // Stays longer than regular toasts
+            icon: '❌',
+            onClose: () => {
+              delete activeToasts.current['image_save_error'];
+            },
+          });
+          activeToasts.current['image_save_error'] = toastId;
         }
       },
     };
@@ -131,4 +150,4 @@ export const useMachineEvents = (socket) => {
       });
     };
   }, [socket]);
-}; 
+};
