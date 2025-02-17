@@ -136,6 +136,25 @@ export const useMachineEvents = (socket) => {
           activeToasts.current['image_save_error'] = toastId;
         }
       },
+      validation_error: (data) => {
+        if (!activeToasts.current['validation_error']) {
+          const toastId = toast(data.message || 'Validation Error', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626', // Red for errors
+              backgroundColor: '#fef2f2', // Light red background
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000, // Stays longer than regular toasts
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['validation_error'];
+            },
+          });
+          activeToasts.current['validation_error'] = toastId;
+        }
+      },
     };
 
     // Register all event handlers
