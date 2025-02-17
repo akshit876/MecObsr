@@ -103,29 +103,11 @@ function Page() {
     if (!socket) return;
 
     const handleMarkingData = (data) => {
-      if (markingTimeoutRef.current) {
-        clearTimeout(markingTimeoutRef.current);
-      }
-
       setMarkingData(data.data);
-
-      // Clear data after 300ms
-      markingTimeoutRef.current = setTimeout(() => {
-        setMarkingData('');
-      }, 10 * 1000);
     };
 
     const handleScannerData = (data) => {
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
-      }
-
       setScannerData(data.data);
-
-      // Clear data after 300ms
-      scannerTimeoutRef.current = setTimeout(() => {
-        setScannerData('');
-      }, 5 * 1000);
     };
 
     const handleFirstScanOk = (data) => {
@@ -147,21 +129,12 @@ function Page() {
     socket.on('first_scan_ok', handleFirstScanOk);
     socket.on('validation_error', handleValidationError);
 
-    // Cleanup function
+    // Cleanup function - remove timeout refs and clearTimeout calls
     return () => {
-      // Clear socket listeners
       socket.off('marking_data', handleMarkingData);
       socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
       socket.off('validation_error', handleValidationError);
-
-      // Clear any pending timeouts
-      if (markingTimeoutRef.current) {
-        clearTimeout(markingTimeoutRef.current);
-      }
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
-      }
     };
   }, [socket]);
 
@@ -446,61 +419,4 @@ function Page() {
             ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
           >
             <span
-              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {scannerData || 'Waiting for data...'}
-            </span>
-          </div>
-        </div>
-
-        {/* Control Buttons - Fixed layout */}
-        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
-          <div className="flex gap-1.5">
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleScannerTrigger}
-            >
-              Scanner
-            </Button>
-            {/* <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleMarkOn}
-            >
-              Mark
-            </Button> */}
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleLigt}
-            >
-              Light
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Table section remains unchanged */}
-      <div className="flex-grow rounded-xl bg-white shadow-sm">
-        <div className="p-2.5 border-b border-gray-200/60 bg-white/60">
-          <h2 className="text-sm font-semibold text-gray-800">Production History</h2>
-        </div>
-        <div className="flex-grow p-2 min-h-0">
-          {isTableLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="h-full bg-white/80 rounded-lg border border-gray-200/60 shadow-sm">
-              <StyledTable2 data={csvData?.data || []} />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Add the HourlyDataDisplayWidget at the end */}
-      {/* <HourlyDataDisplayWidget /> */}
-    </div>
-  );
-}
-
-export default Page;
+              className={`
