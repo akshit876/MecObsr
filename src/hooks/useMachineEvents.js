@@ -155,6 +155,158 @@ export const useMachineEvents = (socket) => {
           activeToasts.current['validation_error'] = toastId;
         }
       },
+      'tap-missing1': (data) => {
+        if (!activeToasts.current['tap-missing1']) {
+          const toastId = toast(data.message || 'Tap missing 1...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing1'];
+            },
+          });
+          activeToasts.current['tap-missing1'] = toastId;
+        }
+      },
+      'tap-missing2': (data) => {
+        if (!activeToasts.current['tap-missing2']) {
+          const toastId = toast(data.message || 'Tap missing 2...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing2'];
+            },
+          });
+          activeToasts.current['tap-missing2'] = toastId;
+        }
+      },
+      'tap-missing3': (data) => {
+        if (!activeToasts.current['tap-missing3']) {
+          const toastId = toast(data.message || 'Tap missing 3...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing3'];
+            },
+          });
+          activeToasts.current['tap-missing3'] = toastId;
+        }
+      },
+      'tap-missing4': (data) => {
+        if (!activeToasts.current['tap-missing4']) {
+          const toastId = toast(data.message || 'Tap missing 4...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing4'];
+            },
+          });
+          activeToasts.current['tap-missing4'] = toastId;
+        }
+      },
+      'tap-missing5': (data) => {
+        if (!activeToasts.current['tap-missing5']) {
+          const toastId = toast(data.message || 'Tap missing 5...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing5'];
+            },
+          });
+          activeToasts.current['tap-missing5'] = toastId;
+        }
+      },
+      'tap-missing6': (data) => {
+        if (!activeToasts.current['tap-missing6']) {
+          const toastId = toast(data.message || 'Tap missing 6...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing6'];
+            },
+          });
+          activeToasts.current['tap-missing6'] = toastId;
+        }
+      },
+      'tap-missing7': (data) => {
+        if (!activeToasts.current['tap-missing7']) {
+          const toastId = toast(data.message || 'Tap missing 7...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing7'];
+            },
+          });
+          activeToasts.current['tap-missing7'] = toastId;
+        }
+      },
+      'tap-missing8': (data) => {
+        if (!activeToasts.current['tap-missing8']) {
+          const toastId = toast(data.message || 'Tap missing 8...', {
+            ...toastConfig,
+            style: {
+              ...toastConfig.style,
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              border: '2px solid #dc2626',
+            },
+            autoClose: 5000,
+            icon: '⚠️',
+            onClose: () => {
+              delete activeToasts.current['tap-missing8'];
+            },
+          });
+          activeToasts.current['tap-missing8'] = toastId;
+        }
+      },
     };
 
     // Register all event handlers
