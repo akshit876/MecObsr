@@ -135,9 +135,17 @@ function Page() {
       });
     };
 
+    const handleValidationError = (data) => {
+      toast.error('Validation Error', {
+        description: data.details,
+        duration: 5000,
+      });
+    };
+
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
     socket.on('first_scan_ok', handleFirstScanOk);
+    socket.on('validation_error', handleValidationError);
 
     // Cleanup function
     return () => {
@@ -145,6 +153,7 @@ function Page() {
       socket.off('marking_data', handleMarkingData);
       socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
+      socket.off('validation_error', handleValidationError);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
