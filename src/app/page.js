@@ -184,12 +184,12 @@ function Page() {
       // Format the data as per the requirements
       const formattedData = data.map((row, index) => {
         let scannerDataWithoutGrade = row.ScannerData || '';
-        let grade = '';
+        // let grade = '';
 
         // Handle N/A case first
         if (row.ScannerData === 'N/A') {
           scannerDataWithoutGrade = 'N/A';
-          grade = 'N/A';
+          // grade = 'N/A';
         }
         // Only process grade if Result is not NG and ScannerData is not N/A
         else if (row.ScannerData !== 'NG' && row.ScannerData) {
@@ -202,7 +202,7 @@ function Page() {
           Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
           MarkingData: row.MarkingData || '',
           ScannerData: scannerDataWithoutGrade,
-          Grade: grade,
+          // Grade: grade,
           Result: row.Result || '',
           User: row.User || '',
           remark: row.remark || '',
