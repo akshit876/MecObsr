@@ -193,7 +193,7 @@ function Page() {
         }
         // Only process grade if Result is not NG and ScannerData is not N/A
         else if (row.ScannerData !== 'NG' && row.ScannerData) {
-          grade = row.ScannerData.slice(-1);
+          // grade = row.ScannerData.slice(-1);
           scannerDataWithoutGrade = row.ScannerData.slice(0, -1);
         }
 
