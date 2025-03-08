@@ -85,6 +85,7 @@ export const useMachineEvents = (socket) => {
         if (!activeToasts.current['reject-bin']) {
           const toastId = toast(data.message || 'Put the part in the rejection bin', {
             ...toastConfig,
+            position: 'top-right', // Changed position to top-right
             style: {
               ...toastConfig.style,
               color: '#f59e0b', // Amber/orange for warnings
