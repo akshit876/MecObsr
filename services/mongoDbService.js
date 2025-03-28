@@ -57,9 +57,13 @@ class MongoDBService {
 
   async getRecordsByDateRange(startDate, endDate) {
     try {
+      // Create end of day timestamp for the endDate
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
       return await this.collection
         .find({
-          Timestamp: { $gte: new Date(startDate), $lte: new Date(endDate) },
+          Timestamp: { $gte: new Date(startDate), $lte: endOfDay },
         })
         .toArray();
     } catch (error) {

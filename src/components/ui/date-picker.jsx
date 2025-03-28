@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-export function DatePicker({ selected, onSelect, placeholder }) {
+export function DatePicker({ selected, onChange, placeholder }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -17,7 +17,7 @@ export function DatePicker({ selected, onSelect, placeholder }) {
           variant={'outline'}
           className={cn(
             'w-[240px] justify-start text-left font-normal',
-            !selected && 'text-muted-foreground',
+            !selected ? 'text-muted-foreground' : 'text-black',
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -31,7 +31,7 @@ export function DatePicker({ selected, onSelect, placeholder }) {
           onSelect={(date) => {
             console.log(date);
             if (date) {
-              onSelect(date); // Call the onSelect function with the selected date
+              onChange(date);
             }
           }}
           initialFocus
