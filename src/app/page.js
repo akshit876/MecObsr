@@ -285,14 +285,17 @@ function Page() {
   return (
     <div className="h-screen w-full p-4 flex flex-col gap-4 bg-slate-50">
       {/* Top Cards - Modern design */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
+        {/* Current Model - Takes full height */}
         <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
           <p className="text-sm text-gray-300 mb-1">Current Model</p>
           <h3 className="text-xl font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
         </div>
+
+        {/* Date Selection */}
         <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
+          <div className="space-y-3">
+            <div>
               <p className="text-sm text-gray-300 mb-1">Start Date</p>
               <DatePicker
                 selected={startDate}
@@ -301,7 +304,7 @@ function Page() {
                 className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
             </div>
-            <div className="flex-1">
+            <div>
               <p className="text-sm text-gray-300 mb-1">End Date</p>
               <DatePicker
                 selected={endDate}
@@ -310,17 +313,28 @@ function Page() {
                 className="w-full h-9 text-sm px-3 rounded-lg bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
             </div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-300 mb-1">Export</p>
-              <Button
-                size="default"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-sm h-9 rounded-lg"
-                onClick={handleDownloadExcel}
-                disabled={isLoading || !startDate || !endDate}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Download'}
-              </Button>
-            </div>
+          </div>
+        </div>
+
+        {/* Export Section */}
+        <div className="p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+          <div className="h-full flex flex-col justify-center">
+            <p className="text-sm text-gray-300 mb-3">Export Report</p>
+            <Button
+              size="default"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-sm h-10 rounded-lg font-medium"
+              onClick={handleDownloadExcel}
+              disabled={isLoading || !startDate || !endDate}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                'Download Excel'
+              )}
+            </Button>
           </div>
         </div>
       </div>

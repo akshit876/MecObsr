@@ -50,7 +50,7 @@ const createColumns = (data) => [
       const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
       return <div className="font-medium text-center">{pieceNumber}</div>;
     },
-    size: 60,
+    size: 50,
   }),
 
   columnHelper.accessor('MarkingData', {
@@ -69,28 +69,34 @@ const createColumns = (data) => [
         </div>
       );
     },
-    size: 120,
+    size: 100,
   }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
     cell: (info) => (
-      <div className="font-bold text-gray-700 text-xs break-all leading-tight max-w-[180px]">
+      <div
+        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
+        title={info.getValue()}
+      >
         {info.getValue()}
       </div>
     ),
-    size: 180,
+    size: 220,
     id: 'markingDataContent',
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
     cell: (info) => (
-      <div className="font-bold text-gray-700 text-xs break-all leading-tight max-w-[180px]">
+      <div
+        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
+        title={info.getValue()}
+      >
         {info.getValue()}
       </div>
     ),
-    size: 180,
+    size: 220,
   }),
 
   columnHelper.accessor('Result', {
@@ -105,13 +111,13 @@ const createColumns = (data) => [
             : '';
       return <span className={styles}>{result}</span>;
     },
-    size: 80,
+    size: 70,
   }),
 
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
     cell: (info) => (
-      <div className="text-gray-600 text-xs leading-tight">
+      <div className="text-gray-600 text-xs leading-tight whitespace-nowrap">
         {new Date(info.getValue()).toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -121,7 +127,7 @@ const createColumns = (data) => [
         })}
       </div>
     ),
-    size: 120,
+    size: 100,
   }),
 ];
 
