@@ -54,21 +54,35 @@ const createColumns = (data) => [
   }),
 
   columnHelper.accessor('MarkingData', {
+    header: 'Serial No/Model No',
+    cell: (info) => {
+      const serialNumber = info.row.original.SerialNumber;
+      const modelNumber = info.row.original.ModelNumber || 'N/A';
+      return (
+        <div className="space-y-1">
+          <div className="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-1 rounded border">
+            SN: {serialNumber}
+          </div>
+          <div className="text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-200">
+            Model: {modelNumber}
+          </div>
+        </div>
+      );
+    },
+    size: 180,
+  }),
+
+  columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
     cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
     size: 250,
+    id: 'markingDataContent',
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
     cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
     size: 250,
-  }),
-
-  columnHelper.accessor('ModelNumber', {
-    header: 'Model Number',
-    cell: (info) => <div className="font-medium text-gray-700">{info.getValue() || 'N/A'}</div>,
-    size: 150,
   }),
 
   columnHelper.accessor('Result', {
