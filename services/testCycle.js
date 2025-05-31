@@ -31,18 +31,36 @@ async function saveToMongoDB({ io, serialNumber, markingData, scannerData, resul
   const now = new Date();
   const timestamp = format(now, 'yyyy-MM-dd HH:mm:ss');
 
+  // Get current model number from configuration
+  let modelNumber = 'N/A';
+  try {
+    const mainDataDB = mongoDbService.db.useDb('main-data');
+    const currentConfig = await mainDataDB.collection('config').findOne({}, { sort: { _id: -1 } });
+    if (currentConfig && currentConfig.currentModelConfig) {
+      const modelField = currentConfig.currentModelConfig.fields.find(
+        (field) => field.fieldName === 'Model Number',
+      );
+      modelNumber = modelField ? modelField.value : 'N/A';
+    }
+  } catch (error) {
+    logger.error('Error fetching current model number:', error);
+    // Continue with 'N/A' as fallback
+  }
+
   const data = {
     Timestamp: new Date(timestamp),
     SerialNumber: serialNumber,
     MarkingData: markingData,
     ScannerData: scannerData,
+    ModelNumber: modelNumber,
     Result: result ? 'OK' : 'NG',
+    User: 'Unknown',
   };
 
   try {
     // Save to MongoDB
     await mongoDbService.insertRecord(data);
-    logger.info(`Data saved to MongoDB`);
+    logger.info(`Data saved to MongoDB with ModelNumber: ${modelNumber}`);
 
     if (io) {
       mongoDbService.sendMongoDbDataToClient(io, 'main-data', 'records');

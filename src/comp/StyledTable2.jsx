@@ -12,23 +12,63 @@ import React from 'react';
 
 const columnHelper = createColumnHelper();
 
-const columns = [
+// Helper function to calculate piece number based on timestamp
+const calculatePieceNumber = (timestamp, data, index) => {
+  const recordDate = new Date(timestamp);
+  const startOfDay = new Date(recordDate);
+  startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
+
+  // If the record is before 6 AM, consider it part of previous day
+  if (recordDate.getHours() < 6) {
+    startOfDay.setDate(startOfDay.getDate() - 1);
+  }
+
+  // Filter records from the same day (from 6 AM onwards)
+  const sameDayRecords = data.filter((record) => {
+    const recordTimestamp = new Date(record.Timestamp);
+    const recordStartOfDay = new Date(recordTimestamp);
+    recordStartOfDay.setHours(6, 0, 0, 0);
+
+    if (recordTimestamp.getHours() < 6) {
+      recordStartOfDay.setDate(recordStartOfDay.getDate() - 1);
+    }
+
+    return recordStartOfDay.getTime() === startOfDay.getTime() && recordTimestamp >= startOfDay;
+  });
+
+  // Sort by timestamp and find the position
+  sameDayRecords.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
+  const pieceIndex = sameDayRecords.findIndex((record) => record.Timestamp === timestamp);
+
+  return pieceIndex + 1;
+};
+
+const createColumns = (data) => [
   columnHelper.accessor('SerialNumber', {
-    header: 'SNO',
-    cell: (info) => <div className="font-medium">{info.getValue()}</div>,
-    size: 150,
+    header: 'Piece #',
+    cell: (info) => {
+      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
+      return <div className="font-medium">{pieceNumber}</div>;
+    },
+    size: 100,
   }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
     cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
-    size: 200,
+    size: 250,
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
     cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
-    size: 200,
+    size: 250,
+  }),
+
+  columnHelper.accessor('ModelNumber', {
+    header: 'Model Number',
+    cell: (info) => <div className="font-medium text-gray-700">{info.getValue() || 'N/A'}</div>,
+    size: 150,
   }),
 
   columnHelper.accessor('Result', {
@@ -44,12 +84,6 @@ const columns = [
       return <span className={styles}>{result}</span>;
     },
     size: 100,
-  }),
-
-  columnHelper.accessor('User', {
-    header: 'User',
-    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
-    size: 150,
   }),
 
   columnHelper.accessor('Timestamp', {
@@ -84,7 +118,7 @@ const StyledTable = ({ data = [] }) => {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: createColumns(data),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,

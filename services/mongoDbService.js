@@ -128,8 +128,10 @@ class MongoDBService {
         SerialNumber: item?.SerialNumber,
         MarkingData: item?.MarkingData,
         ScannerData: item?.ScannerData,
-        Shift: item?.Shift,
+        ModelNumber: item?.ModelNumber,
         Result: item?.Result,
+        User: item?.User,
+        Shift: item?.Shift,
         Date: item?.Date,
       }));
 

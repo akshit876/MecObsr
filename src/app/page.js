@@ -17,6 +17,37 @@ import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
 
+// Helper function to calculate piece number based on timestamp
+const calculatePieceNumber = (timestamp, data) => {
+  const recordDate = new Date(timestamp);
+  const startOfDay = new Date(recordDate);
+  startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
+
+  // If the record is before 6 AM, consider it part of previous day
+  if (recordDate.getHours() < 6) {
+    startOfDay.setDate(startOfDay.getDate() - 1);
+  }
+
+  // Filter records from the same day (from 6 AM onwards)
+  const sameDayRecords = data.filter((record) => {
+    const recordTimestamp = new Date(record.Timestamp);
+    const recordStartOfDay = new Date(recordTimestamp);
+    recordStartOfDay.setHours(6, 0, 0, 0);
+
+    if (recordTimestamp.getHours() < 6) {
+      recordStartOfDay.setDate(recordStartOfDay.getDate() - 1);
+    }
+
+    return recordStartOfDay.getTime() === startOfDay.getTime() && recordTimestamp >= startOfDay;
+  });
+
+  // Sort by timestamp and find the position
+  sameDayRecords.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
+  const pieceIndex = sameDayRecords.findIndex((record) => record.Timestamp === timestamp);
+
+  return pieceIndex + 1;
+};
+
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
   const [startDate, setStartDate] = useState('');
@@ -27,7 +58,7 @@ function Page() {
   const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
 
-  const { session, status } = useProtectedRoute();
+  const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
 
   // Move useRef declarations to component level
@@ -144,14 +175,14 @@ function Page() {
         return;
       }
 
-      // Format the data as per the requirements
-      const formattedData = data.map((row, index) => ({
-        SerialNumber: index + 1,
+      // Format the data as per the requirements with piece number calculation
+      const formattedData = data.map((row) => ({
+        'Piece #': calculatePieceNumber(row.Timestamp, data),
         Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
         MarkingData: row.MarkingData,
         ScannerData: row.ScannerData,
+        ModelNumber: row.ModelNumber || 'N/A',
         Result: row.Result,
-        User: row.User,
       }));
 
       // Create a worksheet from the formatted data
