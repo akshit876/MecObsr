@@ -8,11 +8,11 @@ import { useCsvData } from '../../hooks/useSocket';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useRouter } from 'next/navigation';
-import { useProtectedRoute } from '../../hooks/useProtectedRoute';
+// import { useRouter } from 'next/navigation';
+// import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import useModelStore from '@/store/modelStore';
+// import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
@@ -53,12 +53,12 @@ function Page() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
-  const { selectedModel, modelFields } = useModelStore();
+  // const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
 
-  const { status } = useProtectedRoute();
+  // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
 
   // Move useRef declarations to component level

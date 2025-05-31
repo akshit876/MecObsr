@@ -60,10 +60,10 @@ const createColumns = (data) => [
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
         <div className="space-y-1">
-          <div className="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-1 rounded border">
+          <div className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-1 rounded border border-gray-200">
             SN: {serialNumber}
           </div>
-          <div className="text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-200">
+          <div className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200">
             Model: {modelNumber}
           </div>
         </div>

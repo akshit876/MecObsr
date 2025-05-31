@@ -27,25 +27,16 @@ const __dirname = dirname(__filename);
 
 const comPort = new ComPortService();
 
-async function saveToMongoDB({ io, serialNumber, markingData, scannerData, result }) {
+async function saveToMongoDB({
+  io,
+  serialNumber,
+  markingData,
+  scannerData,
+  result,
+  modelNumber = 'N/A',
+}) {
   const now = new Date();
   const timestamp = format(now, 'yyyy-MM-dd HH:mm:ss');
-
-  // Get current model number from configuration
-  let modelNumber = 'N/A';
-  try {
-    const mainDataDB = mongoDbService.db.useDb('main-data');
-    const currentConfig = await mainDataDB.collection('config').findOne({}, { sort: { _id: -1 } });
-    if (currentConfig && currentConfig.currentModelConfig) {
-      const modelField = currentConfig.currentModelConfig.fields.find(
-        (field) => field.fieldName === 'Model Number',
-      );
-      modelNumber = modelField ? modelField.value : 'N/A';
-    }
-  } catch (error) {
-    logger.error('Error fetching current model number:', error);
-    // Continue with 'N/A' as fallback
-  }
 
   const data = {
     Timestamp: new Date(timestamp),
@@ -133,6 +124,35 @@ const RESET_COOLDOWN = 1000; // 1 second cooldown between resets
 const SCAN_READNER = 10 * 1000; // 1 second cooldown between resets
 
 export const sleep = promisify(setTimeout);
+
+// Function to get current model number from configuration
+async function getCurrentModelNumber() {
+  try {
+    // Ensure we have a connection to the main-data database
+    if (!mongoDbService.client) {
+      await mongoDbService.connect('main-data', 'config');
+    }
+
+    const configCollection = mongoDbService.client.db('main-data').collection('config');
+    const currentConfig = await configCollection.findOne({}, { sort: { _id: -1 } });
+
+    if (
+      currentConfig &&
+      currentConfig.currentModelConfig &&
+      currentConfig.currentModelConfig.fields
+    ) {
+      const modelField = currentConfig.currentModelConfig.fields.find(
+        (field) => field.fieldName === 'Model Number',
+      );
+      return modelField && modelField.value ? modelField.value : 'N/A';
+    }
+
+    return 'N/A';
+  } catch (error) {
+    logger.error('Error fetching current model number:', error);
+    return 'N/A';
+  }
+}
 
 async function waitForBitToBecomeOne(register, bit, value) {
   logger.debug(`awaiting ${register} , bit ${bit}`);
@@ -484,6 +504,7 @@ export async function runContinuousScan(io = null, comService) {
         markingData: text,
         scannerData: secondScannerData,
         result: isDataMatching,
+        modelNumber: await getCurrentModelNumber(),
       });
       logger.info('Data saved to MongoDB');
 
