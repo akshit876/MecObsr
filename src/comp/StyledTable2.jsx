@@ -48,9 +48,9 @@ const createColumns = (data) => [
     header: 'Piece #',
     cell: (info) => {
       const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
-      return <div className="font-medium">{pieceNumber}</div>;
+      return <div className="font-medium text-center">{pieceNumber}</div>;
     },
-    size: 100,
+    size: 70,
   }),
 
   columnHelper.accessor('MarkingData', {
@@ -59,29 +59,29 @@ const createColumns = (data) => [
       const serialNumber = info.row.original.SerialNumber;
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
-        <div className="space-y-1">
-          <div className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-1 rounded border border-gray-200">
-            SN: {serialNumber}
+        <div className="space-y-1.5">
+          <div className="text-xs font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-3 py-1.5 rounded-md border border-blue-200/50">
+            {serialNumber}
           </div>
-          <div className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200">
-            Model: {modelNumber}
+          <div className="text-xs font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-3 py-1.5 rounded-md border border-emerald-200/50">
+            {modelNumber}
           </div>
         </div>
       );
     },
-    size: 180,
+    size: 140,
   }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
-    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
+    cell: (info) => <div className="font-bold text-gray-700">{info.getValue()}</div>,
     size: 250,
     id: 'markingDataContent',
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
-    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
+    cell: (info) => <div className="font-bold text-gray-700">{info.getValue()}</div>,
     size: 250,
   }),
 
@@ -91,9 +91,9 @@ const createColumns = (data) => [
       const result = info.getValue();
       const styles =
         result === 'OK'
-          ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold'
+          ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-extrabold'
           : result === 'NG'
-            ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-bold shadow-sm'
+            ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-extrabold shadow-sm'
             : '';
       return <span className={styles}>{result}</span>;
     },
