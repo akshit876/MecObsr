@@ -50,7 +50,7 @@ const createColumns = (data) => [
       const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
       return <div className="font-medium text-center">{pieceNumber}</div>;
     },
-    size: 70,
+    size: 60,
   }),
 
   columnHelper.accessor('MarkingData', {
@@ -60,29 +60,37 @@ const createColumns = (data) => [
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
         <div className="space-y-1.5">
-          <div className="text-xs font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-3 py-1.5 rounded-md border border-blue-200/50">
+          <div className="text-xs font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-2 py-1 rounded-md border border-blue-200/50 truncate">
             {serialNumber}
           </div>
-          <div className="text-xs font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-3 py-1.5 rounded-md border border-emerald-200/50">
+          <div className="text-xs font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-2 py-1 rounded-md border border-emerald-200/50 truncate">
             {modelNumber}
           </div>
         </div>
       );
     },
-    size: 140,
+    size: 120,
   }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
-    cell: (info) => <div className="font-bold text-gray-700">{info.getValue()}</div>,
-    size: 250,
+    cell: (info) => (
+      <div className="font-bold text-gray-700 text-xs break-all leading-tight max-w-[180px]">
+        {info.getValue()}
+      </div>
+    ),
+    size: 180,
     id: 'markingDataContent',
   }),
 
   columnHelper.accessor('ScannerData', {
     header: 'Scanner Data',
-    cell: (info) => <div className="font-bold text-gray-700">{info.getValue()}</div>,
-    size: 250,
+    cell: (info) => (
+      <div className="font-bold text-gray-700 text-xs break-all leading-tight max-w-[180px]">
+        {info.getValue()}
+      </div>
+    ),
+    size: 180,
   }),
 
   columnHelper.accessor('Result', {
@@ -91,31 +99,29 @@ const createColumns = (data) => [
       const result = info.getValue();
       const styles =
         result === 'OK'
-          ? 'bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-extrabold'
+          ? 'bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-extrabold'
           : result === 'NG'
-            ? 'bg-red-600 text-white text-xs px-4 py-1.5 rounded-full font-extrabold shadow-sm'
+            ? 'bg-red-600 text-white text-xs px-3 py-1 rounded-full font-extrabold shadow-sm'
             : '';
       return <span className={styles}>{result}</span>;
     },
-    size: 100,
+    size: 80,
   }),
 
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
     cell: (info) => (
-      <div className="text-gray-600">
+      <div className="text-gray-600 text-xs leading-tight">
         {new Date(info.getValue()).toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'numeric',
+          month: 'short',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
-          second: '2-digit',
           hour12: true,
         })}
       </div>
     ),
-    size: 200,
+    size: 120,
   }),
 ];
 
@@ -143,8 +149,8 @@ const StyledTable = ({ data = [] }) => {
 
   return (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
-      <div className="w-full overflow-auto max-h-[calc(100vh-16rem)]">
-        <table className="w-full border-collapse relative">
+      <div className="w-full overflow-x-hidden overflow-y-auto max-h-[calc(100vh-16rem)]">
+        <table className="w-full border-collapse relative min-w-full table-fixed">
           <thead className="sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-white border-b border-gray-200 shadow-sm">
@@ -152,7 +158,7 @@ const StyledTable = ({ data = [] }) => {
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
-                    className="text-left text-sm font-medium text-gray-600 p-3 bg-white"
+                    className="text-left text-sm font-medium text-gray-600 p-2 bg-white"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -180,7 +186,7 @@ const StyledTable = ({ data = [] }) => {
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
-                      className={`p-3 text-sm ${
+                      className={`p-2 text-sm ${
                         result === 'NG'
                           ? 'text-red-900 font-medium'
                           : result === 'OK'
