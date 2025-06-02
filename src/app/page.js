@@ -1,7 +1,7 @@
 'use client';
 import StyledTable2 from '@/comp/StyledTable2';
 import { format } from 'date-fns';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks/useSocket';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 // import { useRouter } from 'next/navigation';
 // import { useProtectedRoute } from '../../hooks/useProtectedRoute';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
@@ -67,6 +67,8 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [recordLimit, setRecordLimit] = useState(5000);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -281,47 +283,112 @@ function Page() {
   // Add this line to use the machine events hook
   useMachineEvents(socket);
 
+  const handleLoadMoreRecords = async () => {
+    setIsLoadingMore(true);
+    try {
+      // Request more records by increasing the limit
+      const newLimit = recordLimit + 5000;
+      const response = await fetch(`/api/reports?limit=${newLimit}`);
+
+      if (!response.ok) throw new Error('Failed to fetch more records');
+
+      const result = await response.json();
+
+      if (result.data && result.data.length > csvData?.data?.length) {
+        // Update the record limit
+        setRecordLimit(newLimit);
+        toast.success(`Loaded ${result.data.length.toLocaleString()} records`);
+
+        // Force socket to request updated data with new limit
+        if (socket) {
+          socket.emit('request-csv-data-with-limit', {
+            userId: null, // Will be handled by server
+            limit: newLimit,
+          });
+        }
+      } else {
+        toast.info('No additional records available');
+      }
+    } catch (error) {
+      console.error('Error loading more records:', error);
+      toast.error('Failed to load more records');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Calculate record statistics
+  const recordStats = useMemo(() => {
+    if (!csvData?.data || csvData.data.length === 0) {
+      return { total: 0, ok: 0, ng: 0, successRate: 0 };
+    }
+
+    const total = csvData.data.length;
+    const ok = csvData.data.filter((record) => record.Result === 'OK').length;
+    const ng = csvData.data.filter((record) => record.Result === 'NG').length;
+    const successRate = total > 0 ? Math.round((ok / total) * 100) : 0;
+
+    return { total, ok, ng, successRate };
+  }, [csvData?.data]);
+
   // console.log({ csvData });
   return (
     <div className="h-screen w-full p-4 flex flex-col gap-3 bg-slate-50">
       {/* Top Cards - Compact design */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {/* Current Model */}
         <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
           <p className="text-xs text-gray-300 mb-1">Current Model</p>
           <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
         </div>
 
+        {/* Record Statistics */}
+        <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <p className="text-xs text-gray-300 mb-1">Record Stats</p>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-green-300">OK: {recordStats.ok.toLocaleString()}</span>
+            <span className="text-red-300">NG: {recordStats.ng.toLocaleString()}</span>
+            <span className="text-blue-300">Rate: {recordStats.successRate}%</span>
+          </div>
+        </div>
+
         {/* Date Selection & Download */}
         <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div className="grid grid-cols-3 gap-2 items-end">
-            <div>
-              <p className="text-xs text-gray-300 mb-1">Start Date</p>
-              <DatePicker
-                selected={startDate}
-                onChange={(date) => setStartDate(date)}
-                placeholder="Start Date"
-                className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-              />
+          <div className="space-y-2">
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <p className="text-xs text-gray-300 mb-1">Start Date</p>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  placeholder="Start Date"
+                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-300 mb-1">End Date</p>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  placeholder="End Date"
+                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
+                />
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-300 mb-1">End Date</p>
-              <DatePicker
-                selected={endDate}
-                onChange={(date) => setEndDate(date)}
-                placeholder="End Date"
-                className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-              />
-            </div>
-            <div>
-              <p className="text-xs text-gray-300 mb-1">Export</p>
+            <div className="flex justify-center">
               <Button
                 size="sm"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-xs h-7 rounded font-medium"
+                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
                 onClick={handleDownloadExcel}
                 disabled={isLoading || !startDate || !endDate}
+                title="Download Excel Report"
               >
-                {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Download'}
+                {isLoading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3" />
+                )}
+                <span className="text-xs">Download</span>
               </Button>
             </div>
           </div>
@@ -386,10 +453,37 @@ function Page() {
         </div>
       </div>
 
-      {/* Table section remains unchanged */}
+      {/* Table section with enhanced controls */}
       <div className="flex-grow rounded-xl bg-white shadow-sm">
         <div className="p-2.5 border-b border-gray-200/60 bg-white/60">
-          <h2 className="text-sm font-semibold text-gray-800">Production History</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-sm font-semibold text-gray-800">Production History</h2>
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-gray-600">
+                {csvData?.data?.length
+                  ? `${csvData.data.length.toLocaleString()} records`
+                  : 'Loading...'}
+              </div>
+              {csvData?.data?.length >= recordLimit && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-3 text-xs"
+                  onClick={handleLoadMoreRecords}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Load More'
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex-grow p-2 min-h-0">
           {isTableLoading ? (

@@ -114,7 +114,8 @@ class MongoDBService {
       }
 
       // Fetch data from MongoDB, sorted in descending order by Timestamp
-      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(100).toArray();
+      // Increased limit to 5000 to ensure at least 3000 records are displayed
+      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(5000).toArray();
 
       if (data.length === 0) {
         logger.info('No data found in MongoDB collection.');

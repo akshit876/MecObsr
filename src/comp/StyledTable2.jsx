@@ -6,7 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import React from 'react';
 
@@ -48,9 +48,9 @@ const createColumns = (data) => [
     header: 'Piece #',
     cell: (info) => {
       const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
-      return <div className="font-medium text-center">{pieceNumber}</div>;
+      return <div className="font-medium text-center text-xs">{pieceNumber}</div>;
     },
-    size: 50,
+    size: 60,
   }),
 
   columnHelper.accessor('MarkingData', {
@@ -59,11 +59,11 @@ const createColumns = (data) => [
       const serialNumber = info.row.original.SerialNumber;
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
-        <div className="space-y-1.5">
-          <div className="text-xs font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-2 py-1 rounded-md border border-blue-200/50 truncate">
+        <div className="space-y-1">
+          <div className="text-[10px] font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
             {serialNumber}
           </div>
-          <div className="text-xs font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-2 py-1 rounded-md border border-emerald-200/50 truncate">
+          <div className="text-[10px] font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
             {modelNumber}
           </div>
         </div>
@@ -76,13 +76,13 @@ const createColumns = (data) => [
     header: 'Marking Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
       </div>
     ),
-    size: 220,
+    size: 200,
     id: 'markingDataContent',
   }),
 
@@ -90,13 +90,13 @@ const createColumns = (data) => [
     header: 'Scanner Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
       </div>
     ),
-    size: 220,
+    size: 200,
   }),
 
   columnHelper.accessor('Result', {
@@ -105,19 +105,19 @@ const createColumns = (data) => [
       const result = info.getValue();
       const styles =
         result === 'OK'
-          ? 'bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-extrabold'
+          ? 'bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold'
           : result === 'NG'
-            ? 'bg-red-600 text-white text-xs px-3 py-1 rounded-full font-extrabold shadow-sm'
+            ? 'bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold shadow-sm'
             : '';
       return <span className={styles}>{result}</span>;
     },
-    size: 70,
+    size: 60,
   }),
 
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
     cell: (info) => (
-      <div className="text-gray-600 text-xs leading-tight whitespace-nowrap">
+      <div className="text-gray-600 text-[10px] leading-tight whitespace-nowrap">
         {new Date(info.getValue()).toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -127,12 +127,15 @@ const createColumns = (data) => [
         })}
       </div>
     ),
-    size: 100,
+    size: 90,
   }),
 ];
 
 const StyledTable = ({ data = [] }) => {
   const [sorting, setSorting] = useState([]);
+
+  // Memoize columns to prevent unnecessary re-renders
+  const columns = useMemo(() => createColumns(data), [data]);
 
   if (!data || data.length === 0) {
     return (
@@ -144,7 +147,7 @@ const StyledTable = ({ data = [] }) => {
 
   const table = useReactTable({
     data,
-    columns: createColumns(data),
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
@@ -155,16 +158,30 @@ const StyledTable = ({ data = [] }) => {
 
   return (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
-      <div className="w-full overflow-x-hidden overflow-y-auto max-h-[calc(100vh-16rem)]">
+      {/* Header with scroll info */}
+      <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xs font-semibold text-gray-700">Production Records</h3>
+          <div className="text-xs text-gray-500">
+            Showing {data.length.toLocaleString()} records
+          </div>
+        </div>
+      </div>
+
+      {/* Optimized scrollable table with fixed height for large datasets */}
+      <div
+        className="w-full overflow-auto"
+        style={{ height: 'calc(100vh - 22rem)', minHeight: '400px', maxHeight: '70vh' }}
+      >
         <table className="w-full border-collapse relative min-w-full table-fixed">
-          <thead className="sticky top-0 z-10">
+          <thead className="sticky top-0 z-10 bg-white shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-white border-b border-gray-200 shadow-sm">
+              <tr key={headerGroup.id} className="bg-white border-b border-gray-200">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
-                    className="text-left text-sm font-medium text-gray-600 p-2 bg-white"
+                    className="text-left text-[11px] font-medium text-gray-600 p-2 bg-white border-r border-gray-100 last:border-r-0"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -173,17 +190,20 @@ const StyledTable = ({ data = [] }) => {
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => {
+            {table.getRowModel().rows.map((row, index) => {
               const result = row.original.Result;
               const rowClassName = `
-                border-b border-gray-200 last:border-0
+                border-b border-gray-100 last:border-0 h-10
                 ${
                   result === 'NG'
                     ? 'bg-red-50 hover:bg-red-100'
                     : result === 'OK'
                       ? 'bg-green-50 hover:bg-green-100'
-                      : 'hover:bg-gray-50'
+                      : index % 2 === 0
+                        ? 'bg-white hover:bg-gray-50'
+                        : 'bg-gray-25 hover:bg-gray-50'
                 }
+                transition-colors duration-150
               `;
 
               return (
@@ -192,12 +212,12 @@ const StyledTable = ({ data = [] }) => {
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
-                      className={`p-2 text-sm ${
+                      className={`p-1.5 text-xs border-r border-gray-100 last:border-r-0 ${
                         result === 'NG'
                           ? 'text-red-900 font-medium'
                           : result === 'OK'
                             ? 'text-green-900'
-                            : ''
+                            : 'text-gray-800'
                       }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -208,6 +228,13 @@ const StyledTable = ({ data = [] }) => {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Footer with record count */}
+      <div className="bg-gray-50 px-3 py-2 border-t border-gray-200">
+        <div className="text-xs text-gray-600 text-center">
+          {data.length >= 5000 ? 'Showing latest 5,000 records' : `Total ${data.length} records`}
+        </div>
       </div>
     </div>
   );
