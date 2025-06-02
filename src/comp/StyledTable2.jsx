@@ -135,6 +135,7 @@ const StyledTable = ({
   data = [],
   hasMore = false,
   onLoadMore,
+  onRefresh,
   isLoading = false,
   totalRecords = 0,
 }) => {
@@ -208,14 +209,23 @@ const StyledTable = ({
 
   return (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
-      {/* Header with scroll info */}
+      {/* Header */}
       <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
         <div className="flex justify-between items-center">
           <h3 className="text-xs font-semibold text-gray-700">Production Records</h3>
-          <div className="text-xs text-gray-500">
-            Showing {data.length.toLocaleString()} of {totalRecords.toLocaleString()} records
-            {isLoadingMore && <span className="ml-2 text-blue-600">Loading more...</span>}
-            {isLoading && <span className="ml-2 text-blue-600">Loading...</span>}
+          <div className="flex items-center gap-2">
+            {isLoadingMore && <span className="text-xs text-blue-600">Loading more...</span>}
+            {isLoading && <span className="text-xs text-blue-600">Loading...</span>}
+            {onRefresh && (
+              <button
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh data"
+              >
+                🔄 Refresh
+              </button>
+            )}
           </div>
         </div>
       </div>

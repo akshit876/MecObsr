@@ -400,47 +400,22 @@ function Page() {
         </div>
       </div>
 
-      {/* Table section with infinite scroll */}
-      <div className="flex-grow rounded-xl bg-white shadow-sm">
-        <div className="p-2.5 border-b border-gray-200/60 bg-white/60">
-          <div className="flex justify-between items-center">
-            <h2 className="text-sm font-semibold text-gray-800">Production History</h2>
-            <div className="flex items-center gap-3">
-              <div className="text-xs text-gray-600">
-                {csvData?.data?.length
-                  ? `${csvData.data.length.toLocaleString()} total records`
-                  : 'Loading...'}
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 px-3 text-xs"
-                onClick={refreshData}
-                disabled={isTableLoading}
-                title="Refresh data"
-              >
-                🔄 Refresh
-              </Button>
-            </div>
+      {/* Table section - direct render */}
+      <div className="flex-grow">
+        {isTableLoading ? (
+          <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-sm">
+            <LoadingSpinner />
           </div>
-        </div>
-        <div className="flex-grow p-2 min-h-0">
-          {isTableLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="h-full bg-white/80 rounded-lg border border-gray-200/60 shadow-sm">
-              <StyledTable2
-                data={csvData?.data || []}
-                hasMore={hasMore}
-                onLoadMore={loadMoreData}
-                isLoading={isTableLoading}
-                totalRecords={totalRecords}
-              />
-            </div>
-          )}
-        </div>
+        ) : (
+          <StyledTable2
+            data={csvData?.data || []}
+            hasMore={hasMore}
+            onLoadMore={loadMoreData}
+            onRefresh={refreshData}
+            isLoading={isTableLoading}
+            totalRecords={totalRecords}
+          />
+        )}
       </div>
     </div>
   );
