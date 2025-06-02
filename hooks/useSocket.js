@@ -14,11 +14,6 @@ export const useCsvData = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleCsvData = (data) => {
-      setCsvData(data);
-      setLoading(false);
-    };
-
     const handlePaginatedData = (response) => {
       const { data, pagination } = response;
 
@@ -45,8 +40,7 @@ export const useCsvData = () => {
       setLoading(false);
     };
 
-    // Set up socket listeners
-    socket.on('csv-data', handleCsvData);
+    // Set up socket listeners - only use paginated data
     socket.on('paginated-data', handlePaginatedData);
     socket.on('error', handleError);
 
@@ -59,7 +53,6 @@ export const useCsvData = () => {
     });
 
     return () => {
-      socket.off('csv-data', handleCsvData);
       socket.off('paginated-data', handlePaginatedData);
       socket.off('error', handleError);
     };
