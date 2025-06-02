@@ -1,66 +1,110 @@
 /* eslint-disable consistent-return */
 import { useSocket } from '@/SocketContext';
 import { useState, useEffect, useCallback } from 'react';
-import { useProtectedRoute } from './useProtectedRoute';
 
 export const useCsvData = () => {
-  const [csvData, setCsvData] = useState([]);
+  const [csvData, setCsvData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const socket = useSocket();
-  const { session, status } = useProtectedRoute();
-
-  // Create a memoized function for requesting data
-  const requestCsvData = useCallback(() => {
-    if (!socket || !session?.user) return;
-
-    setLoading(true);
-    socket.emit('request-csv-data', {
-      userId: session.user.id,
-      userName: session.user.email,
-      userRole: session.user.role,
-    });
-  }, [socket, session]);
 
   useEffect(() => {
-    if (!socket || !session) return;
+    if (!socket) return;
 
-    // Handle incoming CSV data
     const handleCsvData = (data) => {
-      console.log('Received CSV data:', data);
       setCsvData(data);
       setLoading(false);
     };
 
-    // Setup socket event listeners
+    const handlePaginatedData = (response) => {
+      const { data, pagination } = response;
+
+      setCsvData((prevData) => {
+        // If it's the first page, replace the data
+        if (pagination.currentPage === 1) {
+          return { data };
+        }
+        // Otherwise, append to existing data
+        return {
+          data: [...(prevData?.data || []), ...data],
+        };
+      });
+
+      setTotalRecords(pagination.total);
+      setHasMore(pagination.hasMore);
+      setCurrentPage(pagination.currentPage);
+      setLoading(false);
+    };
+
+    const handleError = (error) => {
+      console.error('Socket error:', error);
+      setError(error.message || 'Failed to fetch data');
+      setLoading(false);
+    };
+
+    // Set up socket listeners
     socket.on('csv-data', handleCsvData);
-    socket.on('connect', () => {
-      console.log('Socket connected, requesting data...');
-      requestCsvData();
-    });
-    socket.on('reconnect', () => {
-      console.log('Socket reconnected, requesting data...');
-      requestCsvData();
+    socket.on('paginated-data', handlePaginatedData);
+    socket.on('error', handleError);
+
+    // Request initial data (500 records)
+    socket.emit('request-paginated-data', {
+      limit: 500,
+      skip: 0,
+      sortBy: 'Timestamp',
+      sortOrder: -1,
     });
 
-    // Initial request for data
-    requestCsvData();
-
-    // Cleanup
     return () => {
       socket.off('csv-data', handleCsvData);
-      socket.off('connect');
-      socket.off('reconnect');
+      socket.off('paginated-data', handlePaginatedData);
+      socket.off('error', handleError);
     };
-  }, [socket, session, requestCsvData]);
+  }, [socket]);
 
-  // Function to manually refresh data
-  const refreshData = () => {
-    requestCsvData();
+  // Function to load more data
+  const loadMoreData = () => {
+    if (!socket || loading || !hasMore) return;
+
+    setLoading(true);
+    const skip = currentPage * 500; // Calculate skip based on current page
+
+    socket.emit('request-paginated-data', {
+      limit: 500,
+      skip: skip,
+      sortBy: 'Timestamp',
+      sortOrder: -1,
+    });
   };
 
-  return { 
-    csvData, 
+  // Function to refresh data (start from beginning)
+  const refreshData = () => {
+    if (!socket) return;
+
+    setLoading(true);
+    setCurrentPage(1);
+    setCsvData(null);
+    setHasMore(true);
+
+    socket.emit('request-paginated-data', {
+      limit: 500,
+      skip: 0,
+      sortBy: 'Timestamp',
+      sortOrder: -1,
+    });
+  };
+
+  return {
+    csvData,
     loading,
-    refreshData // Expose refresh function
+    error,
+    hasMore,
+    totalRecords,
+    currentPage,
+    loadMoreData,
+    refreshData,
   };
 };

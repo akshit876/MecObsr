@@ -6,7 +6,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import React from 'react';
 
@@ -131,22 +131,69 @@ const createColumns = (data) => [
   }),
 ];
 
-const StyledTable = ({ data = [] }) => {
+const StyledTable = ({
+  data = [],
+  hasMore = false,
+  onLoadMore,
+  isLoading = false,
+  totalRecords = 0,
+}) => {
   const [sorting, setSorting] = useState([]);
+  const scrollRef = useRef(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Memoize columns to prevent unnecessary re-renders
   const columns = useMemo(() => createColumns(data), [data]);
 
+  // Infinite scroll implementation with throttling
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current || isLoadingMore || !hasMore || isLoading) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+    // Load more when user scrolls to 85% of current content
+    if (scrollPercentage > 0.85) {
+      setIsLoadingMore(true);
+
+      // Call the load more function with a small delay for smooth UX
+      setTimeout(() => {
+        if (onLoadMore) {
+          onLoadMore();
+        }
+        setIsLoadingMore(false);
+      }, 200);
+    }
+  }, [hasMore, isLoading, isLoadingMore, onLoadMore]);
+
+  // Throttled scroll handler for better performance
+  const throttledHandleScroll = useMemo(() => {
+    let timeoutId;
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleScroll, 100); // Throttle to 100ms
+    };
+  }, [handleScroll]);
+
+  // Attach scroll listener
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', throttledHandleScroll, { passive: true });
+      return () => scrollElement.removeEventListener('scroll', throttledHandleScroll);
+    }
+  }, [throttledHandleScroll]);
+
   if (!data || data.length === 0) {
     return (
       <div className="w-full border border-gray-200 rounded-lg p-4 text-center text-gray-500">
-        No data available
+        {isLoading ? 'Loading data...' : 'No data available'}
       </div>
     );
   }
 
   const table = useReactTable({
-    data,
+    data, // Use all data (no client-side slicing)
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -154,6 +201,9 @@ const StyledTable = ({ data = [] }) => {
     state: {
       sorting,
     },
+    // No pagination - using server-side pagination via socket
+    manualPagination: false,
+    enablePagination: false,
   });
 
   return (
@@ -163,13 +213,16 @@ const StyledTable = ({ data = [] }) => {
         <div className="flex justify-between items-center">
           <h3 className="text-xs font-semibold text-gray-700">Production Records</h3>
           <div className="text-xs text-gray-500">
-            Showing {data.length.toLocaleString()} records
+            Showing {data.length.toLocaleString()} of {totalRecords.toLocaleString()} records
+            {isLoadingMore && <span className="ml-2 text-blue-600">Loading more...</span>}
+            {isLoading && <span className="ml-2 text-blue-600">Loading...</span>}
           </div>
         </div>
       </div>
 
-      {/* Optimized scrollable table with fixed height for large datasets */}
+      {/* Scrollable table with server-side pagination */}
       <div
+        ref={scrollRef}
         className="w-full overflow-auto"
         style={{ height: 'calc(100vh - 22rem)', minHeight: '400px', maxHeight: '70vh' }}
       >
@@ -228,12 +281,35 @@ const StyledTable = ({ data = [] }) => {
             })}
           </tbody>
         </table>
+
+        {/* Loading indicator at bottom */}
+        {(isLoadingMore || isLoading) && (
+          <div className="flex justify-center items-center py-4 bg-gray-50">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+              {isLoading ? 'Loading records...' : 'Loading more records...'}
+            </div>
+          </div>
+        )}
+
+        {/* End indicator when no more data */}
+        {!hasMore && !isLoading && data.length > 0 && (
+          <div className="flex justify-center items-center py-4 bg-gray-50">
+            <div className="text-sm text-gray-500">
+              All {totalRecords.toLocaleString()} records loaded
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer with record count */}
       <div className="bg-gray-50 px-3 py-2 border-t border-gray-200">
         <div className="text-xs text-gray-600 text-center">
-          {data.length >= 5000 ? 'Showing latest 5,000 records' : `Total ${data.length} records`}
+          {hasMore && !isLoading
+            ? `Loaded ${data.length.toLocaleString()} of ${totalRecords.toLocaleString()} records - scroll for more`
+            : data.length > 0
+              ? `All ${totalRecords.toLocaleString()} records loaded`
+              : 'No records to display'}
         </div>
       </div>
     </div>

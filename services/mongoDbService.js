@@ -113,9 +113,44 @@ class MongoDBService {
         await this.connect(dbName, collectionName);
       }
 
-      // Fetch data from MongoDB, sorted in descending order by Timestamp
-      // Increased limit to 5000 to ensure at least 3000 records are displayed
-      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(5000).toArray();
+      // Calculate current day range (starting from 6 AM)
+      const now = new Date();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
+
+      // If current time is before 6 AM, consider it part of previous day
+      if (now.getHours() < 6) {
+        startOfDay.setDate(startOfDay.getDate() - 1);
+      }
+
+      // End of current production day (6 AM next day)
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(endOfDay.getDate() + 1);
+
+      // First, try to get current day records
+      const currentDayData = await this.collection
+        .find({
+          Timestamp: {
+            $gte: startOfDay,
+            $lt: endOfDay,
+          },
+        })
+        .sort({ Timestamp: -1 })
+        .toArray();
+
+      let data;
+
+      // If current day has fewer than 100 records, get recent records to fill the display
+      if (currentDayData.length < 100) {
+        logger.info(
+          `Current day has only ${currentDayData.length} records. Fetching recent records to fill display.`,
+        );
+        data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(5000).toArray();
+      } else {
+        // Use current day data if we have enough records
+        data = currentDayData;
+        logger.info(`Found ${currentDayData.length} records for current production day.`);
+      }
 
       if (data.length === 0) {
         logger.info('No data found in MongoDB collection.');
@@ -138,9 +173,16 @@ class MongoDBService {
 
       // console.log({ transformedData });
 
-      // Send the data to the client
-      socket.emit('csv-data', { data: transformedData });
-      logger.info(`Emitted MongoDB data to client: ${socket.id}`);
+      // Send the data to the client with additional metadata
+      socket.emit('csv-data', {
+        data: transformedData,
+        currentDayRecords: currentDayData.length,
+        isCurrentDayOnly: currentDayData.length >= 100,
+        productionDayStart: startOfDay.toISOString(),
+      });
+      logger.info(
+        `Emitted MongoDB data to client: ${socket.id} (${transformedData.length} total records, ${currentDayData.length} current day records)`,
+      );
     } catch (error) {
       console.error({ error });
       logger.error('Error in sendMongoDbDataToClient: ', error.message);
