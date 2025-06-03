@@ -70,10 +70,13 @@ function Page() {
 
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
-  const scannerTimeoutRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
-  const [scannerData, setScannerData] = useState('');
+
+  // Manual entry state - simplified
+  const [manualEntryData, setManualEntryData] = useState('');
+  const [isManualEntryReady, setIsManualEntryReady] = useState(true);
+  const [isSubmittingManual, setIsSubmittingManual] = useState(false);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -92,6 +95,13 @@ function Page() {
     fetchCurrentModel();
   }, []);
 
+  // Check manual entry status on mount
+  useEffect(() => {
+    if (socket?.connected) {
+      checkManualEntryStatus();
+    }
+  }, [socket?.connected]);
+
   // Add updateProductionRecords function
   const updateProductionRecords = () => {
     // This will trigger a refresh of the CSV data through the existing hook
@@ -105,6 +115,37 @@ function Page() {
       return;
     }
     socket.emit('request-recent-records', { limit: 100 });
+  };
+
+  // Manual entry functions
+  const handleManualEntrySubmit = (e) => {
+    e.preventDefault();
+
+    if (!manualEntryData.trim()) {
+      toast.error('Please enter manual data');
+      return;
+    }
+
+    if (!socket?.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+
+    setIsSubmittingManual(true);
+    socket.emit('manual-entry-submit', {
+      manualData: manualEntryData.trim(),
+      modelNumber: currentModelNumber,
+    });
+
+    toast.info('Submitting manual entry...');
+  };
+
+  const checkManualEntryStatus = () => {
+    if (!socket?.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    socket.emit('check-manual-entry-status');
   };
 
   useEffect(() => {
@@ -121,19 +162,6 @@ function Page() {
       markingTimeoutRef.current = setTimeout(() => {
         setMarkingData('');
       }, 10 * 1000);
-    };
-
-    const handleScannerData = (data) => {
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
-      }
-
-      setScannerData(data.data);
-
-      // Clear data after 300ms
-      scannerTimeoutRef.current = setTimeout(() => {
-        setScannerData('');
-      }, 5 * 1000);
     };
 
     const handleFirstScanOk = (data) => {
@@ -184,32 +212,73 @@ function Page() {
       updateProductionRecords();
     };
 
+    // Manual entry event handlers
+    const handleManualEntryReceived = (data) => {
+      console.log('Manual data received:', data.manualData);
+      toast.success(data.message);
+      setManualEntryData('');
+      setIsManualEntryReady(false);
+      setIsSubmittingManual(false);
+    };
+
+    const handleManualEntryError = (error) => {
+      console.error('Manual entry error:', error.message);
+      toast.error(error.message);
+      setIsSubmittingManual(false);
+      setIsManualEntryReady(true);
+    };
+
+    const handleManualCycleCompleted = (event) => {
+      console.log(`Manual Cycle ${event.cycleNumber} completed:`, event.success);
+      console.log('Result:', event.result);
+      console.log('Data:', event.data);
+
+      if (event.success) {
+        toast.success(`Cycle ${event.cycleNumber} completed successfully`);
+      } else {
+        toast.error(`Cycle ${event.cycleNumber} failed: ${event.error}`);
+      }
+
+      setIsManualEntryReady(true);
+      updateProductionRecords();
+    };
+
+    const handleManualEntryStatus = (status) => {
+      console.log('Manual entry system ready:', status.isReady);
+      console.log('Current cycle count:', status.cycleCount);
+
+      setIsManualEntryReady(status.isReady);
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
-    socket.on('scanner_read', handleScannerData);
     socket.on('first_scan_ok', handleFirstScanOk);
     socket.on('csv-data', handleCsvData);
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
+    socket.on('manual-entry-received', handleManualEntryReceived);
+    socket.on('manual-entry-error', handleManualEntryError);
+    socket.on('manual-cycle-completed', handleManualCycleCompleted);
+    socket.on('manual-entry-status', handleManualEntryStatus);
 
     // Cleanup function
     return () => {
       // Clear socket listeners
       socket.off('marking_data', handleMarkingData);
-      socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
       socket.off('csv-data', handleCsvData);
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
+      socket.off('manual-entry-received', handleManualEntryReceived);
+      socket.off('manual-entry-error', handleManualEntryError);
+      socket.off('manual-cycle-completed', handleManualCycleCompleted);
+      socket.off('manual-entry-status', handleManualEntryStatus);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
         clearTimeout(markingTimeoutRef.current);
-      }
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
       }
     };
   }, [socket]);
@@ -410,7 +479,7 @@ function Page() {
       {/* Data Display & Controls Row */}
       <div className="grid grid-cols-12 gap-4">
         {/* Marking Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-10 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -420,21 +489,6 @@ function Page() {
               className={`text-sm font-medium ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
             >
               {markingData || 'Waiting for data...'}
-            </span>
-          </div>
-        </div>
-
-        {/* Scanner Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
-          <div
-            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
-            ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
-          >
-            <span
-              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {scannerData || 'Waiting for data...'}
             </span>
           </div>
         </div>
@@ -462,6 +516,71 @@ function Page() {
               Light
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Manual Entry Section */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Manual Entry Form */}
+        <div className="col-span-12 p-4 rounded-xl bg-white shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-800">Manual Entry</h3>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-gray-600">Status:</span>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  isManualEntryReady
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}
+              >
+                {isManualEntryReady ? 'Ready' : 'Busy'}
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleManualEntrySubmit} className="space-y-3">
+            <div>
+              <label htmlFor="manual-data" className="block text-xs font-medium text-gray-700 mb-1">
+                Enter Code:
+              </label>
+              <input
+                type="text"
+                id="manual-data"
+                value={manualEntryData}
+                onChange={(e) => setManualEntryData(e.target.value)}
+                placeholder="P5314775:57386:TTA:D25154:VR0003"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={!isManualEntryReady || isSubmittingManual}
+                required
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                disabled={!isManualEntryReady || isSubmittingManual || !manualEntryData.trim()}
+                className="bg-blue-500 hover:bg-blue-600 text-sm font-medium h-9 px-6 rounded-lg shadow-sm"
+              >
+                {isSubmittingManual ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Entry'
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                onClick={checkManualEntryStatus}
+                className="bg-gray-500 hover:bg-gray-600 text-sm font-medium h-9 px-4 rounded-lg shadow-sm"
+              >
+                Check Status
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
 
