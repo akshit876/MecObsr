@@ -92,6 +92,21 @@ function Page() {
     fetchCurrentModel();
   }, []);
 
+  // Add updateProductionRecords function
+  const updateProductionRecords = () => {
+    // This will trigger a refresh of the CSV data through the existing hook
+    refreshData();
+  };
+
+  // Manual refresh capability - modify existing refreshData to emit socket event
+  const handleManualRefresh = () => {
+    if (!socket?.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    socket.emit('request-recent-records', { limit: 100 });
+  };
+
   useEffect(() => {
     if (!socket) return;
 
@@ -128,9 +143,55 @@ function Page() {
       });
     };
 
+    // Initial data load
+    const handleCsvData = (data) => {
+      console.log('Received csv-data:', data);
+      // Update the production records table
+      updateProductionRecords();
+    };
+
+    // Automatic refresh on cycle completion
+    const handleCycleCompleted = (event) => {
+      // Refresh the UI with latest data
+      console.log('Cycle completed at:', event.timestamp);
+      // The csv-data event will follow automatically
+      toast.success('Cycle completed successfully', {
+        duration: 2000,
+      });
+    };
+
+    // Detailed cycle status
+    const handleScanCycleCompleted = (event) => {
+      // Update cycle status indicators
+      console.log(`Cycle ${event.cycleNumber}: ${event.success ? 'SUCCESS' : 'FAILED'}`);
+      console.log('Result:', event.result);
+
+      // Show toast notification based on cycle result
+      if (event.success) {
+        toast.success(`Cycle ${event.cycleNumber}: ${event.result}`, {
+          duration: 3000,
+        });
+      } else {
+        toast.error(`Cycle ${event.cycleNumber}: FAILED - ${event.result}`, {
+          duration: 4000,
+        });
+      }
+    };
+
+    // Handle recent records response
+    const handleRecentRecords = (data) => {
+      console.log('Received recent records:', data);
+      updateProductionRecords();
+    };
+
+    // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
     socket.on('first_scan_ok', handleFirstScanOk);
+    socket.on('csv-data', handleCsvData);
+    socket.on('cycle-completed', handleCycleCompleted);
+    socket.on('scan-cycle-completed', handleScanCycleCompleted);
+    socket.on('recent-records', handleRecentRecords);
 
     // Cleanup function
     return () => {
@@ -138,6 +199,10 @@ function Page() {
       socket.off('marking_data', handleMarkingData);
       socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
+      socket.off('csv-data', handleCsvData);
+      socket.off('cycle-completed', handleCycleCompleted);
+      socket.off('scan-cycle-completed', handleScanCycleCompleted);
+      socket.off('recent-records', handleRecentRecords);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
@@ -411,7 +476,7 @@ function Page() {
             data={csvData?.data || []}
             hasMore={hasMore}
             onLoadMore={loadMoreData}
-            onRefresh={refreshData}
+            onRefresh={handleManualRefresh}
             isLoading={isTableLoading}
             totalRecords={totalRecords}
           />
