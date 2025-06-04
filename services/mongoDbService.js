@@ -114,7 +114,7 @@ class MongoDBService {
       }
 
       // Fetch data from MongoDB, sorted in descending order by Timestamp
-      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(100).toArray();
+      const data = await this.collection.find({}).sort({ Timestamp: -1 }).limit(1000).toArray();
 
       if (data.length === 0) {
         logger.info('No data found in MongoDB collection.');
@@ -127,7 +127,6 @@ class MongoDBService {
         Timestamp: item?.Timestamp,
         SerialNumber: item?.SerialNumber,
         MarkingData: item?.MarkingData,
-        ScannerData: item?.ScannerData,
         Shift: item?.Shift,
         Result: item?.Result,
         Date: item?.Date,

@@ -7,7 +7,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useState } from 'react';
-import { ArrowUpDown } from 'lucide-react';
 import React from 'react';
 
 const columnHelper = createColumnHelper();
@@ -27,19 +26,7 @@ const columns = [
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
     cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
-    size: 200,
-  }),
-
-  columnHelper.accessor('ScannerData', {
-    header: 'Scanner Data',
-    cell: (info) => (
-      <div className="font-medium text-gray-600">
-        {info.getValue() === 'NG' || info.getValue() === 'N/A'
-          ? info.getValue()
-          : info.getValue()?.slice(0, -1)}
-      </div>
-    ),
-    size: 200,
+    size: 300,
   }),
 
   columnHelper.accessor('Result', {
@@ -56,33 +43,6 @@ const columns = [
     },
     size: 100,
   }),
-
-  columnHelper.accessor('User', {
-    header: 'User',
-    cell: (info) => <div className="font-medium text-gray-600">{info.getValue()}</div>,
-    size: 150,
-  }),
-
-  // columnHelper.accessor('Grade', {
-  //   header: ({ column }) => {
-  //     return <div className="flex items-center cursor-pointer">Grade</div>;
-  //   },
-  //   cell: (info) => {
-  //     const grade = info.getValue();
-  //     const gradeStyles = {
-  //       A: 'bg-emerald-100 text-emerald-800',
-  //       B: 'bg-blue-100 text-blue-800',
-  //       C: 'bg-amber-100 text-amber-800',
-  //       D: 'bg-red-100 text-red-800',
-  //     };
-
-  //     const baseStyles = 'text-xs px-3 py-1 rounded-full font-semibold';
-  //     const colorStyles = gradeStyles[grade] || 'bg-gray-100 text-gray-800';
-
-  //     return <span className={`${baseStyles} ${colorStyles}`}>{grade}</span>;
-  //   },
-  //   size: 100,
-  // }),
 
   columnHelper.accessor('Timestamp', {
     header: 'Created At',

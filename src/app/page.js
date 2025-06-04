@@ -33,10 +33,8 @@ function Page() {
 
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
-  const scannerTimeoutRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
-  const [scannerData, setScannerData] = useState('');
   const [todayCounts, setTodayCounts] = useState({ okCount: 0, ngCount: 0 });
   const [isLoadingCounts, setIsLoadingCounts] = useState(true);
 
@@ -106,42 +104,15 @@ function Page() {
       setMarkingData(data.data);
     };
 
-    const handleScannerData = (data) => {
-      setScannerData(data.data);
-    };
-
-    const handleFirstScanOk = (data) => {
-      toast.warning('Part already marked!', {
-        description: data.message,
-        duration: 3000,
-      });
-    };
-
-    const handleValidationError = (data) => {
-      toast.error('Validation Error', {
-        description: data.details,
-        duration: 5000,
-      });
-    };
-
     socket.on('marking_data', handleMarkingData);
-    socket.on('scanner_read', handleScannerData);
-    socket.on('first_scan_ok', handleFirstScanOk);
-    socket.on('validation_error', handleValidationError);
 
     // Cleanup function - remove timeout refs and clearTimeout calls
     return () => {
       socket.off('marking_data', handleMarkingData);
-      socket.off('scanner_read', handleScannerData);
-      socket.off('first_scan_ok', handleFirstScanOk);
-      socket.off('validation_error', handleValidationError);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
         clearTimeout(markingTimeoutRef.current);
-      }
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
       }
     };
   }, [socket]);
@@ -183,29 +154,11 @@ function Page() {
 
       // Format the data as per the requirements
       const formattedData = data.map((row, index) => {
-        let scannerDataWithoutGrade = row.ScannerData || '';
-        // let grade = '';
-
-        // Handle N/A case first
-        if (row.ScannerData === 'N/A') {
-          scannerDataWithoutGrade = 'N/A';
-          // grade = 'N/A';
-        }
-        // Only process grade if Result is not NG and ScannerData is not N/A
-        else if (row.ScannerData !== 'NG' && row.ScannerData) {
-          // grade = row.ScannerData.slice(-1);
-          scannerDataWithoutGrade = row.ScannerData.slice(0, -1);
-        }
-
         return {
           SerialNumber: index + 1,
           Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
           MarkingData: row.MarkingData || '',
-          ScannerData: scannerDataWithoutGrade,
-          // Grade: grade,
           Result: row.Result || '',
-          User: row.User || '',
-          remark: row.remark || '',
         };
       });
 
@@ -284,13 +237,6 @@ function Page() {
     socket.emit('scanner_trigger');
   };
 
-  const handleMarkOn = () => {
-    if (!socket.connected) {
-      toast.error('Socket not connected');
-      return;
-    }
-    socket.emit('mark_on');
-  };
   const handleLigt = () => {
     if (!socket.connected) {
       toast.error('Socket not connected');
@@ -405,7 +351,7 @@ function Page() {
       {/* Data Display & Controls Row */}
       <div className="grid grid-cols-12 gap-4">
         {/* Marking Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-10 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -415,21 +361,6 @@ function Page() {
               className={`text-sm font-medium ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
             >
               {markingData || 'Waiting for data...'}
-            </span>
-          </div>
-        </div>
-
-        {/* Scanner Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
-          <div
-            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
-            ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
-          >
-            <span
-              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {scannerData || 'Waiting for data...'}
             </span>
           </div>
         </div>
@@ -444,12 +375,6 @@ function Page() {
             >
               Scanner
             </Button>
-            {/* <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleMarkOn}
-            >
-              Mark
-            </Button> */}
             <Button
               className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
               onClick={handleLigt}

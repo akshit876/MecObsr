@@ -16,13 +16,10 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
   }
 
   const headers = [
-    { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
-    { key: 'MarkingData', label: 'Marking Data', width: '25%' },
-    { key: 'ScannerData', label: 'Scanner Data', width: '25%' },
-    { key: 'Grade', label: 'Grade', width: '8%' },
-    { key: 'Result', label: 'Result', width: '8%' },
-    { key: 'User', label: 'User', width: '10%' },
-    { key: 'Timestamp', label: 'Timestamp', width: '12%' },
+    { key: 'SerialNumber', label: 'Serial Number', width: '15%' },
+    { key: 'MarkingData', label: 'Marking Data', width: '50%' },
+    { key: 'Result', label: 'Result', width: '15%' },
+    { key: 'Timestamp', label: 'Timestamp', width: '20%' },
   ];
 
   const getResultStyles = (result) => {
@@ -39,14 +36,9 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
   const getCellStyles = (header, isNG) => {
     let baseStyles = 'p-3 border border-gray-900 text-sm';
 
-    // Add bold styling for Marking and Scanner data
-    if (header.key === 'MarkingData' || header.key === 'ScannerData') {
+    // Add bold styling for Marking data
+    if (header.key === 'MarkingData') {
       baseStyles += ' font-semibold text-gray-900';
-    }
-
-    // Add User styling
-    if (header.key === 'User') {
-      baseStyles += ' font-medium text-gray-700';
     }
 
     // Add NG text color if applicable
@@ -103,17 +95,6 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                         <span className={getResultStyles(row[header.key])}>{row[header.key]}</span>
                       ) : header.key === 'Timestamp' ? (
                         new Date(row[header.key]).toLocaleString()
-                      ) : header.key === 'ScannerData' ? (
-                        <div
-                          className="truncate font-semibold text-gray-900"
-                          title={row[header.key]}
-                        >
-                          {row[header.key]}
-                        </div>
-                      ) : header.key === 'Grade' ? (
-                        <div className="truncate font-semibold text-gray-900">
-                          {row[header.key]}
-                        </div>
                       ) : (
                         <div
                           className={`truncate ${
