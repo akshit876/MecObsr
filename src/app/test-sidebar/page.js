@@ -12,7 +12,6 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
-  Image,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -43,11 +42,6 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
       label: 'Dashboard',
       href: '/',
       icon: Home,
-    },
-    {
-      label: 'Image Search',
-      href: '/image-search',
-      icon: Image,
     },
     ...(session?.user?.role === 'admin'
       ? [
@@ -85,8 +79,7 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
                 label: 'Grade Config',
                 href: '/grade-config',
                 icon: CgShapeZigzag,
-
-              }
+              },
             ],
           },
         ]
