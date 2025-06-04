@@ -229,22 +229,6 @@ function Page() {
     }
   };
 
-  const handleScannerTrigger = () => {
-    if (!socket.connected) {
-      toast.error('Socket not connected');
-      return;
-    }
-    socket.emit('scanner_trigger');
-  };
-
-  const handleLigt = () => {
-    if (!socket.connected) {
-      toast.error('Socket not connected');
-      return;
-    }
-    socket.emit('light_on');
-  };
-
   // Use the pulse signal hook
   usePulseSignal(socket);
 
@@ -351,7 +335,7 @@ function Page() {
       {/* Data Display & Controls Row */}
       <div className="grid grid-cols-12 gap-4">
         {/* Marking Data */}
-        <div className="col-span-10 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-12 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -362,25 +346,6 @@ function Page() {
             >
               {markingData || 'Waiting for data...'}
             </span>
-          </div>
-        </div>
-
-        {/* Control Buttons - Fixed layout */}
-        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
-          <div className="flex gap-1.5">
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleScannerTrigger}
-            >
-              Scanner
-            </Button>
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleLigt}
-            >
-              Light
-            </Button>
           </div>
         </div>
       </div>
