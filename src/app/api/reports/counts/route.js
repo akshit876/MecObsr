@@ -8,22 +8,14 @@ export async function POST(request) {
 
     // Create date object for current time
     const currentDate = new Date(startDate);
-    const currentHour = currentDate.getHours();
-    logger.info(`Current hour: ${currentHour}`);
+    logger.info(`Current date: ${currentDate}`);
 
-    // If current time is before 6 AM OR it's midnight (hour 0), use previous day's 6 AM as start
-    const startDateTime = new Date(startDate);
-    if (currentHour < 6 || currentHour === 0) {
-      // Added explicit check for midnight
-      startDateTime.setDate(startDateTime.getDate() - 1);
-      logger.info('Adjusted to previous day due to time before 6 AM or midnight');
-    }
-    startDateTime.setHours(6, 0, 0, 0);
+    // Start time is 12:00 AM (midnight) of the current day
+    const startDateTime = new Date(currentDate);
+    startDateTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
 
-    // End time is always start date + 1 day at 6 AM
-    const endDateTime = new Date(startDateTime);
-    endDateTime.setDate(endDateTime.getDate() + 1);
-    endDateTime.setHours(6, 0, 0, 0);
+    // End time is the current time (now)
+    const endDateTime = new Date();
 
     logger.info(`Query time range: ${startDateTime.toISOString()} to ${endDateTime.toISOString()}`);
 
@@ -38,7 +30,7 @@ export async function POST(request) {
         $match: {
           Timestamp: {
             $gte: startDateTime,
-            $lt: endDateTime,
+            $lte: endDateTime,
           },
         },
       },

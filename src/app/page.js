@@ -35,50 +35,6 @@ function Page() {
   const markingTimeoutRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
-  const [todayCounts, setTodayCounts] = useState({ okCount: 0, ngCount: 0 });
-  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
-
-  useEffect(() => {
-    const fetchTodayCounts = async () => {
-      try {
-        // Get today's date at 6 AM
-        const today = new Date();
-        // today.setHours(6, 0, 0, 0);
-
-        const response = await fetch('/api/reports/counts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            startDate: today.toISOString(),
-            endDate: new Date().toISOString(),
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch counts');
-        }
-
-        const data = await response.json();
-        setTodayCounts({
-          okCount: data.okCount || 0,
-          ngCount: data.ngCount || 0,
-        });
-      } catch (error) {
-        // logger.error('Error fetching counts:', error);
-        console.log({ error });
-        toast.error("Failed to fetch today's counts");
-      } finally {
-        setIsLoadingCounts(false);
-      }
-    };
-
-    fetchTodayCounts();
-    const intervalId = setInterval(fetchTodayCounts, 5 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -241,59 +197,9 @@ function Page() {
       {/* Top Cards - Single row with all elements */}
       <div className="grid grid-cols-12 gap-4">
         {/* Current Model */}
-        <div className="col-span-4 p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-6 p-4 rounded-xl bg-[#012B41] text-white shadow-sm">
           <p className="text-sm text-gray-300 mb-1">Current Model</p>
           <h3 className="text-xl font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
-        </div>
-
-        {/* OK Count Card */}
-        <div className="col-span-1 p-3 rounded-xl bg-white border-2 border-emerald-300 shadow-sm hover:border-emerald-400 transition-colors">
-          <p className="text-sm font-bold text-emerald-700 mb-1">OK</p>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-emerald-700">
-              {isLoadingCounts ? '-' : todayCounts.okCount}
-            </h3>
-          </div>
-        </div>
-
-        {/* NG Count Card */}
-        <div className="col-span-1 p-3 rounded-xl bg-white border-2 border-red-300 shadow-sm hover:border-red-400 transition-colors">
-          <p className="text-sm font-bold text-red-700 mb-1">NG</p>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-red-100 flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-red-700">
-              {isLoadingCounts ? '-' : todayCounts.ngCount}
-            </h3>
-          </div>
         </div>
 
         {/* Date Range and Export */}
