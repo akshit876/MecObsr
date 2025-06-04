@@ -17,37 +17,6 @@ import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
 
-// Helper function to calculate piece number based on timestamp
-const calculatePieceNumber = (timestamp, data) => {
-  const recordDate = new Date(timestamp);
-  const startOfDay = new Date(recordDate);
-  startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
-
-  // If the record is before 6 AM, consider it part of previous day
-  if (recordDate.getHours() < 6) {
-    startOfDay.setDate(startOfDay.getDate() - 1);
-  }
-
-  // Filter records from the same day (from 6 AM onwards)
-  const sameDayRecords = data.filter((record) => {
-    const recordTimestamp = new Date(record.Timestamp);
-    const recordStartOfDay = new Date(recordTimestamp);
-    recordStartOfDay.setHours(6, 0, 0, 0);
-
-    if (recordTimestamp.getHours() < 6) {
-      recordStartOfDay.setDate(recordStartOfDay.getDate() - 1);
-    }
-
-    return recordStartOfDay.getTime() === startOfDay.getTime() && recordTimestamp >= startOfDay;
-  });
-
-  // Sort by timestamp and find the position
-  sameDayRecords.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-  const pieceIndex = sameDayRecords.findIndex((record) => record.Timestamp === timestamp);
-
-  return pieceIndex + 1;
-};
-
 function Page() {
   const {
     csvData,
@@ -70,10 +39,8 @@ function Page() {
 
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
-  const scannerTimeoutRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
-  const [scannerData, setScannerData] = useState('');
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -123,26 +90,6 @@ function Page() {
       }, 10 * 1000);
     };
 
-    const handleScannerData = (data) => {
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
-      }
-
-      setScannerData(data.data);
-
-      // Clear data after 300ms
-      scannerTimeoutRef.current = setTimeout(() => {
-        setScannerData('');
-      }, 5 * 1000);
-    };
-
-    const handleFirstScanOk = (data) => {
-      toast.warning('Part already marked!', {
-        description: data.message,
-        duration: 3000,
-      });
-    };
-
     // Initial data load
     const handleCsvData = (data) => {
       console.log('Received csv-data:', data);
@@ -186,8 +133,6 @@ function Page() {
 
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
-    socket.on('scanner_read', handleScannerData);
-    socket.on('first_scan_ok', handleFirstScanOk);
     socket.on('csv-data', handleCsvData);
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
@@ -197,8 +142,6 @@ function Page() {
     return () => {
       // Clear socket listeners
       socket.off('marking_data', handleMarkingData);
-      socket.off('scanner_read', handleScannerData);
-      socket.off('first_scan_ok', handleFirstScanOk);
       socket.off('csv-data', handleCsvData);
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
@@ -207,9 +150,6 @@ function Page() {
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
         clearTimeout(markingTimeoutRef.current);
-      }
-      if (scannerTimeoutRef.current) {
-        clearTimeout(scannerTimeoutRef.current);
       }
     };
   }, [socket]);
@@ -247,25 +187,25 @@ function Page() {
         return;
       }
 
-      // Format the data as per the requirements with piece number calculation
-      const formattedData = data.map((row) => ({
-        'Piece #': calculatePieceNumber(row.Timestamp, data),
-        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
+      // Map the data to include only required fields for the Excel export
+      const mappedData = data.map((row) => ({
+        Timestamp: row.Timestamp,
+        SerialNumber: row.SerialNumber,
         MarkingData: row.MarkingData,
-        ScannerData: row.ScannerData,
-        ModelNumber: row.ModelNumber || 'N/A',
         Result: row.Result,
+        User: row.User || 'N/A',
+        ModelNumber: row.ModelNumber || 'N/A',
       }));
 
       // Create a worksheet from the formatted data
-      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const worksheet = XLSX.utils.json_to_sheet(mappedData);
 
       // Calculate column widths with additional 50px (approximately 7 characters)
-      const columnWidths = Object.keys(formattedData[0]).map((key) => ({
+      const columnWidths = Object.keys(mappedData[0]).map((key) => ({
         wch:
           Math.max(
             key.length,
-            ...formattedData.map((row) => (row[key] ? row[key].toString().length : 10)),
+            ...mappedData.map((row) => (row[key] ? row[key].toString().length : 10)),
           ) + 7, // Add approximately 50px worth of characters
       }));
       worksheet['!cols'] = columnWidths;
@@ -274,10 +214,10 @@ function Page() {
       worksheet['!freeze'] = { pos: { r: 1, c: 0 } };
 
       // Add conditional formatting for Result column
-      const resultColumnIndex = Object.keys(formattedData[0]).findIndex((key) => key === 'Result');
+      const resultColumnIndex = Object.keys(mappedData[0]).findIndex((key) => key === 'Result');
 
       // Apply colors to all rows (excluding header)
-      for (let i = 1; i <= formattedData.length; i++) {
+      for (let i = 1; i <= mappedData.length; i++) {
         const cellRef = XLSX.utils.encode_cell({ r: i, c: resultColumnIndex });
         if (!worksheet[cellRef]) continue;
 
@@ -410,7 +350,7 @@ function Page() {
       {/* Data Display & Controls Row */}
       <div className="grid grid-cols-12 gap-4">
         {/* Marking Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-8 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -424,23 +364,8 @@ function Page() {
           </div>
         </div>
 
-        {/* Scanner Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
-          <div
-            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
-            ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
-          >
-            <span
-              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {scannerData || 'Waiting for data...'}
-            </span>
-          </div>
-        </div>
-
         {/* Control Buttons - Fixed layout */}
-        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-4 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
           <div className="flex gap-1.5">
             <Button

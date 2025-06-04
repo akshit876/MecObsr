@@ -17,11 +17,10 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
 
   const headers = [
     { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
-    { key: 'MarkingData', label: 'Marking Data', width: '30%' },
-    { key: 'ScannerData', label: 'Scanner Data', width: '30%' },
+    { key: 'MarkingData', label: 'Marking Data', width: '40%' },
     { key: 'Result', label: 'Result', width: '8%' },
-    { key: 'User', label: 'User', width: '10%' },
-    { key: 'Timestamp', label: 'Timestamp', width: '10%' },
+    { key: 'User', label: 'User', width: '20%' },
+    { key: 'Timestamp', label: 'Timestamp', width: '20%' },
   ];
 
   const getResultStyles = (result) => {
@@ -38,8 +37,8 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
   const getCellStyles = (header, isNG) => {
     let baseStyles = 'p-3 border border-gray-900 text-sm';
 
-    // Add bold styling for Marking and Scanner data
-    if (header.key === 'MarkingData' || header.key === 'ScannerData') {
+    // Add bold styling for Marking data
+    if (header.key === 'MarkingData') {
       baseStyles += ' font-semibold text-gray-900';
     }
 
@@ -105,9 +104,7 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
                       ) : (
                         <div
                           className={`truncate ${
-                            header.key === 'MarkingData' || header.key === 'ScannerData'
-                              ? 'font-semibold text-gray-900'
-                              : ''
+                            header.key === 'MarkingData' ? 'font-semibold text-gray-900' : ''
                           }`}
                           title={row[header.key]}
                         >

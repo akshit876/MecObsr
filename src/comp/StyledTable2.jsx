@@ -86,19 +86,6 @@ const createColumns = (data) => [
     id: 'markingDataContent',
   }),
 
-  columnHelper.accessor('ScannerData', {
-    header: 'Scanner Data',
-    cell: (info) => (
-      <div
-        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
-        title={info.getValue()}
-      >
-        {info.getValue()}
-      </div>
-    ),
-    size: 200,
-  }),
-
   columnHelper.accessor('Result', {
     header: 'Result',
     cell: (info) => {

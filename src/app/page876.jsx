@@ -13,7 +13,6 @@ export default function Page() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [markingData, setMarkingData] = useState('Waiting for data...');
-  const [scannerData, setScannerData] = useState('Waiting for data...');
   const socket = useSocket();
 
   const handleScannerTrigger = () => {
@@ -101,10 +100,6 @@ export default function Page() {
               <div>
                 <label className="text-sm text-gray-600">Marking Data</label>
                 <div className="mt-1 p-2 bg-white border rounded-md text-sm">{markingData}</div>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Scanner Data</label>
-                <div className="mt-1 p-2 bg-white border rounded-md text-sm">{scannerData}</div>
               </div>
             </div>
           </div>
