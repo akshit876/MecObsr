@@ -69,7 +69,7 @@ const createColumns = (data) => [
     header: 'Marking Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -83,7 +83,7 @@ const createColumns = (data) => [
     header: 'Scanner Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -98,9 +98,9 @@ const createColumns = (data) => [
       const result = info.getValue();
       const styles =
         result === 'OK'
-          ? 'bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold'
+          ? 'bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-extrabold'
           : result === 'NG'
-            ? 'bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold shadow-sm'
+            ? 'bg-red-600 text-white text-xs px-3 py-1 rounded-full font-extrabold shadow-sm'
             : '';
       return <span className={styles}>{result}</span>;
     },

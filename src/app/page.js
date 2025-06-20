@@ -360,26 +360,9 @@ function Page() {
       <div className="grid grid-cols-12 gap-3">
         {/* Current Model */}
         <div className="col-span-4 p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-300 mb-1">Current Model</p>
-              <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                className="bg-blue-500 hover:bg-blue-600 h-8 w-8 p-0 rounded-full flex items-center justify-center"
-                onClick={handleDownloadExcel}
-                disabled={isLoading || !startDate || !endDate}
-                title="Download Excel Report"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+          <div>
+            <p className="text-xs text-gray-300 mb-1">Current Model</p>
+            <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
           </div>
         </div>
 
@@ -407,19 +390,17 @@ function Page() {
             <div className="flex items-end">
               <Button
                 size="sm"
-                className="bg-green-500 hover:bg-green-600 h-7 px-3 rounded font-medium flex items-center gap-1"
-                onClick={handleManualRefresh}
-                title="Refresh Data"
+                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
+                onClick={handleDownloadExcel}
+                disabled={isLoading || !startDate || !endDate}
+                title="Download Excel Report"
               >
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                <span className="text-xs">Refresh</span>
+                {isLoading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3" />
+                )}
+                <span className="text-xs">Download</span>
               </Button>
             </div>
           </div>
