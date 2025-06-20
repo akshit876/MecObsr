@@ -359,7 +359,7 @@ function Page() {
       {/* Top Cards - Compact design */}
       <div className="grid grid-cols-12 gap-2">
         {/* Current Model */}
-        <div className="col-span-4 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-2 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div>
             <p className="text-xs text-gray-300 mb-1">Current Model</p>
             <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
@@ -367,8 +367,8 @@ function Page() {
         </div>
 
         {/* Date Selection */}
-        <div className="col-span-8 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div className="flex items-center gap-3">
+        <div className="col-span-10 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <div className="flex items-center gap-4">
             <div className="flex-1">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
               <DatePicker
@@ -390,17 +390,16 @@ function Page() {
             <div className="flex items-end">
               <Button
                 size="sm"
-                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
+                className="bg-blue-500 hover:bg-blue-600 h-8 w-8 p-0 rounded-full flex items-center justify-center"
                 onClick={handleDownloadExcel}
                 disabled={isLoading || !startDate || !endDate}
                 title="Download Excel Report"
               >
                 {isLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-3 w-3" />
+                  <Download className="h-4 w-4" />
                 )}
-                <span className="text-xs">Download</span>
               </Button>
             </div>
           </div>
