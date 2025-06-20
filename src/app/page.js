@@ -357,50 +357,69 @@ function Page() {
   return (
     <div className="h-screen w-full p-4 flex flex-col gap-3 bg-slate-50">
       {/* Top Cards - Compact design */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-12 gap-3">
         {/* Current Model */}
-        <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <p className="text-xs text-gray-300 mb-1">Current Model</p>
-          <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
-        </div>
-
-        {/* Date Selection & Download */}
-        <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div className="space-y-2">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <p className="text-xs text-gray-300 mb-1">Start Date</p>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  placeholder="Start Date"
-                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-                />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-300 mb-1">End Date</p>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  placeholder="End Date"
-                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-                />
-              </div>
+        <div className="col-span-4 p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-300 mb-1">Current Model</p>
+              <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
             </div>
-            <div className="flex justify-center">
+            <div className="flex items-center gap-2">
               <Button
                 size="sm"
-                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
+                className="bg-blue-500 hover:bg-blue-600 h-8 w-8 p-0 rounded-full flex items-center justify-center"
                 onClick={handleDownloadExcel}
                 disabled={isLoading || !startDate || !endDate}
                 title="Download Excel Report"
               >
                 {isLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-3 w-3" />
+                  <Download className="h-4 w-4" />
                 )}
-                <span className="text-xs">Download</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Date Selection */}
+        <div className="col-span-8 p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-xs text-gray-300 mb-1">Start Date</p>
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                placeholder="Start Date"
+                className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-gray-300 mb-1">End Date</p>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                placeholder="End Date"
+                className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                size="sm"
+                className="bg-green-500 hover:bg-green-600 h-7 px-3 rounded font-medium flex items-center gap-1"
+                onClick={handleManualRefresh}
+                title="Refresh Data"
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                <span className="text-xs">Refresh</span>
               </Button>
             </div>
           </div>

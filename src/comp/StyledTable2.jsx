@@ -7,13 +7,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { ArrowUpDown } from 'lucide-react';
 import React from 'react';
 
 const columnHelper = createColumnHelper();
 
 // Helper function to calculate piece number based on timestamp
-const calculatePieceNumber = (timestamp, data, index) => {
+const calculatePieceNumber = (timestamp, data) => {
   const recordDate = new Date(timestamp);
   const startOfDay = new Date(recordDate);
   startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
@@ -47,25 +46,19 @@ const createColumns = (data) => [
   columnHelper.accessor('SerialNumber', {
     header: 'Piece #',
     cell: (info) => {
-      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
+      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data);
       return <div className="font-medium text-center text-xs">{pieceNumber}</div>;
     },
     size: 60,
   }),
 
   columnHelper.accessor('MarkingData', {
-    header: 'Serial No/Model No',
+    header: 'Serial No',
     cell: (info) => {
       const serialNumber = info.row.original.SerialNumber;
-      const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
-        <div className="space-y-1">
-          <div className="text-[10px] font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
-            {serialNumber}
-          </div>
-          <div className="text-[10px] font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
-            {modelNumber}
-          </div>
+        <div className="text-[10px] font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
+          {serialNumber}
         </div>
       );
     },
