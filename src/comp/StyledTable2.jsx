@@ -224,11 +224,7 @@ const StyledTable = ({
       </div>
 
       {/* Scrollable table with server-side pagination */}
-      <div
-        ref={scrollRef}
-        className="w-full overflow-auto"
-        style={{ height: 'calc(100vh - 22rem)', minHeight: '400px', maxHeight: '70vh' }}
-      >
+      <div ref={scrollRef} className="w-full overflow-auto flex-1" style={{ minHeight: '300px' }}>
         <table className="w-full border-collapse relative min-w-full table-fixed">
           <thead className="sticky top-0 z-10 bg-white shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (

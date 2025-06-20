@@ -355,11 +355,11 @@ function Page() {
 
   // console.log({ csvData });
   return (
-    <div className="h-screen w-full p-4 flex flex-col gap-3 bg-slate-50">
+    <div className="h-screen w-full p-3 flex flex-col gap-2 bg-slate-50">
       {/* Top Cards - Compact design */}
-      <div className="grid grid-cols-12 gap-3">
+      <div className="grid grid-cols-12 gap-2">
         {/* Current Model */}
-        <div className="col-span-4 p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-4 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div>
             <p className="text-xs text-gray-300 mb-1">Current Model</p>
             <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
@@ -367,7 +367,7 @@ function Page() {
         </div>
 
         {/* Date Selection */}
-        <div className="col-span-8 p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-8 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
@@ -408,9 +408,9 @@ function Page() {
       </div>
 
       {/* Data Display & Controls Row */}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-2">
         {/* Marking Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-5 p-2 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -425,7 +425,7 @@ function Page() {
         </div>
 
         {/* Scanner Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-5 p-2 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
           <div
             className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
@@ -440,7 +440,7 @@ function Page() {
         </div>
 
         {/* Control Buttons - Fixed layout */}
-        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
+        <div className="col-span-2 p-2 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
           <div className="flex gap-1.5">
             <Button
@@ -466,7 +466,7 @@ function Page() {
       </div>
 
       {/* Table section - direct render */}
-      <div className="flex-grow">
+      <div className="flex-1 min-h-0">
         {isTableLoading ? (
           <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-sm">
             <LoadingSpinner />
