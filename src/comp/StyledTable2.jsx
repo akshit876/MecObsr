@@ -7,12 +7,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { ArrowUpDown } from 'lucide-react';
 import React from 'react';
 
 const columnHelper = createColumnHelper();
 
 // Helper function to calculate piece number based on timestamp
-const calculatePieceNumber = (timestamp, data) => {
+const calculatePieceNumber = (timestamp, data, index) => {
   const recordDate = new Date(timestamp);
   const startOfDay = new Date(recordDate);
   startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
@@ -46,7 +47,7 @@ const createColumns = (data) => [
   columnHelper.accessor('SerialNumber', {
     header: 'Piece #',
     cell: (info) => {
-      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data);
+      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
       return <div className="font-medium text-center text-xs">{pieceNumber}</div>;
     },
     size: 60,
@@ -186,7 +187,7 @@ const StyledTable = ({
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full border border-slate-600 rounded-lg p-4 text-center text-slate-400 bg-slate-800/50">
+      <div className="w-full border border-gray-200 rounded-lg p-4 text-center text-gray-500">
         {isLoading ? 'Loading data...' : 'No data available'}
       </div>
     );
@@ -207,19 +208,19 @@ const StyledTable = ({
   });
 
   return (
-    <div className="w-full border border-slate-600 rounded-lg overflow-hidden bg-slate-800/50">
+    <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-slate-700/50 px-3 py-2 border-b border-slate-600">
+      <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h3 className="text-xs font-semibold text-slate-300">Production Records</h3>
+          <h3 className="text-xs font-semibold text-gray-700">Production Records</h3>
           <div className="flex items-center gap-2">
-            {isLoadingMore && <span className="text-xs text-blue-400">Loading more...</span>}
-            {isLoading && <span className="text-xs text-blue-400">Loading...</span>}
+            {isLoadingMore && <span className="text-xs text-blue-600">Loading more...</span>}
+            {isLoading && <span className="text-xs text-blue-600">Loading...</span>}
             {onRefresh && (
               <button
                 onClick={onRefresh}
                 disabled={isLoading}
-                className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Refresh data"
               >
                 🔄 Refresh
@@ -236,14 +237,14 @@ const StyledTable = ({
         style={{ height: 'calc(100vh - 22rem)', minHeight: '400px', maxHeight: '70vh' }}
       >
         <table className="w-full border-collapse relative min-w-full table-fixed">
-          <thead className="sticky top-0 z-10 bg-slate-700 shadow-sm">
+          <thead className="sticky top-0 z-10 bg-white shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-slate-700 border-b border-slate-600">
+              <tr key={headerGroup.id} className="bg-white border-b border-gray-200">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
-                    className="text-left text-[11px] font-medium text-slate-300 p-2 bg-slate-700 border-r border-slate-600 last:border-r-0"
+                    className="text-left text-[11px] font-medium text-gray-600 p-2 bg-white border-r border-gray-100 last:border-r-0"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -255,15 +256,15 @@ const StyledTable = ({
             {table.getRowModel().rows.map((row, index) => {
               const result = row.original.Result;
               const rowClassName = `
-                border-b border-slate-600 last:border-0 h-10
+                border-b border-gray-100 last:border-0 h-10
                 ${
                   result === 'NG'
-                    ? 'bg-red-900/20 hover:bg-red-900/30'
+                    ? 'bg-red-50 hover:bg-red-100'
                     : result === 'OK'
-                      ? 'bg-green-900/20 hover:bg-green-900/30'
+                      ? 'bg-green-50 hover:bg-green-100'
                       : index % 2 === 0
-                        ? 'bg-slate-800 hover:bg-slate-700'
-                        : 'bg-slate-800/50 hover:bg-slate-700'
+                        ? 'bg-white hover:bg-gray-50'
+                        : 'bg-gray-25 hover:bg-gray-50'
                 }
                 transition-colors duration-150
               `;
@@ -274,12 +275,12 @@ const StyledTable = ({
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
-                      className={`p-1.5 text-xs border-r border-slate-600 last:border-r-0 ${
+                      className={`p-1.5 text-xs border-r border-gray-100 last:border-r-0 ${
                         result === 'NG'
-                          ? 'text-red-300 font-medium'
+                          ? 'text-red-900 font-medium'
                           : result === 'OK'
-                            ? 'text-green-300'
-                            : 'text-slate-300'
+                            ? 'text-green-900'
+                            : 'text-gray-800'
                       }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -293,9 +294,9 @@ const StyledTable = ({
 
         {/* Loading indicator at bottom */}
         {(isLoadingMore || isLoading) && (
-          <div className="flex justify-center items-center py-4 bg-slate-700/50">
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent"></div>
+          <div className="flex justify-center items-center py-4 bg-gray-50">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
               {isLoading ? 'Loading records...' : 'Loading more records...'}
             </div>
           </div>
@@ -303,8 +304,8 @@ const StyledTable = ({
 
         {/* End indicator when no more data */}
         {!hasMore && !isLoading && data.length > 0 && (
-          <div className="flex justify-center items-center py-4 bg-slate-700/50">
-            <div className="text-sm text-slate-400">
+          <div className="flex justify-center items-center py-4 bg-gray-50">
+            <div className="text-sm text-gray-500">
               All {totalRecords.toLocaleString()} records loaded
             </div>
           </div>
@@ -312,8 +313,8 @@ const StyledTable = ({
       </div>
 
       {/* Footer with record count */}
-      <div className="bg-slate-700/50 px-3 py-2 border-t border-slate-600">
-        <div className="text-xs text-slate-400 text-center">
+      <div className="bg-gray-50 px-3 py-2 border-t border-gray-200">
+        <div className="text-xs text-gray-600 text-center">
           {hasMore && !isLoading
             ? `Loaded ${data.length.toLocaleString()} of ${totalRecords.toLocaleString()} records - scroll for more`
             : data.length > 0
