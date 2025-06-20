@@ -369,7 +369,7 @@ function Page() {
         {/* Date Selection */}
         <div className="col-span-10 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="flex-1">
+            <div className="w-[40%]">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
               <DatePicker
                 selected={startDate}
@@ -378,7 +378,7 @@ function Page() {
                 className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
             </div>
-            <div className="flex-1">
+            <div className="w-[40%]">
               <p className="text-xs text-gray-300 mb-1">End Date</p>
               <DatePicker
                 selected={endDate}
@@ -387,7 +387,7 @@ function Page() {
                 className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
             </div>
-            <div className="flex items-end">
+            <div className="w-[10%] flex justify-center">
               <Button
                 size="sm"
                 className="bg-blue-500 hover:bg-blue-600 h-8 w-8 p-0 rounded-full flex items-center justify-center"
