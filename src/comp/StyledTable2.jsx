@@ -57,7 +57,7 @@ const createColumns = (data) => [
     cell: (info) => {
       const serialNumber = info.row.original.SerialNumber;
       return (
-        <div className="text-[10px] font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
+        <div className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
           {serialNumber}
         </div>
       );
