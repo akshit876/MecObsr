@@ -8,11 +8,21 @@ import { useCsvData } from '../../hooks/useSocket';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-// import { useRouter } from 'next/navigation';
-// import { useProtectedRoute } from '../../hooks/useProtectedRoute';
-import { Loader2, Download } from 'lucide-react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-// import useModelStore from '@/store/modelStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Loader2,
+  Download,
+  Activity,
+  TrendingUp,
+  AlertTriangle,
+  Square,
+  Zap,
+  Target,
+  BarChart3,
+  Clock,
+  Settings,
+  RefreshCw,
+} from 'lucide-react';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
@@ -48,6 +58,47 @@ const calculatePieceNumber = (timestamp, data) => {
   return pieceIndex + 1;
 };
 
+// Calculate production statistics
+const calculateStats = (data) => {
+  if (!data || data.length === 0) {
+    return {
+      totalProduction: 0,
+      successRate: 0,
+      todayProduction: 0,
+      averageCycleTime: 0,
+      okCount: 0,
+      ngCount: 0,
+    };
+  }
+
+  const today = new Date();
+  const startOfDay = new Date(today);
+  startOfDay.setHours(6, 0, 0, 0);
+
+  if (today.getHours() < 6) {
+    startOfDay.setDate(startOfDay.getDate() - 1);
+  }
+
+  const todayRecords = data.filter((record) => {
+    const recordDate = new Date(record.Timestamp);
+    return recordDate >= startOfDay;
+  });
+
+  const okCount = data.filter((record) => record.Result === 'OK').length;
+  const ngCount = data.filter((record) => record.Result === 'NG').length;
+  const totalCount = data.length;
+  const successRate = totalCount > 0 ? ((okCount / totalCount) * 100).toFixed(1) : 0;
+
+  return {
+    totalProduction: totalCount,
+    successRate: parseFloat(successRate),
+    todayProduction: todayRecords.length,
+    averageCycleTime: 0, // Could be calculated if cycle time data is available
+    okCount,
+    ngCount,
+  };
+};
+
 function Page() {
   const {
     csvData,
@@ -60,13 +111,9 @@ function Page() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  // const router = useRouter();
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
-  // const { selectedModel, modelFields } = useModelStore();
+  const [machineStatus, setMachineStatus] = useState('idle'); // idle, running, error, maintenance
   const socket = useSocket();
-
-  // const { status } = useProtectedRoute();
-  console.log({ startDate, endDate });
 
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
@@ -74,6 +121,9 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+
+  // Calculate stats
+  const stats = calculateStats(csvData?.data || []);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -116,10 +166,12 @@ function Page() {
       }
 
       setMarkingData(data.data);
+      setMachineStatus('running');
 
-      // Clear data after 300ms
+      // Clear data after 10 seconds
       markingTimeoutRef.current = setTimeout(() => {
         setMarkingData('');
+        setMachineStatus('idle');
       }, 10 * 1000);
     };
 
@@ -129,10 +181,12 @@ function Page() {
       }
 
       setScannerData(data.data);
+      setMachineStatus('running');
 
-      // Clear data after 300ms
+      // Clear data after 5 seconds
       scannerTimeoutRef.current = setTimeout(() => {
         setScannerData('');
+        setMachineStatus('idle');
       }, 5 * 1000);
     };
 
@@ -222,7 +276,7 @@ function Page() {
       return;
     }
 
-    setIsLoading(true); // Optional: manage loading state
+    setIsLoading(true);
     try {
       // Fetch data from the server
       const response = await fetch('/api/reports', {
@@ -320,7 +374,7 @@ function Page() {
     } catch (error) {
       toast.error('Error generating report: ' + error.message);
     } finally {
-      setIsLoading(false); // Optional: manage loading state
+      setIsLoading(false);
     }
   };
 
@@ -339,7 +393,8 @@ function Page() {
     }
     socket.emit('mark_on');
   };
-  const handleLigt = () => {
+
+  const handleLight = () => {
     if (!socket.connected) {
       toast.error('Socket not connected');
       return;
@@ -353,134 +408,311 @@ function Page() {
   // Add this line to use the machine events hook
   useMachineEvents(socket);
 
-  // console.log({ csvData });
-  return (
-    <div className="h-screen w-full p-4 flex flex-col gap-3 bg-slate-50">
-      {/* Top Cards - Compact design */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Current Model */}
-        <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <p className="text-xs text-gray-300 mb-1">Current Model</p>
-          <h3 className="text-sm font-semibold truncate">{currentModelNumber || 'N/A'}</h3>
-        </div>
+  // Get status color and icon
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'running':
+        return {
+          color: 'text-green-500',
+          bgColor: 'bg-green-500/10',
+          icon: Activity,
+          label: 'Running',
+        };
+      case 'error':
+        return {
+          color: 'text-red-500',
+          bgColor: 'bg-red-500/10',
+          icon: AlertTriangle,
+          label: 'Error',
+        };
+      case 'maintenance':
+        return {
+          color: 'text-yellow-500',
+          bgColor: 'bg-yellow-500/10',
+          icon: Settings,
+          label: 'Maintenance',
+        };
+      default:
+        return { color: 'text-gray-500', bgColor: 'bg-gray-500/10', icon: Square, label: 'Idle' };
+    }
+  };
 
-        {/* Date Selection & Download */}
-        <div className="p-3 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div className="space-y-2">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <p className="text-xs text-gray-300 mb-1">Start Date</p>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  placeholder="Start Date"
-                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-                />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-300 mb-1">End Date</p>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  placeholder="End Date"
-                  className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
-                />
-              </div>
+  const statusConfig = getStatusConfig(machineStatus);
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      {/* Header Section */}
+      <div className="border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Production Dashboard</h1>
+              <p className="text-slate-400 text-sm">
+                Real-time manufacturing monitoring &amp; control
+              </p>
             </div>
-            <div className="flex justify-center">
-              <Button
-                size="sm"
-                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
-                onClick={handleDownloadExcel}
-                disabled={isLoading || !startDate || !endDate}
-                title="Download Excel Report"
+            <div className="flex items-center gap-4">
+              {/* Machine Status Indicator */}
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${statusConfig.bgColor} border border-slate-600`}
               >
-                {isLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Download className="h-3 w-3" />
-                )}
-                <span className="text-xs">Download</span>
+                <StatusIcon className={`w-4 h-4 ${statusConfig.color}`} />
+                <span className={`text-sm font-medium ${statusConfig.color}`}>
+                  {statusConfig.label}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleManualRefresh}
+                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Data Display & Controls Row */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Marking Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Marking Data</p>
-          <div
-            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
-            ${markingData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
-          >
-            <span
-              className={`text-sm font-medium ${markingData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {markingData || 'Waiting for data...'}
-            </span>
-          </div>
+      <div className="p-6 space-y-6">
+        {/* KPI Cards Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Total Production */}
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-400">
+                  Total Production
+                </CardTitle>
+                <BarChart3 className="w-5 h-5 text-blue-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {stats.totalProduction.toLocaleString()}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">All time records</p>
+            </CardContent>
+          </Card>
+
+          {/* Success Rate */}
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-400">Success Rate</CardTitle>
+                <TrendingUp className="w-5 h-5 text-green-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{stats.successRate}%</div>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex-1 bg-slate-700 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${stats.successRate}%` }}
+                  />
+                </div>
+                <span className="text-xs text-slate-400">
+                  {stats.okCount}/{stats.totalProduction}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Today&apos;s Production */}
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-400">
+                  Today&apos;s Production
+                </CardTitle>
+                <Clock className="w-5 h-5 text-yellow-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{stats.todayProduction}</div>
+              <p className="text-xs text-slate-400 mt-1">Since 6:00 AM</p>
+            </CardContent>
+          </Card>
+
+          {/* Current Model */}
+          <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-400">Current Model</CardTitle>
+                <Target className="w-5 h-5 text-purple-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold text-white truncate">
+                {currentModelNumber || 'N/A'}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Active configuration</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Scanner Data */}
-        <div className="col-span-5 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Scanner Data</p>
-          <div
-            className={`h-8 rounded-lg flex items-center px-3 transition-all duration-300
-            ${scannerData ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}
-          >
-            <span
-              className={`text-sm font-medium ${scannerData ? 'text-blue-700' : 'text-gray-500'}`}
-            >
-              {scannerData || 'Waiting for data...'}
-            </span>
+        {/* Control & Data Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Real-time Data Display */}
+          <div className="lg:col-span-2 space-y-4">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-white">Real-time Data</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Marking Data */}
+                <div>
+                  <label className="text-sm font-medium text-slate-400 mb-2 block">
+                    Marking Data
+                  </label>
+                  <div
+                    className={`p-4 rounded-lg border transition-all duration-300 ${
+                      markingData
+                        ? 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                        : 'bg-slate-700/50 border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${markingData ? 'bg-blue-400 animate-pulse' : 'bg-slate-500'}`}
+                      />
+                      <span className="font-mono text-sm">
+                        {markingData || 'Waiting for marking data...'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scanner Data */}
+                <div>
+                  <label className="text-sm font-medium text-slate-400 mb-2 block">
+                    Scanner Data
+                  </label>
+                  <div
+                    className={`p-4 rounded-lg border transition-all duration-300 ${
+                      scannerData
+                        ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                        : 'bg-slate-700/50 border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${scannerData ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}
+                      />
+                      <span className="font-mono text-sm">
+                        {scannerData || 'Waiting for scanner data...'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Manual Controls */}
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-white">Manual Controls</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={handleScannerTrigger}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 h-12 text-sm font-medium"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Scanner Trigger
+              </Button>
+              <Button
+                onClick={handleMarkOn}
+                className="w-full bg-green-600 hover:bg-green-700 text-white border-0 h-12 text-sm font-medium"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Mark On
+              </Button>
+              <Button
+                onClick={handleLight}
+                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white border-0 h-12 text-sm font-medium"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Work Light
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Control Buttons - Fixed layout */}
-        <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
-          <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
-          <div className="flex gap-1.5">
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleScannerTrigger}
-            >
-              Scanner
-            </Button>
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleMarkOn}
-            >
-              Mark
-            </Button>
-            <Button
-              className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleLigt}
-            >
-              Light
-            </Button>
-          </div>
-        </div>
-      </div>
+        {/* Report Generation Section */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-white">Report Generation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">Start Date</label>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  placeholder="Select start date"
+                  className="w-full bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-400 mb-2 block">End Date</label>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  placeholder="Select end date"
+                  className="w-full bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 rounded-lg"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={handleDownloadExcel}
+                  disabled={isLoading || !startDate || !endDate}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 h-10"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Generate Report
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Table section - direct render */}
-      <div className="flex-grow">
-        {isTableLoading ? (
-          <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-sm">
-            <LoadingSpinner />
-          </div>
-        ) : (
-          <StyledTable2
-            data={csvData?.data || []}
-            hasMore={hasMore}
-            onLoadMore={loadMoreData}
-            onRefresh={handleManualRefresh}
-            isLoading={isTableLoading}
-            totalRecords={totalRecords}
-          />
-        )}
+        {/* Production Records Table */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-white">Production Records</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isTableLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Loading production data...</span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-900/50">
+                <StyledTable2
+                  data={csvData?.data || []}
+                  hasMore={hasMore}
+                  onLoadMore={loadMoreData}
+                  onRefresh={handleManualRefresh}
+                  isLoading={isTableLoading}
+                  totalRecords={totalRecords}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
