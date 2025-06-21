@@ -48,6 +48,12 @@ const calculatePieceNumber = (timestamp, data) => {
   return pieceIndex + 1;
 };
 
+// Helper function to show toast and clear previous ones
+const showToast = (type, message, options = {}) => {
+  toast.dismiss(); // Clear all existing toasts
+  toast[type](message, options);
+};
+
 function Page() {
   const {
     csvData,
@@ -85,7 +91,7 @@ function Page() {
         setCurrentModelNumber(data.currentModelNumber || 'No Model Selected');
       } catch (error) {
         console.error('Error fetching current model:', error);
-        toast.error('Failed to fetch current model configuration');
+        // Removed toast notification to reduce GUI messages
       }
     };
 
@@ -101,7 +107,7 @@ function Page() {
   // Manual refresh capability - modify existing refreshData to emit socket event
   const handleManualRefresh = () => {
     if (!socket?.connected) {
-      toast.error('Socket not connected');
+      // Removed toast notification to reduce GUI messages
       return;
     }
     socket.emit('request-recent-records', { limit: 100 });
@@ -137,7 +143,7 @@ function Page() {
     };
 
     const handleFirstScanOk = (data) => {
-      toast.warning('Part already marked!', {
+      showToast('warning', 'Part already marked!', {
         description: data.message,
         duration: 3000,
       });
@@ -155,9 +161,7 @@ function Page() {
       // Refresh the UI with latest data
       console.log('Cycle completed at:', event.timestamp);
       // The csv-data event will follow automatically
-      toast.success('Cycle completed successfully', {
-        duration: 2000,
-      });
+      // Removed toast notification to reduce GUI messages
     };
 
     // Detailed cycle status
@@ -166,15 +170,17 @@ function Page() {
       console.log(`Cycle ${event.cycleNumber}: ${event.success ? 'SUCCESS' : 'FAILED'}`);
       console.log('Result:', event.result);
 
-      // Show toast notification based on cycle result
-      if (event.success) {
-        toast.success(`Cycle ${event.cycleNumber}: ${event.result}`, {
-          duration: 3000,
-        });
-      } else {
-        toast.error(`Cycle ${event.cycleNumber}: FAILED - ${event.result}`, {
-          duration: 4000,
-        });
+      // Only show toast for OK/NG results, not for other status messages
+      if (event.result === 'OK' || event.result === 'NG') {
+        if (event.result === 'OK') {
+          showToast('success', `Cycle ${event.cycleNumber}: ${event.result}`, {
+            duration: 3000,
+          });
+        } else {
+          showToast('error', `Cycle ${event.cycleNumber}: ${event.result}`, {
+            duration: 4000,
+          });
+        }
       }
     };
 
@@ -218,7 +224,7 @@ function Page() {
     console.log('Downloading Excel with date range:', startDate, endDate);
 
     if (!startDate || !endDate) {
-      toast.error('Please select both start and end dates');
+      showToast('error', 'Please select both start and end dates');
       return;
     }
 
@@ -243,7 +249,7 @@ function Page() {
       const data = await response.json();
 
       if (data.length === 0) {
-        toast.error('No data found for the specified date range.');
+        showToast('error', 'No data found for the specified date range.');
         return;
       }
 
@@ -316,9 +322,9 @@ function Page() {
       a.click();
       window.URL.revokeObjectURL(url);
 
-      toast.success('Report generated successfully!');
+      showToast('success', 'Report generated successfully!');
     } catch (error) {
-      toast.error('Error generating report: ' + error.message);
+      showToast('error', 'Error generating report: ' + error.message);
     } finally {
       setIsLoading(false); // Optional: manage loading state
     }
@@ -326,7 +332,7 @@ function Page() {
 
   const handleScannerTrigger = () => {
     if (!socket.connected) {
-      toast.error('Socket not connected');
+      // Removed toast notification to reduce GUI messages
       return;
     }
     socket.emit('scanner_trigger');
@@ -334,14 +340,14 @@ function Page() {
 
   const handleMarkOn = () => {
     if (!socket.connected) {
-      toast.error('Socket not connected');
+      // Removed toast notification to reduce GUI messages
       return;
     }
     socket.emit('mark_on');
   };
   const handleLigt = () => {
     if (!socket.connected) {
-      toast.error('Socket not connected');
+      // Removed toast notification to reduce GUI messages
       return;
     }
     socket.emit('light_on');
