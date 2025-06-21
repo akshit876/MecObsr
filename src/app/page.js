@@ -143,9 +143,23 @@ function Page() {
     };
 
     const handleFirstScanOk = (data) => {
-      showToast('warning', 'Part already marked!', {
+      showToast('warning', '⚠️ PART ALREADY MARKED! ⚠️', {
         description: data.message,
-        duration: 3000,
+        duration: 5000,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#ff6b35',
+          color: 'white',
+          border: '3px solid #ff4500',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(255, 107, 53, 0.4)',
+        },
+        bodyStyle: {
+          fontSize: '14px',
+          fontWeight: '600',
+        },
       });
     };
 
@@ -170,18 +184,8 @@ function Page() {
       console.log(`Cycle ${event.cycleNumber}: ${event.success ? 'SUCCESS' : 'FAILED'}`);
       console.log('Result:', event.result);
 
-      // Only show toast for OK/NG results, not for other status messages
-      if (event.result === 'OK' || event.result === 'NG') {
-        if (event.result === 'OK') {
-          showToast('success', `Cycle ${event.cycleNumber}: ${event.result}`, {
-            duration: 3000,
-          });
-        } else {
-          showToast('error', `Cycle ${event.cycleNumber}: ${event.result}`, {
-            duration: 4000,
-          });
-        }
-      }
+      // Removed OK/NG toast notifications to reduce UI messages
+      // Only logging to console for debugging purposes
     };
 
     // Handle recent records response
