@@ -59,9 +59,8 @@ const TopBar = () => {
 
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-sm h-16 px-6 shadow-sm border-b border-gray-200">
-      {/* Left side - Logo and Search */}
+      {/* Left side - Search */}
       <div className="flex items-center gap-4">
-        <img src="/logo.png" alt="Laser Marking Solutions" className="h-10 w-auto mr-4" />
         <div className="relative flex items-center">
           <FaSearch className="absolute left-3 text-gray-400 h-4 w-4" />
           <input
