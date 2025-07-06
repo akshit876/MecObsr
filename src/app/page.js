@@ -473,23 +473,8 @@ function Page() {
           </div>
         </div>
 
-        {/* Alarm Status */}
-        <div className="col-span-2 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
-          <div>
-            <p className="text-xs text-gray-300 mb-1">Alarm Status</p>
-            <div className="flex items-center gap-1">
-              <div
-                className={`w-2 h-2 rounded-full ${activeAlarms.length > 0 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}
-              ></div>
-              <span className="text-xs font-medium">
-                {activeAlarms.length > 0 ? `${activeAlarms.length} Active` : 'All Clear'}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Date Selection */}
-        <div className="col-span-8 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-10 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-[40%]">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
