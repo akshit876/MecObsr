@@ -244,6 +244,41 @@ function Page() {
       });
     };
 
+    // Handle manual run bits success
+    const handleManualRunBitsSuccess = (data) => {
+      console.log('✅ Manual run bits success:', data.message);
+      // Optional: Show success notification for manual operations
+      showToast('success', `✅ ${data.message}`, {
+        duration: 2000,
+        style: {
+          fontSize: '14px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#059669',
+          color: 'white',
+          border: '2px solid #047857',
+          borderRadius: '6px',
+        },
+      });
+    };
+
+    // Handle manual run bits error
+    const handleManualRunBitsError = (error) => {
+      console.error('❌ Manual run bits error:', error.message);
+      showToast('error', `❌ ${error.message}`, {
+        duration: 3000,
+        style: {
+          fontSize: '14px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '2px solid #b91c1c',
+          borderRadius: '6px',
+        },
+      });
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
@@ -254,6 +289,8 @@ function Page() {
     socket.on('recent-records', handleRecentRecords);
     socket.on('alarm', handleAlarm);
     socket.on('alarm-clear', handleAlarmClear);
+    socket.on('manualRunBitsSuccess', handleManualRunBitsSuccess);
+    socket.on('error', handleManualRunBitsError);
 
     // Cleanup function
     return () => {
@@ -267,6 +304,8 @@ function Page() {
       socket.off('recent-records', handleRecentRecords);
       socket.off('alarm', handleAlarm);
       socket.off('alarm-clear', handleAlarmClear);
+      socket.off('manualRunBitsSuccess', handleManualRunBitsSuccess);
+      socket.off('error', handleManualRunBitsError);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
@@ -393,7 +432,8 @@ function Page() {
       // Removed toast notification to reduce GUI messages
       return;
     }
-    socket.emit('scanner_trigger');
+    // Manual Scan (1481.0)
+    socket.emit('manual-run-bits', { register: 1481, bit: 0, value: 1 });
   };
 
   const handleMarkOn = () => {
@@ -401,14 +441,17 @@ function Page() {
       // Removed toast notification to reduce GUI messages
       return;
     }
-    socket.emit('mark_on');
+    // Manual Mark On (1480.0)
+    socket.emit('manual-run-bits', { register: 1480, bit: 0, value: 1 });
   };
-  const handleLigt = () => {
+
+  const handleLight = () => {
     if (!socket.connected) {
       // Removed toast notification to reduce GUI messages
       return;
     }
-    socket.emit('light_on');
+    // Manual Light (1482.0)
+    socket.emit('manual-run-bits', { register: 1482, bit: 0, value: 1 });
   };
 
   // Use the pulse signal hook
@@ -535,7 +578,7 @@ function Page() {
             </Button>
             <Button
               className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
-              onClick={handleLigt}
+              onClick={handleLight}
             >
               Light
             </Button>
