@@ -80,6 +80,7 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [activeAlarms, setActiveAlarms] = useState([]);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -194,6 +195,55 @@ function Page() {
       updateProductionRecords();
     };
 
+    // Handle alarm events
+    const handleAlarm = (alarmData) => {
+      console.log('🚨 Alarm:', alarmData.message);
+
+      // Clear all previous alarms and set only the new one
+      setActiveAlarms([alarmData]);
+
+      // Show alarm notification
+      showToast('error', `🚨 ${alarmData.message}`, {
+        duration: 0, // Don't auto-dismiss
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '3px solid #b91c1c',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+        },
+        bodyStyle: {
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      });
+    };
+
+    // Handle alarm clear events
+    const handleAlarmClear = (alarmData) => {
+      console.log('✅ Alarm cleared:', alarmData.alarm);
+
+      // Remove alarm from active alarms list
+      setActiveAlarms((prev) => prev.filter((alarm) => alarm.alarm !== alarmData.alarm));
+
+      // Show alarm cleared notification
+      showToast('success', `✅ ${alarmData.description} cleared`, {
+        duration: 3000,
+        style: {
+          fontSize: '14px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#059669',
+          color: 'white',
+          border: '2px solid #047857',
+          borderRadius: '6px',
+        },
+      });
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
@@ -202,6 +252,8 @@ function Page() {
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
+    socket.on('alarm', handleAlarm);
+    socket.on('alarm-clear', handleAlarmClear);
 
     // Cleanup function
     return () => {
@@ -213,6 +265,8 @@ function Page() {
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
+      socket.off('alarm', handleAlarm);
+      socket.off('alarm-clear', handleAlarmClear);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
@@ -376,8 +430,23 @@ function Page() {
           </div>
         </div>
 
+        {/* Alarm Status */}
+        <div className="col-span-2 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <div>
+            <p className="text-xs text-gray-300 mb-1">Alarm Status</p>
+            <div className="flex items-center gap-1">
+              <div
+                className={`w-2 h-2 rounded-full ${activeAlarms.length > 0 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}
+              ></div>
+              <span className="text-xs font-medium">
+                {activeAlarms.length > 0 ? `${activeAlarms.length} Active` : 'All Clear'}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Date Selection */}
-        <div className="col-span-10 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-8 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-[40%]">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
