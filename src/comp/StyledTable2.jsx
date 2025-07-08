@@ -51,18 +51,18 @@ const createColumns = (data) => [
     },
     size: 60,
   }),
-  columnHelper.accessor('MarkingData', {
-    header: 'Serial No',
-    cell: (info) => {
-      const serialNumber = info.row.original.SerialNumber;
-      return (
-        <div className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
-          {serialNumber}
-        </div>
-      );
-    },
-    size: 100,
-  }),
+  // columnHelper.accessor('MarkingData', {
+  //   header: 'Serial No',
+  //   cell: (info) => {
+  //     const serialNumber = info.row.original.SerialNumber;
+  //     return (
+  //       <div className="font-bold text-gray-700 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
+  //         {serialNumber}
+  //       </div>
+  //     );
+  //   },
+  //   size: 100,
+  // }),
 
   columnHelper.accessor('MarkingData', {
     header: 'Marking Data',
