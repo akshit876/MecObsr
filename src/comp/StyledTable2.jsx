@@ -44,6 +44,7 @@ const calculatePieceNumber = (timestamp, data) => {
 
 const createColumns = (data) => [
   columnHelper.accessor('Timestamp', {
+    id: 'pieceNumber', // Unique key for Piece # column
     header: 'Piece #',
     cell: (info) => {
       const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data);
