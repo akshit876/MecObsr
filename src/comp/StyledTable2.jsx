@@ -43,7 +43,14 @@ const calculatePieceNumber = (timestamp, data) => {
 };
 
 const createColumns = (data) => [
-  // Removed SerialNumber column
+  columnHelper.accessor('Timestamp', {
+    header: 'Piece #',
+    cell: (info) => {
+      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data);
+      return <div className="font-medium text-center text-xs">{pieceNumber}</div>;
+    },
+    size: 60,
+  }),
   columnHelper.accessor('MarkingData', {
     header: 'Serial No',
     cell: (info) => {
