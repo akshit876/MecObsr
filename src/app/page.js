@@ -184,6 +184,70 @@ function Page() {
       updateProductionRecords();
     };
 
+    // Handle safety violations
+    const handleSafetyViolation = (data) => {
+      console.log('Safety violation detected:', data);
+
+      // Show critical toast notification
+      toast.error(`Alarm: ${data.violation}`, {
+        position: 'top-center',
+        autoClose: 8000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          textAlign: 'center',
+        },
+      });
+
+      // You can also update any safety status indicators here
+      // For example, you could set a state variable to show safety violation status
+    };
+
+    // Handle scanner trigger success
+    const handleScannerTriggerSuccess = (data) => {
+      console.log('Scanner triggered successfully:', data);
+      toast.success('Scanner triggered successfully', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    };
+
+    // Handle marking success
+    const handleMarkOnSuccess = (data) => {
+      console.log('Marking activated successfully:', data);
+      toast.success('Marking activated successfully', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    };
+
+    // Handle light on success
+    const handleLightOnSuccess = (data) => {
+      console.log('Light activated successfully:', data);
+      toast.success('Light activated successfully', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
@@ -192,6 +256,10 @@ function Page() {
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
+    socket.on('safety_violation', handleSafetyViolation);
+    socket.on('scanner_trigger_success', handleScannerTriggerSuccess);
+    socket.on('mark_on_success', handleMarkOnSuccess);
+    socket.on('light_on_success', handleLightOnSuccess);
 
     // Cleanup function
     return () => {
@@ -203,6 +271,10 @@ function Page() {
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
+      socket.off('safety_violation', handleSafetyViolation);
+      socket.off('scanner_trigger_success', handleScannerTriggerSuccess);
+      socket.off('mark_on_success', handleMarkOnSuccess);
+      socket.off('light_on_success', handleLightOnSuccess);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
