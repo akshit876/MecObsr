@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 import { useSocket } from '@/SocketContext';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useCsvData = () => {
   const [csvData, setCsvData] = useState(null);
@@ -34,14 +34,21 @@ export const useCsvData = () => {
       setLoading(false);
     };
 
+    const handleCsvData = (data) => {
+      // Update the table data directly when csv-data is received
+      setCsvData({ data: data.data }); // Adjust as per your data structure
+      setLoading(false);
+    };
+
     const handleError = (error) => {
       console.error('Socket error:', error);
       setError(error.message || 'Failed to fetch data');
       setLoading(false);
     };
 
-    // Set up socket listeners - only use paginated data
+    // Set up socket listeners
     socket.on('paginated-data', handlePaginatedData);
+    socket.on('csv-data', handleCsvData);
     socket.on('error', handleError);
 
     // Request initial data (500 records)
@@ -54,6 +61,7 @@ export const useCsvData = () => {
 
     return () => {
       socket.off('paginated-data', handlePaginatedData);
+      socket.off('csv-data', handleCsvData);
       socket.off('error', handleError);
     };
   }, [socket]);
