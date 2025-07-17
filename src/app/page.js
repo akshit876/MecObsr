@@ -152,30 +152,16 @@ function Page() {
 
     // Automatic refresh on cycle completion
     const handleCycleCompleted = (event) => {
-      // Refresh the UI with latest data
+      // No toast here, just log if needed
       console.log('Cycle completed at:', event.timestamp);
       // The csv-data event will follow automatically
-      toast.success('Cycle completed successfully', {
-        duration: 2000,
-      });
     };
 
     // Detailed cycle status
     const handleScanCycleCompleted = (event) => {
-      // Update cycle status indicators
+      // No toast here, just log if needed
       console.log(`Cycle ${event.cycleNumber}: ${event.success ? 'SUCCESS' : 'FAILED'}`);
       console.log('Result:', event.result);
-
-      // Show toast notification based on cycle result
-      if (event.success) {
-        toast.success(`Cycle ${event.cycleNumber}: ${event.result}`, {
-          duration: 3000,
-        });
-      } else {
-        toast.error(`Cycle ${event.cycleNumber}: FAILED - ${event.result}`, {
-          duration: 4000,
-        });
-      }
     };
 
     // Handle recent records response

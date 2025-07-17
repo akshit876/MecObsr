@@ -31,13 +31,13 @@ export const useCsvData = () => {
       setTotalRecords(pagination.total);
       setHasMore(pagination.hasMore);
       setCurrentPage(pagination.currentPage);
-      setLoading(false);
+      setLoading(false); // Only set loading false here
     };
 
     const handleCsvData = (data) => {
       // Update the table data directly when csv-data is received
       setCsvData({ data: data.data }); // Adjust as per your data structure
-      setLoading(false);
+      setLoading(false); // Only set loading false here
     };
 
     const handleError = (error) => {
@@ -70,7 +70,7 @@ export const useCsvData = () => {
   const loadMoreData = () => {
     if (!socket || loading || !hasMore) return;
 
-    setLoading(true);
+    setLoading(true); // Only set loading true here
     const skip = currentPage * 500; // Calculate skip based on current page
 
     socket.emit('request-paginated-data', {
@@ -85,7 +85,7 @@ export const useCsvData = () => {
   const refreshData = () => {
     if (!socket) return;
 
-    setLoading(true);
+    setLoading(true); // Only set loading true here
     setCurrentPage(1);
     setCsvData(null);
     setHasMore(true);
