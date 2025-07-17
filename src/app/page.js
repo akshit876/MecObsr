@@ -145,9 +145,9 @@ function Page() {
 
     // Initial data load
     const handleCsvData = (data) => {
+      // No need to call updateProductionRecords or refreshData here
+      // The useCsvData hook already updates the table data on csv-data event
       console.log('Received csv-data:', data);
-      // Update the production records table
-      updateProductionRecords();
     };
 
     // Automatic refresh on cycle completion
