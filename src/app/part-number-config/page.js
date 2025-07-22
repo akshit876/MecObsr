@@ -614,7 +614,12 @@ export default function PartNumberConfig() {
                 <div className="text-center">Check</div>
                 <div className="text-center">Order</div>
               </div>
-              <div className="p-1 space-y-0.5 flex-1 overflow-auto">{renderFields()}</div>
+              <div className="px-2 pt-2 pb-1 text-[13px] font-semibold text-gray-700">
+                Configure Fields
+              </div>
+              <div className="p-1 space-y-0.5 flex-1 overflow-auto max-h-[70vh] overflow-y-auto text-xs">
+                {renderFields()}
+              </div>
             </div>
 
             {/* Generated Part Number - Highlighted and Bigger */}
