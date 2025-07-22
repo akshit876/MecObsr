@@ -419,6 +419,7 @@ export default function PartNumberConfig() {
 
     const displayFields = fields
       .filter((field) => {
+        if (!field) return false;
         if (field.fieldName === 'Model Number' || renderedFields.has(field.fieldName)) {
           return false;
         }
@@ -431,51 +432,54 @@ export default function PartNumberConfig() {
         return a.order - b.order;
       });
 
-    return displayFields.map((field) => (
-      <div
-        key={field.fieldName}
-        className="grid grid-cols-[1fr,80px,80px] gap-4 items-center py-2 border-b border-gray-200"
-      >
-        <div className="flex items-center gap-4">
-          <span className="font-medium w-[150px]">
-            {field.fieldName.toUpperCase()}
-            {field.isRequired && <span className="text-red-500 ml-1">*</span>}
-          </span>
-          <Input
-            value={field.value}
-            onChange={(e) => {
-              const index = fields.findIndex((f) => f.fieldName === field.fieldName);
-              updateFieldValue(index, e.target.value);
-            }}
-            className={`h-8 ${['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(field.fieldName) ? 'bg-gray-100' : ''}`}
-            readOnly={['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(
-              field.fieldName,
-            )}
-            maxLength={field.maxLength}
-          />
+    return displayFields.map((field) => {
+      if (!field) return null;
+      return (
+        <div
+          key={field.fieldName}
+          className="grid grid-cols-[1fr,80px,80px] gap-4 items-center py-2 border-b border-gray-200"
+        >
+          <div className="flex items-center gap-4">
+            <span className="font-medium w-[150px]">
+              {field.fieldName.toUpperCase()}
+              {field.isRequired && <span className="text-red-500 ml-1">*</span>}
+            </span>
+            <Input
+              value={field.value}
+              onChange={(e) => {
+                const index = fields.findIndex((f) => f && f.fieldName === field.fieldName);
+                updateFieldValue(index, e.target.value);
+              }}
+              className={`h-8 ${['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(field.fieldName) ? 'bg-gray-100' : ''}`}
+              readOnly={['Year', 'Month', 'Date', 'Julian Date', 'Shift', 'Serial Number'].includes(
+                field.fieldName,
+              )}
+              maxLength={field.maxLength}
+            />
+          </div>
+          <div className="flex justify-center items-center">
+            <Checkbox
+              checked={field.isChecked}
+              onCheckedChange={() => toggleField(field.fieldName)}
+              className="h-5 w-5 border-2 rounded-sm"
+            />
+          </div>
+          <div className="flex justify-center items-center">
+            <Input
+              type="number"
+              value={field.order}
+              onChange={(e) => {
+                const index = fields.findIndex((f) => f && f.fieldName === field.fieldName);
+                updateOrder(index, e.target.value);
+              }}
+              className="w-16 h-8 text-center"
+              placeholder="#"
+              min="1"
+            />
+          </div>
         </div>
-        <div className="flex justify-center items-center">
-          <Checkbox
-            checked={field.isChecked}
-            onCheckedChange={() => toggleField(field.fieldName)}
-            className="h-5 w-5 border-2 rounded-sm"
-          />
-        </div>
-        <div className="flex justify-center items-center">
-          <Input
-            type="number"
-            value={field.order}
-            onChange={(e) => {
-              const index = fields.findIndex((f) => f.fieldName === field.fieldName);
-              updateOrder(index, e.target.value);
-            }}
-            className="w-16 h-8 text-center"
-            placeholder="#"
-            min="1"
-          />
-        </div>
-      </div>
-    ));
+      );
+    });
   };
 
   // Modify the handleReset function

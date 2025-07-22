@@ -2,6 +2,14 @@ import mongoose from 'mongoose';
 
 const DEFAULT_FIELDS = [
   {
+    fieldName: 'Model Number',
+    value: '',
+    isChecked: false,
+    isRequired: true,
+    order: 0,
+    maxLength: 20,
+  },
+  {
     fieldName: 'Identification installation location / barcode',
     value: '',
     isChecked: false,
