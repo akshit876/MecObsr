@@ -127,7 +127,8 @@ function Page() {
     // Set toast as active
     setIsValidationToastActive(true);
 
-    showToast('error', `❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
+    // Use regular toast instead of showToast to avoid clearing other toasts
+    toast.error(`❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
       description: `${errorList}${additionalText}`,
       duration: 15000, // Increased to 15 seconds
       style: {
@@ -248,7 +249,10 @@ function Page() {
         },
       ]);
 
-      // Don't show toast here - let the debounced effect handle it
+      // Show toast immediately if none is active
+      if (!isValidationToastActive) {
+        showValidationErrorsToast();
+      }
     };
 
     // Register all socket event handlers
@@ -297,17 +301,6 @@ function Page() {
 
     return () => clearInterval(clearErrorsInterval);
   }, [validationErrors]);
-
-  // Debounced validation error handler to prevent rapid-fire toasts
-  useEffect(() => {
-    if (validationErrors.length > 0 && !isValidationToastActive) {
-      const timer = setTimeout(() => {
-        showValidationErrorsToast();
-      }, 1000); // Wait 1 second before showing toast
-
-      return () => clearTimeout(timer);
-    }
-  }, [validationErrors, isValidationToastActive]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
