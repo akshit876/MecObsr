@@ -198,6 +198,20 @@ function Page() {
       updateProductionRecords();
     };
 
+    // Handle reset detected event - clear all validation toasts
+    const handleResetDetected = (data) => {
+      console.log('Reset detected:', data.message);
+
+      // Clear all validation toasts
+      toast.dismiss();
+
+      // Reset validation toast state
+      validationToastRef.current = null;
+      validationToastActive.current = false;
+
+      console.log('All validation toasts cleared due to reset');
+    };
+
     const handleValidationError = (data) => {
       console.log('Validation error received:', data);
       console.log('Data type:', typeof data);
@@ -299,6 +313,7 @@ function Page() {
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
     socket.on('validation_error', handleValidationError);
+    socket.on('reset_detected', handleResetDetected);
 
     // Cleanup function
     return () => {
@@ -311,6 +326,7 @@ function Page() {
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
       socket.off('validation_error', handleValidationError);
+      socket.off('reset_detected', handleResetDetected);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
