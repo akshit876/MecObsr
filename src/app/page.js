@@ -205,8 +205,9 @@ function Page() {
       const errorMessage =
         data?.details || data?.message || data?.error || 'Validation error occurred';
 
-      // Show toast directly with backend details
+      // Show toast directly with backend details ONLY if no validation toast is currently active
       if (!isValidationToastActive) {
+        console.log('No validation toast active, showing new one...');
         setIsValidationToastActive(true);
 
         toast.error(
@@ -243,10 +244,21 @@ function Page() {
             },
             onClose: () => {
               // Reset active state when toast is closed
+              console.log('Validation toast closed, resetting active state');
               setIsValidationToastActive(false);
             },
           },
         );
+
+        // Backup timeout to reset state after toast duration (plus buffer)
+        setTimeout(() => {
+          if (isValidationToastActive) {
+            console.log('Backup timeout: resetting validation toast state');
+            setIsValidationToastActive(false);
+          }
+        }, 16000); // 15 seconds + 1 second buffer
+      } else {
+        console.log('Validation toast already active, skipping new toast');
       }
     };
 
