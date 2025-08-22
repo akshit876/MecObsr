@@ -1,7 +1,7 @@
 'use client';
 import StyledTable2 from '@/comp/StyledTable2';
 import { format } from 'date-fns';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks/useSocket';
@@ -80,7 +80,6 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
-  const [validationErrors, setValidationErrors] = useState([]);
   const [isValidationToastActive, setIsValidationToastActive] = useState(false);
 
   useEffect(() => {
@@ -114,51 +113,6 @@ function Page() {
     }
     socket.emit('request-recent-records', { limit: 100 });
   };
-
-  // Move showValidationErrorsToast outside useEffect so it can be accessed by other effects
-  const showValidationErrorsToast = useCallback((errors) => {
-    console.log('showValidationErrorsToast called with errors:', errors);
-
-    const errorCount = errors.length;
-    const latestErrors = errors.slice(-3); // Show last 3 errors
-
-    console.log('Latest errors:', latestErrors);
-
-    const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
-
-    console.log('Error list:', errorList);
-
-    const additionalText = errorCount > 3 ? `\n... and ${errorCount - 3} more errors` : '';
-
-    // Set toast as active
-    setIsValidationToastActive(true);
-
-    // Use regular toast instead of showToast to avoid clearing other toasts
-    toast.error(`❌ Validation Error ❌`, {
-      description: `${errorList}${additionalText}`,
-      duration: 15000, // Increased to 15 seconds
-      style: {
-        fontSize: '16px',
-        fontWeight: 'bold',
-        textAlign: 'left',
-        backgroundColor: '#fef2f2',
-        color: '#dc2626',
-        border: '3px solid #fecaca',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
-        maxWidth: '500px',
-        whiteSpace: 'pre-line',
-      },
-      bodyStyle: {
-        fontSize: '14px',
-        fontWeight: '700',
-      },
-      onClose: () => {
-        // Reset active state when toast is closed
-        setIsValidationToastActive(false);
-      },
-    });
-  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -243,26 +197,57 @@ function Page() {
 
     const handleValidationError = (data) => {
       console.log('Validation error received:', data);
-      const errorMessage = data.details || 'Validation error occurred';
+      console.log('Data type:', typeof data);
+      console.log('Data keys:', Object.keys(data || {}));
+      console.log('Data.details:', data?.details);
+      console.log('Full data object:', JSON.stringify(data, null, 2));
 
-      // Create the new error object
-      const newError = {
-        id: Date.now(),
-        message: errorMessage,
-        timestamp: new Date().toLocaleTimeString(),
-      };
+      const errorMessage =
+        data?.details || data?.message || data?.error || 'Validation error occurred';
 
-      // Add new error to the list and show toast
-      setValidationErrors((prev) => {
-        const updatedErrors = [...prev, newError];
+      // Show toast directly with backend details
+      if (!isValidationToastActive) {
+        setIsValidationToastActive(true);
 
-        // Show toast immediately if none is active
-        if (!isValidationToastActive) {
-          showValidationErrorsToast(updatedErrors);
-        }
-
-        return updatedErrors;
-      });
+        toast.error(
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+              ❌ Validation Error ❌
+            </div>
+            <div
+              style={{
+                fontSize: '14px',
+                fontWeight: '700',
+                whiteSpace: 'pre-line',
+                textAlign: 'left',
+              }}
+            >
+              {errorMessage}
+            </div>
+          </div>,
+          {
+            position: 'top-right',
+            autoClose: 15000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            style: {
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              border: '3px solid #fecaca',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
+              maxWidth: '500px',
+            },
+            onClose: () => {
+              // Reset active state when toast is closed
+              setIsValidationToastActive(false);
+            },
+          },
+        );
+      }
     };
 
     // Register all socket event handlers
@@ -296,21 +281,6 @@ function Page() {
       }
     };
   }, [socket]);
-
-  // Clear validation errors every 5 minutes to prevent accumulation
-  useEffect(() => {
-    const clearErrorsInterval = setInterval(
-      () => {
-        if (validationErrors.length > 0) {
-          setValidationErrors([]);
-          setIsValidationToastActive(false);
-        }
-      },
-      5 * 60 * 1000,
-    ); // 5 minutes
-
-    return () => clearInterval(clearErrorsInterval);
-  }, [validationErrors]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
@@ -451,6 +421,15 @@ function Page() {
   // Add this line to use the machine events hook
   useMachineEvents(socket);
 
+  // Test function to verify toast is working
+  const testToast = () => {
+    console.log('Testing toast...');
+    toast.error('Test validation error message', {
+      position: 'top-right',
+      autoClose: 5000,
+    });
+  };
+
   // console.log({ csvData });
   return (
     <div className="h-screen w-full p-3 flex flex-col gap-2 bg-slate-50">
@@ -557,6 +536,13 @@ function Page() {
               onClick={handleLigt}
             >
               Light
+            </Button>
+            <Button
+              className="flex-1 bg-red-500 hover:bg-red-600 text-[11px] font-medium h-8 rounded-lg shadow-sm px-1"
+              onClick={testToast}
+              title="Test Toast"
+            >
+              Test
             </Button>
           </div>
         </div>
