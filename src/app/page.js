@@ -206,9 +206,9 @@ function Page() {
       const errorMessage =
         data?.details || data?.message || data?.error || 'Validation error occurred';
 
-      // Show toast directly with backend details ONLY if no validation toast is currently active
+      // If no validation toast is currently active, create one
       if (!isValidationToastActive) {
-        console.log('No validation toast active, showing new one...');
+        console.log('No validation toast active, creating persistent one...');
 
         // Dismiss any existing toasts to ensure clean display
         toast.dismiss();
@@ -234,8 +234,8 @@ function Page() {
           </div>,
           {
             position: 'top-right',
-            autoClose: 40000,
-            hideProgressBar: false,
+            autoClose: false, // Never auto-close - persist until manually closed
+            hideProgressBar: true, // No progress bar since it never closes
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
@@ -260,16 +260,11 @@ function Page() {
         // Store the toast ID in ref for cleanup
         validationToastRef.current = toastId;
 
-        // Backup timeout to reset state after toast duration (plus buffer)
-        setTimeout(() => {
-          if (isValidationToastActive) {
-            console.log('Backup timeout: resetting validation toast state');
-            setIsValidationToastActive(false);
-            validationToastRef.current = null;
-          }
-        }, 41000); // 40 seconds + 1 second buffer
+        console.log('Persistent validation toast created with ID:', toastId);
       } else {
-        console.log('Validation toast already active, skipping new toast');
+        console.log('Validation toast already active, keeping existing one - no new toast');
+        // Don't create new toast - keep the existing one visible
+        // The toast will persist until manually closed by user
       }
     };
 
