@@ -79,6 +79,9 @@ function Page() {
   const scannerTimeoutRef = useRef(null);
   const validationToastRef = useRef(null);
 
+  // Global flag to track if validation toast is active (persists across re-renders)
+  const validationToastActive = useRef(false);
+
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
 
@@ -205,6 +208,14 @@ function Page() {
       const errorMessage =
         data?.details || data?.message || data?.error || 'Validation error occurred';
 
+      // Check if validation toast is already active using the global flag
+      if (validationToastActive.current) {
+        console.log(
+          'Validation toast already active (flag check), keeping existing one - no new toast',
+        );
+        return; // Exit early - no new toast
+      }
+
       // Check if validation toast is already active using the ref directly
       if (validationToastRef.current) {
         console.log(
@@ -217,6 +228,15 @@ function Page() {
         return; // Exit early - no new toast
       }
 
+      // Additional check: also verify if there are any existing toasts by looking for validation error content
+      const existingValidationToasts = document.querySelectorAll('[class*="Toastify__toast"]');
+      for (let toast of existingValidationToasts) {
+        if (toast.textContent.includes('Validation Error')) {
+          console.log('Found existing validation toast in DOM, skipping new one');
+          return; // Exit early - no new toast
+        }
+      }
+
       console.log('No validation toast active, creating persistent one...');
 
       // Dismiss any existing toasts to ensure clean display
@@ -225,9 +245,6 @@ function Page() {
       // Create the persistent toast
       const toastId = toast.error(
         <div>
-          <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
-            ❌ Validation Error ❌
-          </div>
           <div
             style={{
               fontSize: '14px',
@@ -259,12 +276,16 @@ function Page() {
             // Reset active state when toast is closed
             console.log('Validation toast manually closed, resetting active state');
             validationToastRef.current = null;
+            validationToastActive.current = false;
           },
         },
       );
 
       // Store the toast ID in ref for cleanup
       validationToastRef.current = toastId;
+
+      // Set the global flag to true
+      validationToastActive.current = true;
 
       console.log('Persistent validation toast created with ID:', toastId);
     };
@@ -303,6 +324,7 @@ function Page() {
       if (validationToastRef.current) {
         toast.dismiss(validationToastRef.current);
         validationToastRef.current = null;
+        validationToastActive.current = false;
       }
     };
   }, [socket]);
