@@ -117,10 +117,16 @@ function Page() {
 
   // Move showValidationErrorsToast outside useEffect so it can be accessed by other effects
   const showValidationErrorsToast = useCallback((errors) => {
+    console.log('showValidationErrorsToast called with errors:', errors);
+
     const errorCount = errors.length;
     const latestErrors = errors.slice(-3); // Show last 3 errors
 
+    console.log('Latest errors:', latestErrors);
+
     const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
+
+    console.log('Error list:', errorList);
 
     const additionalText = errorCount > 3 ? `\n... and ${errorCount - 3} more errors` : '';
 
@@ -239,29 +245,24 @@ function Page() {
       console.log('Validation error received:', data);
       const errorMessage = data.details || 'Validation error occurred';
 
-      // Add new error to the list
-      setValidationErrors((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          message: errorMessage,
-          timestamp: new Date().toLocaleTimeString(),
-        },
-      ]);
+      // Create the new error object
+      const newError = {
+        id: Date.now(),
+        message: errorMessage,
+        timestamp: new Date().toLocaleTimeString(),
+      };
 
-      // Show toast immediately if none is active
-      if (!isValidationToastActive) {
-        // Pass the updated errors array to the function
-        const updatedErrors = [
-          ...validationErrors,
-          {
-            id: Date.now(),
-            message: errorMessage,
-            timestamp: new Date().toLocaleTimeString(),
-          },
-        ];
-        showValidationErrorsToast(updatedErrors);
-      }
+      // Add new error to the list and show toast
+      setValidationErrors((prev) => {
+        const updatedErrors = [...prev, newError];
+
+        // Show toast immediately if none is active
+        if (!isValidationToastActive) {
+          showValidationErrorsToast(updatedErrors);
+        }
+
+        return updatedErrors;
+      });
     };
 
     // Register all socket event handlers
@@ -294,7 +295,7 @@ function Page() {
         clearTimeout(scannerTimeoutRef.current);
       }
     };
-  }, [socket, validationErrors]);
+  }, [socket]);
 
   // Clear validation errors every 5 minutes to prevent accumulation
   useEffect(() => {
