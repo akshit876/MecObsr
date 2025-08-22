@@ -234,7 +234,7 @@ function Page() {
           </div>,
           {
             position: 'top-right',
-            autoClose: 15000,
+            autoClose: 40000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -267,7 +267,7 @@ function Page() {
             setIsValidationToastActive(false);
             validationToastRef.current = null;
           }
-        }, 16000); // 15 seconds + 1 second buffer
+        }, 41000); // 40 seconds + 1 second buffer
       } else {
         console.log('Validation toast already active, skipping new toast');
       }
