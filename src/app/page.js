@@ -81,7 +81,6 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
-  const [isValidationToastActive, setIsValidationToastActive] = useState(false);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -206,66 +205,68 @@ function Page() {
       const errorMessage =
         data?.details || data?.message || data?.error || 'Validation error occurred';
 
-      // If no validation toast is currently active, create one
-      if (!isValidationToastActive) {
-        console.log('No validation toast active, creating persistent one...');
-
-        // Dismiss any existing toasts to ensure clean display
-        toast.dismiss();
-
-        setIsValidationToastActive(true);
-
-        // Store the toast ID for cleanup
-        const toastId = toast.error(
-          <div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
-              ❌ Validation Error ❌
-            </div>
-            <div
-              style={{
-                fontSize: '14px',
-                fontWeight: '700',
-                whiteSpace: 'pre-line',
-                textAlign: 'left',
-              }}
-            >
-              {errorMessage}
-            </div>
-          </div>,
-          {
-            position: 'top-right',
-            autoClose: false, // Never auto-close - persist until manually closed
-            hideProgressBar: true, // No progress bar since it never closes
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            style: {
-              backgroundColor: '#fef2f2',
-              color: '#dc2626',
-              border: '3px solid #fecaca',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
-              maxWidth: '500px',
-            },
-            onClose: () => {
-              // Reset active state when toast is closed
-              console.log('Validation toast closed, resetting active state');
-              setIsValidationToastActive(false);
-              validationToastRef.current = null;
-            },
-          },
+      // Check if validation toast is already active using the ref directly
+      if (validationToastRef.current) {
+        console.log(
+          'Validation toast already active (ID:',
+          validationToastRef.current,
+          '), keeping existing one - no new toast',
         );
-
-        // Store the toast ID in ref for cleanup
-        validationToastRef.current = toastId;
-
-        console.log('Persistent validation toast created with ID:', toastId);
-      } else {
-        console.log('Validation toast already active, keeping existing one - no new toast');
         // Don't create new toast - keep the existing one visible
         // The toast will persist until manually closed by user
+        return; // Exit early - no new toast
       }
+
+      console.log('No validation toast active, creating persistent one...');
+
+      // Dismiss any existing toasts to ensure clean display
+      toast.dismiss();
+
+      // Create the persistent toast
+      const toastId = toast.error(
+        <div>
+          <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+            ❌ Validation Error ❌
+          </div>
+          <div
+            style={{
+              fontSize: '14px',
+              fontWeight: '700',
+              whiteSpace: 'pre-line',
+              textAlign: 'left',
+            }}
+          >
+            {errorMessage}
+          </div>
+        </div>,
+        {
+          position: 'top-right',
+          autoClose: false, // Never auto-close - persist until manually closed
+          hideProgressBar: true, // No progress bar since it never closes
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: '#fef2f2',
+            color: '#dc2626',
+            border: '3px solid #fecaca',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
+            maxWidth: '500px',
+          },
+          onClose: () => {
+            // Reset active state when toast is closed
+            console.log('Validation toast manually closed, resetting active state');
+            validationToastRef.current = null;
+          },
+        },
+      );
+
+      // Store the toast ID in ref for cleanup
+      validationToastRef.current = toastId;
+
+      console.log('Persistent validation toast created with ID:', toastId);
     };
 
     // Register all socket event handlers
