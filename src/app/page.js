@@ -77,6 +77,7 @@ function Page() {
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
   const scannerTimeoutRef = useRef(null);
+  const validationToastRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
@@ -208,9 +209,14 @@ function Page() {
       // Show toast directly with backend details ONLY if no validation toast is currently active
       if (!isValidationToastActive) {
         console.log('No validation toast active, showing new one...');
+
+        // Dismiss any existing toasts to ensure clean display
+        toast.dismiss();
+
         setIsValidationToastActive(true);
 
-        toast.error(
+        // Store the toast ID for cleanup
+        const toastId = toast.error(
           <div>
             <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
               ❌ Validation Error ❌
@@ -246,15 +252,20 @@ function Page() {
               // Reset active state when toast is closed
               console.log('Validation toast closed, resetting active state');
               setIsValidationToastActive(false);
+              validationToastRef.current = null;
             },
           },
         );
+
+        // Store the toast ID in ref for cleanup
+        validationToastRef.current = toastId;
 
         // Backup timeout to reset state after toast duration (plus buffer)
         setTimeout(() => {
           if (isValidationToastActive) {
             console.log('Backup timeout: resetting validation toast state');
             setIsValidationToastActive(false);
+            validationToastRef.current = null;
           }
         }, 16000); // 15 seconds + 1 second buffer
       } else {
@@ -290,6 +301,12 @@ function Page() {
       }
       if (scannerTimeoutRef.current) {
         clearTimeout(scannerTimeoutRef.current);
+      }
+
+      // Clear any active validation toast
+      if (validationToastRef.current) {
+        toast.dismiss(validationToastRef.current);
+        validationToastRef.current = null;
       }
     };
   }, [socket]);
