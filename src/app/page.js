@@ -194,6 +194,29 @@ function Page() {
       updateProductionRecords();
     };
 
+    const handleValidationError = (data) => {
+      console.log('Validation error received:', data);
+      const errorMessage = data.details || 'Validation error occurred';
+      showToast('error', '❌ VALIDATION ERROR ❌', {
+        description: errorMessage,
+        duration: 8000,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '3px solid #b91c1c',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+        },
+        bodyStyle: {
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      });
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
@@ -202,6 +225,7 @@ function Page() {
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
+    socket.on('validation_error', handleValidationError);
 
     // Cleanup function
     return () => {
@@ -213,6 +237,7 @@ function Page() {
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
+      socket.off('validation_error', handleValidationError);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
