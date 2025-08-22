@@ -80,6 +80,7 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [validationErrors, setValidationErrors] = useState([]);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -197,18 +198,43 @@ function Page() {
     const handleValidationError = (data) => {
       console.log('Validation error received:', data);
       const errorMessage = data.details || 'Validation error occurred';
-      showToast('error', '❌ VALIDATION ERROR ❌', {
-        description: errorMessage,
-        duration: 8000,
+
+      // Add new error to the list
+      setValidationErrors((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          message: errorMessage,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+
+      // Show consolidated validation errors toast
+      showValidationErrorsToast();
+    };
+
+    const showValidationErrorsToast = () => {
+      const errorCount = validationErrors.length;
+      const latestErrors = validationErrors.slice(-3); // Show last 3 errors
+
+      const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
+
+      const additionalText = errorCount > 3 ? `\n... and ${errorCount - 3} more errors` : '';
+
+      showToast('error', `❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
+        description: `${errorList}${additionalText}`,
+        duration: 10000,
         style: {
           fontSize: '16px',
           fontWeight: 'bold',
-          textAlign: 'center',
+          textAlign: 'left',
           backgroundColor: '#dc2626',
           color: 'white',
           border: '3px solid #b91c1c',
           borderRadius: '8px',
           boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+          maxWidth: '500px',
+          whiteSpace: 'pre-line',
         },
         bodyStyle: {
           fontSize: '14px',
@@ -247,7 +273,21 @@ function Page() {
         clearTimeout(scannerTimeoutRef.current);
       }
     };
-  }, [socket]);
+  }, [socket, validationErrors]);
+
+  // Clear validation errors every 5 minutes to prevent accumulation
+  useEffect(() => {
+    const clearErrorsInterval = setInterval(
+      () => {
+        if (validationErrors.length > 0) {
+          setValidationErrors([]);
+        }
+      },
+      5 * 60 * 1000,
+    ); // 5 minutes
+
+    return () => clearInterval(clearErrorsInterval);
+  }, [validationErrors]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
