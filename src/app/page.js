@@ -1,7 +1,7 @@
 'use client';
 import StyledTable2 from '@/comp/StyledTable2';
 import { format } from 'date-fns';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useCsvData } from '../../hooks/useSocket';
@@ -81,6 +81,7 @@ function Page() {
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
   const [validationErrors, setValidationErrors] = useState([]);
+  const [isValidationToastActive, setIsValidationToastActive] = useState(false);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -113,6 +114,44 @@ function Page() {
     }
     socket.emit('request-recent-records', { limit: 100 });
   };
+
+  // Move showValidationErrorsToast outside useEffect so it can be accessed by other effects
+  const showValidationErrorsToast = useCallback(() => {
+    const errorCount = validationErrors.length;
+    const latestErrors = validationErrors.slice(-3); // Show last 3 errors
+
+    const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
+
+    const additionalText = errorCount > 3 ? `\n... and ${errorCount - 3} more errors` : '';
+
+    // Set toast as active
+    setIsValidationToastActive(true);
+
+    showToast('error', `❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
+      description: `${errorList}${additionalText}`,
+      duration: 15000, // Increased to 15 seconds
+      style: {
+        fontSize: '16px',
+        fontWeight: 'bold',
+        textAlign: 'left',
+        backgroundColor: '#dc2626',
+        color: 'white',
+        border: '3px solid #b91c1c',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+        maxWidth: '500px',
+        whiteSpace: 'pre-line',
+      },
+      bodyStyle: {
+        fontSize: '14px',
+        fontWeight: '600',
+      },
+      onClose: () => {
+        // Reset active state when toast is closed
+        setIsValidationToastActive(false);
+      },
+    });
+  }, [validationErrors]);
 
   useEffect(() => {
     if (!socket) return;
@@ -209,38 +248,7 @@ function Page() {
         },
       ]);
 
-      // Show consolidated validation errors toast
-      showValidationErrorsToast();
-    };
-
-    const showValidationErrorsToast = () => {
-      const errorCount = validationErrors.length;
-      const latestErrors = validationErrors.slice(-3); // Show last 3 errors
-
-      const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
-
-      const additionalText = errorCount > 3 ? `\n... and ${errorCount - 3} more errors` : '';
-
-      showToast('error', `❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
-        description: `${errorList}${additionalText}`,
-        duration: 10000,
-        style: {
-          fontSize: '16px',
-          fontWeight: 'bold',
-          textAlign: 'left',
-          backgroundColor: '#dc2626',
-          color: 'white',
-          border: '3px solid #b91c1c',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
-          maxWidth: '500px',
-          whiteSpace: 'pre-line',
-        },
-        bodyStyle: {
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      });
+      // Don't show toast here - let the debounced effect handle it
     };
 
     // Register all socket event handlers
@@ -281,6 +289,7 @@ function Page() {
       () => {
         if (validationErrors.length > 0) {
           setValidationErrors([]);
+          setIsValidationToastActive(false);
         }
       },
       5 * 60 * 1000,
@@ -288,6 +297,17 @@ function Page() {
 
     return () => clearInterval(clearErrorsInterval);
   }, [validationErrors]);
+
+  // Debounced validation error handler to prevent rapid-fire toasts
+  useEffect(() => {
+    if (validationErrors.length > 0 && !isValidationToastActive) {
+      const timer = setTimeout(() => {
+        showValidationErrorsToast();
+      }, 1000); // Wait 1 second before showing toast
+
+      return () => clearTimeout(timer);
+    }
+  }, [validationErrors, isValidationToastActive]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
