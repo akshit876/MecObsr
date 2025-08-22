@@ -116,9 +116,9 @@ function Page() {
   };
 
   // Move showValidationErrorsToast outside useEffect so it can be accessed by other effects
-  const showValidationErrorsToast = useCallback(() => {
-    const errorCount = validationErrors.length;
-    const latestErrors = validationErrors.slice(-3); // Show last 3 errors
+  const showValidationErrorsToast = useCallback((errors) => {
+    const errorCount = errors.length;
+    const latestErrors = errors.slice(-3); // Show last 3 errors
 
     const errorList = latestErrors.map((err) => `• ${err.message} (${err.timestamp})`).join('\n');
 
@@ -128,31 +128,31 @@ function Page() {
     setIsValidationToastActive(true);
 
     // Use regular toast instead of showToast to avoid clearing other toasts
-    toast.error(`❌ ${errorCount} Validation Error${errorCount > 1 ? 's' : ''} ❌`, {
+    toast.error(`❌ Validation Error ❌`, {
       description: `${errorList}${additionalText}`,
       duration: 15000, // Increased to 15 seconds
       style: {
         fontSize: '16px',
         fontWeight: 'bold',
         textAlign: 'left',
-        backgroundColor: '#dc2626',
-        color: 'white',
-        border: '3px solid #b91c1c',
+        backgroundColor: '#fef2f2',
+        color: '#dc2626',
+        border: '3px solid #fecaca',
         borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
         maxWidth: '500px',
         whiteSpace: 'pre-line',
       },
       bodyStyle: {
         fontSize: '14px',
-        fontWeight: '600',
+        fontWeight: '700',
       },
       onClose: () => {
         // Reset active state when toast is closed
         setIsValidationToastActive(false);
       },
     });
-  }, [validationErrors]);
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -251,7 +251,16 @@ function Page() {
 
       // Show toast immediately if none is active
       if (!isValidationToastActive) {
-        showValidationErrorsToast();
+        // Pass the updated errors array to the function
+        const updatedErrors = [
+          ...validationErrors,
+          {
+            id: Date.now(),
+            message: errorMessage,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+        ];
+        showValidationErrorsToast(updatedErrors);
       }
     };
 
