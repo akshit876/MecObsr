@@ -9,6 +9,9 @@
     "dev:nocache": "next dev --no-cache",
     "build": "next build",
     "start": "next start",
+    "server": "node server.js",
+    "dev:server": "node server.js",
+    "test:plc": "node test-plc-control.js",
     "lint": "next lint",
     "format": "prettier --write ."
   },

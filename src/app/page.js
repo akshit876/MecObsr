@@ -406,38 +406,6 @@ function Page() {
     socket.emit('light_on');
   };
 
-  const handleManualControl = (controlType) => {
-    if (!socket.connected) {
-      toast.error('Socket not connected');
-      return;
-    }
-
-    // Emit the manual control event
-    socket.emit('manual_control', { type: controlType });
-
-    // Show success toast
-    toast.success(`${controlType} activated`, {
-      position: 'top-right',
-      autoClose: 2000,
-    });
-  };
-
-  const handleJogControl = (jogType) => {
-    if (!socket.connected) {
-      toast.error('Socket not connected');
-      return;
-    }
-
-    // Emit the jog control event
-    socket.emit('jog_control', { type: jogType });
-
-    // Show success toast
-    toast.success(`${jogType} activated`, {
-      position: 'top-right',
-      autoClose: 1500,
-    });
-  };
-
   // Use the pulse signal hook
   usePulseSignal(socket);
 
@@ -557,72 +525,6 @@ function Page() {
               >
                 Light
               </Button>
-              <Button
-                className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
-                onClick={() => handleManualControl('HMOE')}
-              >
-                HMOE
-              </Button>
-            </div>
-            {/* Row 3 */}
-            <div className="flex gap-1.5">
-              <Button
-                className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
-                onClick={() => handleManualControl('LoGo')}
-              >
-                LoGo
-              </Button>
-              <Button
-                className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
-                onClick={() => handleManualControl('CODE')}
-              >
-                CODE
-              </Button>
-            </div>
-            {/* Row 4 */}
-            <div className="flex gap-1.5">
-              <Button
-                className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
-                onClick={() => handleManualControl('CASTING_TRACEABILITY')}
-              >
-                CASTING
-              </Button>
-              <Button
-                className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
-                onClick={() => handleManualControl('HUMAN_READABLE')}
-              >
-                HUMAN
-              </Button>
-            </div>
-            {/* Row 5 - Jog Controls */}
-            <div className="pt-1 border-t border-gray-200">
-              <p className="text-[9px] font-medium text-gray-500 mb-1 text-center">JOG CONTROLS</p>
-              <div className="grid grid-cols-2 gap-1">
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-[9px] font-medium h-6 rounded px-1"
-                  onClick={() => handleJogControl('X_JOG_PLUS')}
-                >
-                  X JOG+
-                </Button>
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-[9px] font-medium h-6 rounded px-1"
-                  onClick={() => handleJogControl('X_JOG_MINUS')}
-                >
-                  X JOG-
-                </Button>
-                <Button
-                  className="bg-green-600 hover:bg-green-700 text-[9px] font-medium h-6 rounded px-1"
-                  onClick={() => handleJogControl('Z_JOG_PLUS')}
-                >
-                  Z JOG+
-                </Button>
-                <Button
-                  className="bg-green-600 hover:bg-green-700 text-[9px] font-medium h-6 rounded px-1"
-                  onClick={() => handleJogControl('Z_JOG_MINUS')}
-                >
-                  Z JOG-
-                </Button>
-              </div>
             </div>
           </div>
         </div>
