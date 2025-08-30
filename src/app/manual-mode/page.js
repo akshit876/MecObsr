@@ -390,63 +390,6 @@ const ManualMode = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Debug PLC Mappings */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
-          <h3 className="text-lg font-bold text-yellow-800 mb-4">🔍 Debug: PLC Mappings</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="bg-white p-3 rounded border">
-              <div className="font-bold">HOME</div>
-              <div className="font-mono text-blue-600">
-                {getPLCMapping('HOME')?.register}.{getPLCMapping('HOME')?.bit}
-              </div>
-              <div className="text-xs text-gray-500">Expected: 1900.0</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-bold">LOGO</div>
-              <div className="font-mono text-blue-600">
-                {getPLCMapping('LOGO')?.register}.{getPLCMapping('LOGO')?.bit}
-              </div>
-              <div className="text-xs text-gray-500">Expected: 1900.1</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-bold">X_JOG_PLUS</div>
-              <div className="font-mono text-blue-600">
-                {getPLCMapping('X_JOG_PLUS')?.register}.{getPLCMapping('X_JOG_PLUS')?.bit}
-              </div>
-              <div className="text-xs text-gray-500">Expected: 1901.0</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-bold">Z_JOG_PLUS</div>
-              <div className="font-mono text-blue-600">
-                {getPLCMapping('Z_JOG_PLUS')?.register}.{getPLCMapping('Z_JOG_PLUS')?.bit}
-              </div>
-              <div className="text-xs text-gray-500">Expected: 1901.2</div>
-            </div>
-          </div>
-          <div className="mt-4 p-4 bg-white rounded border">
-            <div className="font-bold text-red-600 mb-2">Raw Function Test:</div>
-            <div className="text-sm">
-              <div>
-                <strong>getPLCMapping(&apos;HOME&apos;):</strong>{' '}
-                {JSON.stringify(getPLCMapping('HOME'))}
-              </div>
-              <div>
-                <strong>getPLCMapping(&apos;LOGO&apos;):</strong>{' '}
-                {JSON.stringify(getPLCMapping('LOGO'))}
-              </div>
-              <div>
-                <strong>getPLCMapping(&apos;X_JOG_PLUS&apos;):</strong>{' '}
-                {JSON.stringify(getPLCMapping('X_JOG_PLUS'))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 text-xs text-yellow-700">
-            <strong>Note:</strong> This debug section shows what the getPLCMapping function is
-            actually returning vs what we expect.
-          </div>
-        </div>
-
         {/* Status Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* System Status */}
@@ -516,7 +459,13 @@ const ManualMode = () => {
                 register: mapping?.register,
                 bit: mapping?.bit,
                 expected:
-                  button.id === 'HOME' ? '1900.0' : button.id === 'LOGO' ? '1900.1' : 'Unknown',
+                  button.id === 'HOME'
+                    ? '1480.0'
+                    : button.id === 'LOGO'
+                      ? '1481.0'
+                      : button.id === 'CODE'
+                        ? '1482.0'
+                        : 'Unknown',
               });
 
               return (

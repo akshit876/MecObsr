@@ -1,26 +1,31 @@
 // PLC Register Mapping for Manual Mode Controls
-// All operations use the 1900 series registers for consistency
+// Updated with correct register numbers from system configuration
 
 export const PLC_MAPPING = {
   // Main Control Operations (Manual Events - Auto OFF after 1 second)
   MANUAL_CONTROLS: {
-    HOME: { register: 1900, bit: 0, description: 'HOME Operation' },
-    LOGO: { register: 1900, bit: 1, description: 'LOGO Operation' },
-    CODE: { register: 1900, bit: 2, description: 'CODE Operation' },
-    CASTING_TRACEABILITY: { register: 1900, bit: 3, description: 'Casting Traceability' },
-    HUMAN_READABLE: { register: 1900, bit: 4, description: 'Human Readable' },
-    SCANNER: { register: 1900, bit: 5, description: 'Scanner Operation' },
-    SCANNER_TRIGGER: { register: 1900, bit: 6, description: 'Scanner Trigger' },
-    MARKON: { register: 1900, bit: 7, description: 'Marking On' },
-    LIGHT: { register: 1900, bit: 8, description: 'Light Control' },
+    HOME: { register: 1480, bit: 0, description: 'HOME Operation' },
+    LOGO: { register: 1481, bit: 0, description: 'LOGO Operation' },
+    CODE: { register: 1482, bit: 0, description: 'CODE Operation' },
+    CASTING_TRACEABILITY: { register: 1483, bit: 0, description: 'Casting Traceability' },
+    HUMAN_READABLE: { register: 1484, bit: 0, description: 'Human Readable' },
+    SCANNER: { register: 1485, bit: 0, description: 'Scanner Operation' },
+    SCANNER_TRIGGER: { register: 1486, bit: 0, description: 'Scanner Trigger' },
+    MARKON: { register: 1487, bit: 0, description: 'Marking On' },
+    LIGHT: { register: 1488, bit: 0, description: 'Light Control' },
   },
 
   // Jog Controls (Keep ON until explicitly stopped)
   JOG_CONTROLS: {
-    X_JOG_PLUS: { register: 1901, bit: 0, description: 'X Axis Jog Forward' },
-    X_JOG_MINUS: { register: 1901, bit: 1, description: 'X Axis Jog Backward' },
-    Z_JOG_PLUS: { register: 1901, bit: 2, description: 'Z Axis Jog Forward' },
-    Z_JOG_MINUS: { register: 1901, bit: 3, description: 'Z Axis Jog Backward' },
+    X_JOG_PLUS: { register: 1490, bit: 0, description: 'X Axis Jog Forward' },
+    X_JOG_MINUS: { register: 1491, bit: 0, description: 'X Axis Jog Backward' },
+    Z_JOG_PLUS: { register: 1492, bit: 0, description: 'Z Axis Jog Forward' },
+    Z_JOG_MINUS: { register: 1493, bit: 0, description: 'Z Axis Jog Backward' },
+  },
+
+  // Emergency Control Operations
+  EMERGENCY_CONTROLS: {
+    EMERGENCY_STOP: { register: 1499, bit: 0, description: 'Emergency Stop' },
   },
 
   // Additional Control Operations (Manual Events - Auto OFF after 1 second)
@@ -87,7 +92,7 @@ export const isManualControl = (eventName) => {
 
 // Default register and bit for unknown events
 export const DEFAULT_MAPPING = {
-  register: 1900,
+  register: 1480,
   bit: 15, // Use last bit of first register for unknown events
   description: 'Unknown Operation',
 };
