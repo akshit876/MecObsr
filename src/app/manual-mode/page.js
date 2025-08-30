@@ -1,13 +1,30 @@
 /* eslint-disable consistent-return */
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import { getPLCMapping } from '@/constants/plcMapping';
+import { useSocket } from '@/SocketContext';
 
 const ManualMode = () => {
   const [activeJogEvents, setActiveJogEvents] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const socket = useSocket();
+
+  // Emit manual mode enter event when component mounts
+  useEffect(() => {
+    if (socket?.connected) {
+      // UI emits this event
+      socket.emit('manual_mode_enter', { reason: 'User in manual mode' });
+
+      // Backend pauses the cycle
+      // scannerController.pauseCycle('User in manual mode');
+
+      console.log('Manual mode entered - cycle paused');
+    } else {
+      console.log('Socket not connected - cannot emit manual_mode_enter event');
+    }
+  }, [socket]);
 
   const handleButtonClick = async (buttonId) => {
     try {
