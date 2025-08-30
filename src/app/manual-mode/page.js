@@ -368,7 +368,7 @@ const ManualMode = () => {
       </div>
 
       {/* Emergency Stop Section */}
-      <div className="p-4 rounded-xl bg-white shadow-sm">
+      {/* <div className="p-4 rounded-xl bg-white shadow-sm">
         <div className="flex justify-center">
           <Button
             onClick={handleEmergencyStop}
@@ -378,7 +378,7 @@ const ManualMode = () => {
             🚨 EMERGENCY STOP 🚨
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
