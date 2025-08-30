@@ -10,7 +10,46 @@ const ManualMode = () => {
   const [activeJogEvents, setActiveJogEvents] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [cycleStatus, setCycleStatus] = useState({ isPaused: false, pauseReason: '' });
+  const [connectionStatus, setConnectionStatus] = useState({
+    port3002: false,
+    port3003: false,
+  });
   const { socket, socket3002, socket3003 } = useSocket();
+
+  // Monitor connection status
+  useEffect(() => {
+    if (socket3002) {
+      setConnectionStatus((prev) => ({ ...prev, port3002: socket3002.connected }));
+
+      const handleConnect = () => setConnectionStatus((prev) => ({ ...prev, port3002: true }));
+      const handleDisconnect = () => setConnectionStatus((prev) => ({ ...prev, port3002: false }));
+
+      socket3002.on('connect', handleConnect);
+      socket3002.on('disconnect', handleDisconnect);
+
+      return () => {
+        socket3002.off('connect', handleConnect);
+        socket3002.off('disconnect', handleDisconnect);
+      };
+    }
+  }, [socket3002]);
+
+  useEffect(() => {
+    if (socket3003) {
+      setConnectionStatus((prev) => ({ ...prev, port3003: socket3003.connected }));
+
+      const handleConnect = () => setConnectionStatus((prev) => ({ ...prev, port3003: true }));
+      const handleDisconnect = () => setConnectionStatus((prev) => ({ ...prev, port3003: false }));
+
+      socket3003.on('connect', handleConnect);
+      socket3003.on('disconnect', handleDisconnect);
+
+      return () => {
+        socket3003.off('connect', handleConnect);
+        socket3003.off('disconnect', handleDisconnect);
+      };
+    }
+  }, [socket3003]);
 
   // Emit manual mode enter event when component mounts
   useEffect(() => {
