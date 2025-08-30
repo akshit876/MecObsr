@@ -58,12 +58,12 @@ const createColumns = (data) => [
     cell: (info) => {
       const serialNumber = info.row.original.SerialNumber;
       return (
-        <div className="text-sm font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
+        <div className="text-sm font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50">
           {serialNumber}
         </div>
       );
     },
-    size: 100,
+    size: 120,
   }),
 
   columnHelper.accessor('ModelNumber', {
@@ -71,12 +71,12 @@ const createColumns = (data) => [
     cell: (info) => {
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
-        <div className="text-sm font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
+        <div className="text-sm font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50">
           {modelNumber}
         </div>
       );
     },
-    size: 100,
+    size: 150,
   }),
 
   columnHelper.accessor('MarkingData', {
@@ -89,7 +89,7 @@ const createColumns = (data) => [
         {info.getValue()}
       </div>
     ),
-    size: 200,
+    size: 180,
     id: 'markingDataContent',
   }),
 
@@ -103,7 +103,7 @@ const createColumns = (data) => [
         {info.getValue()}
       </div>
     ),
-    size: 200,
+    size: 180,
   }),
 
   columnHelper.accessor('Result', {
