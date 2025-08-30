@@ -9,7 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ShiftSetting = () => {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const [shifts, setShifts] = useState({
     A: '',
     B: '',

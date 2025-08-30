@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useSocket } from '@/SocketContext';
 
 export function useErrorToast() {
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   useEffect(() => {
     if (!socket) return;

@@ -6,7 +6,7 @@ export function useModbus({ readRange, writeRange, readOnly = false }) {
   const [readRegisters, setReadRegisters] = useState({});
   const [writeRegisters, setWriteRegisters] = useState({});
   const [refresh, setRefresh] = useState(false);
-  const socket = useSocket(); // Get the socket instance from context
+  const { socket } = useSocket(); // Get the socket instance from context
 
   const fetchReadRegisters = useCallback(() => {
     if (socket && readOnly) {

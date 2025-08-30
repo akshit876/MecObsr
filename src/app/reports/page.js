@@ -16,7 +16,7 @@ const ReportsPage = () => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const handleDownload = async () => {
     if (!startDate || !endDate) {

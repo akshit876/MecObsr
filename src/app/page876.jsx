@@ -14,7 +14,7 @@ export default function Page() {
   const [endDate, setEndDate] = useState(null);
   const [markingData, setMarkingData] = useState('Waiting for data...');
   const [scannerData, setScannerData] = useState('Waiting for data...');
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const handleScannerTrigger = () => {
     socket?.emit('scanner_trigger');

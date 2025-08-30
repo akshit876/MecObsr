@@ -9,7 +9,7 @@ export const useCsvData = () => {
   const [hasMore, setHasMore] = useState(true);
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   useEffect(() => {
     if (!socket) return;

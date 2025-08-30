@@ -63,7 +63,7 @@ function Page() {
   // const router = useRouter();
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   // const { selectedModel, modelFields } = useModelStore();
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });

@@ -18,7 +18,7 @@ function SerialConfig() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { status } = useProtectedRoute();
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   // Fetch current configuration on mount
   useEffect(() => {

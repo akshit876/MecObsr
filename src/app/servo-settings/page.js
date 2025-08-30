@@ -24,7 +24,7 @@ const ServoSettings = () => {
     servomarkposition: false,
   });
   const inputRefs = useRef({}); // Create refs for input elements
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   useEffect(() => {
     if (socket) {

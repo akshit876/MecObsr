@@ -82,7 +82,7 @@ const ModbusSection = ({ section }) => {
 };
 
 const ModbusUI = () => {
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const handleManualRun = (operation) => {
     if (socket) {
