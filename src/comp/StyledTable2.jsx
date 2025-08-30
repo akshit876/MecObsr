@@ -7,13 +7,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { ArrowUpDown } from 'lucide-react';
+
 import React from 'react';
 
 const columnHelper = createColumnHelper();
 
 // Helper function to calculate piece number based on timestamp
-const calculatePieceNumber = (timestamp, data, index) => {
+const calculatePieceNumber = (timestamp, data) => {
   const recordDate = new Date(timestamp);
   const startOfDay = new Date(recordDate);
   startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
@@ -44,26 +44,26 @@ const calculatePieceNumber = (timestamp, data, index) => {
 };
 
 const createColumns = (data) => [
-  columnHelper.accessor('SerialNumber', {
+  columnHelper.accessor('Timestamp', {
     header: 'Piece #',
     cell: (info) => {
-      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data, info.row.index);
-      return <div className="font-medium text-center text-xs">{pieceNumber}</div>;
+      const pieceNumber = calculatePieceNumber(info.row.original.Timestamp, data);
+      return <div className="font-medium text-center text-sm">{pieceNumber}</div>;
     },
     size: 60,
   }),
 
-  columnHelper.accessor('MarkingData', {
-    header: 'Serial No/Model No',
+  columnHelper.accessor('SerialNumber', {
+    header: 'Serial No',
     cell: (info) => {
       const serialNumber = info.row.original.SerialNumber;
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
         <div className="space-y-1">
-          <div className="text-[10px] font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
+          <div className="text-sm font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
             {serialNumber}
           </div>
-          <div className="text-[10px] font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
+          <div className="text-sm font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
             {modelNumber}
           </div>
         </div>
@@ -76,7 +76,7 @@ const createColumns = (data) => [
     header: 'Marking Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-sm whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -90,7 +90,7 @@ const createColumns = (data) => [
     header: 'Scanner Data',
     cell: (info) => (
       <div
-        className="font-bold text-gray-700 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis"
+        className="font-bold text-gray-700 text-sm whitespace-nowrap overflow-hidden text-ellipsis"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -105,9 +105,9 @@ const createColumns = (data) => [
       const result = info.getValue();
       const styles =
         result === 'OK'
-          ? 'bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold'
+          ? 'bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full font-extrabold'
           : result === 'NG'
-            ? 'bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold shadow-sm'
+            ? 'bg-red-600 text-white text-sm px-3 py-1 rounded-full font-extrabold shadow-sm'
             : '';
       return <span className={styles}>{result}</span>;
     },
@@ -117,7 +117,7 @@ const createColumns = (data) => [
   columnHelper.accessor('Timestamp', {
     header: 'Created At',
     cell: (info) => (
-      <div className="text-gray-600 text-[10px] leading-tight whitespace-nowrap">
+      <div className="text-gray-600 text-xs leading-tight whitespace-nowrap">
         {new Date(info.getValue()).toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
@@ -212,15 +212,15 @@ const StyledTable = ({
       {/* Header */}
       <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h3 className="text-xs font-semibold text-gray-700">Production Records</h3>
+          <h3 className="text-sm font-semibold text-gray-700">Production Records</h3>
           <div className="flex items-center gap-2">
-            {isLoadingMore && <span className="text-xs text-blue-600">Loading more...</span>}
-            {isLoading && <span className="text-xs text-blue-600">Loading...</span>}
+            {isLoadingMore && <span className="text-sm text-blue-600">Loading more...</span>}
+            {isLoading && <span className="text-sm text-blue-600">Loading...</span>}
             {onRefresh && (
               <button
                 onClick={onRefresh}
                 disabled={isLoading}
-                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-sm px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Refresh data"
               >
                 🔄 Refresh
@@ -244,7 +244,7 @@ const StyledTable = ({
                   <th
                     key={header.id}
                     style={{ width: header.getSize() }}
-                    className="text-left text-[11px] font-medium text-gray-600 p-2 bg-white border-r border-gray-100 last:border-r-0"
+                    className="text-left text-sm font-medium text-gray-600 p-2 bg-white border-r border-gray-100 last:border-r-0"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -275,7 +275,7 @@ const StyledTable = ({
                     <td
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
-                      className={`p-1.5 text-xs border-r border-gray-100 last:border-r-0 ${
+                      className={`p-2 text-sm border-r border-gray-100 last:border-r-0 ${
                         result === 'NG'
                           ? 'text-red-900 font-medium'
                           : result === 'OK'
@@ -295,7 +295,7 @@ const StyledTable = ({
         {/* Loading indicator at bottom */}
         {(isLoadingMore || isLoading) && (
           <div className="flex justify-center items-center py-4 bg-gray-50">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-base text-gray-600">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
               {isLoading ? 'Loading records...' : 'Loading more records...'}
             </div>
@@ -305,7 +305,7 @@ const StyledTable = ({
         {/* End indicator when no more data */}
         {!hasMore && !isLoading && data.length > 0 && (
           <div className="flex justify-center items-center py-4 bg-gray-50">
-            <div className="text-sm text-gray-500">
+            <div className="text-base text-gray-500">
               All {totalRecords.toLocaleString()} records loaded
             </div>
           </div>
@@ -314,7 +314,7 @@ const StyledTable = ({
 
       {/* Footer with record count */}
       <div className="bg-gray-50 px-3 py-2 border-t border-gray-200">
-        <div className="text-xs text-gray-600 text-center">
+        <div className="text-sm text-gray-600 text-center">
           {hasMore && !isLoading
             ? `Loaded ${data.length.toLocaleString()} of ${totalRecords.toLocaleString()} records - scroll for more`
             : data.length > 0

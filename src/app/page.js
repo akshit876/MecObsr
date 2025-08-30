@@ -308,6 +308,7 @@ function Page() {
       // Format the data as per the requirements with piece number calculation
       const formattedData = data.map((row) => ({
         'Piece #': calculatePieceNumber(row.Timestamp, data),
+        'Serial No': row.SerialNumber || 'N/A',
         Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
         MarkingData: row.MarkingData,
         ScannerData: row.ScannerData,
