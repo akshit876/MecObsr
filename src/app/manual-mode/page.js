@@ -94,8 +94,7 @@ const ManualMode = () => {
 
       console.log('Emitting manual control event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
+      // Emit manual control event to backend
       socket.emit('manual_control', eventData);
 
       // For now, simulate success
@@ -133,8 +132,7 @@ const ManualMode = () => {
 
       console.log('Emitting jog start event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
+      // Emit jog start event to backend
       socket.emit('jog_control', eventData);
 
       // For now, simulate success
@@ -173,8 +171,7 @@ const ManualMode = () => {
 
       console.log('Emitting jog stop event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
+      // Emit jog stop event to backend
       socket.emit('jog_control', eventData);
 
       // For now, simulate success
@@ -204,8 +201,7 @@ const ManualMode = () => {
 
         console.log('Emitting emergency stop event to backend');
 
-        // TODO: Replace this with your actual event emission method
-        // Example: if using Socket.IO client to your backend
+        // Emit emergency stop event to backend
         socket.emit('emergency_stop');
 
         // For now, simulate success
