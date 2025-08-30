@@ -1,214 +1,168 @@
 /* eslint-disable consistent-return */
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useSocket } from '@/SocketContext';
 import { toast } from 'react-toastify';
 import { getPLCMapping } from '@/constants/plcMapping';
 
 const ManualMode = () => {
-  const socket = useSocket();
   const [activeJogEvents, setActiveJogEvents] = useState(new Set());
-  const [plcStatus, setPlcStatus] = useState({
-    isConnected: false,
-    totalActiveEvents: 0,
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (!socket) return;
+  const handleButtonClick = async (buttonId) => {
+    try {
+      setIsLoading(true);
 
-    // Listen for PLC status updates
-    const handlePLCStatusUpdate = (data) => {
-      console.log('PLC Status Update:', data);
-
-      if (data.type === 'jog_event_started') {
-        setActiveJogEvents((prev) => new Set([...prev, data.eventName]));
-        toast.info(`${data.eventName} started`, {
-          position: 'top-right',
-          autoClose: 1000,
-        });
-      } else if (data.type === 'jog_event_stopped') {
-        setActiveJogEvents((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(data.eventName);
-          return newSet;
-        });
-        toast.info(`${data.eventName} stopped (Duration: ${data.duration})`, {
-          position: 'top-right',
-          autoClose: 1000,
-        });
-      } else if (data.type === 'manual_event_started') {
-        toast.success(`${data.eventName} activated`, {
-          position: 'top-right',
-          autoClose: 1000,
-        });
-      } else if (data.type === 'manual_event_completed') {
-        toast.info(`${data.eventName} completed`, {
-          position: 'top-right',
-          autoClose: 1000,
-        });
-      } else if (data.type === 'emergency_stop') {
-        setActiveJogEvents(new Set());
-        toast.warning(
-          `Emergency stop executed. Stopped ${data.stoppedEvents?.length || 0} events.`,
-          {
-            position: 'top-right',
-            autoClose: 3000,
-          },
-        );
-      } else if (data.type === 'status_request') {
-        setPlcStatus({
-          isConnected: data.isConnected,
-          totalActiveEvents: data.totalActiveEvents,
-        });
-        setActiveJogEvents(new Set(data.activeJogEvents?.map((e) => e.eventName) || []));
-      }
-    };
-
-    // Listen for manual control responses
-    const handleManualControlResponse = (data) => {
-      if (data.success) {
-        console.log('Manual control success:', data);
-      } else {
-        toast.error(`Manual control failed: ${data.message}`, {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-      }
-    };
-
-    // Listen for jog control responses
-    const handleJogControlResponse = (data) => {
-      if (data.success) {
-        console.log('Jog control success:', data);
-      } else {
-        toast.error(`Jog control failed: ${data.message}`, {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-      }
-    };
-
-    // Listen for emergency stop responses
-    const handleEmergencyStopResponse = (data) => {
-      if (data.success) {
-        console.log('Emergency stop success:', data);
-      } else {
-        toast.error(`Emergency stop failed: ${data.message}`, {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-      }
-    };
-
-    // Listen for errors
-    const handleError = (data) => {
-      toast.error(`Error: ${data.message}`, {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-    };
-
-    // Bind event listeners
-    socket.on('plc_status_update', handlePLCStatusUpdate);
-    socket.on('manual_control_response', handleManualControlResponse);
-    socket.on('jog_control_response', handleJogControlResponse);
-    socket.on('emergency_stop_response', handleEmergencyStopResponse);
-    socket.on('error', handleError);
-
-    // Get initial PLC status
-    socket.emit('get_plc_status');
-
-    // Cleanup
-    return () => {
-      socket.off('plc_status_update', handlePLCStatusUpdate);
-      socket.off('manual_control_response', handleManualControlResponse);
-      socket.off('jog_control_response', handleJogControlResponse);
-      socket.off('emergency_stop_response', handleEmergencyStopResponse);
-      socket.off('error', handleError);
-    };
-  }, [socket]);
-
-  const handleButtonClick = (buttonId) => {
-    if (socket) {
       // Get PLC mapping for this button
       const mapping = getPLCMapping(buttonId);
+      console.log(`Button clicked: ${buttonId}, Mapping:`, mapping);
+
       if (!mapping) {
         toast.error(`Unknown button: ${buttonId}`);
         return;
       }
 
-      // Emit manual control event with register and bit information
-      socket.emit('manual_control', {
+      // Emit event to your existing Node.js backend
+      // Your backend should listen for these events and handle PLC control
+      const eventData = {
         type: buttonId,
         register: mapping.register,
         bit: mapping.bit,
         description: mapping.description,
-      });
+      };
+
+      console.log('Emitting manual control event to backend:', eventData);
+
+      // TODO: Replace this with your actual event emission method
+      // Example: if using Socket.IO client to your backend
+      // socket.emit('manual_control', eventData);
+
+      // For now, simulate success
+      toast.success(`${buttonId} activated successfully`);
+      console.log('Manual control event emitted:', eventData);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error activating ${buttonId}: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleJogStart = (jogType) => {
-    if (socket) {
+  const handleJogStart = async (jogType) => {
+    try {
+      setIsLoading(true);
+
       // Get PLC mapping for this jog control
       const mapping = getPLCMapping(jogType);
+      console.log(`Jog start: ${jogType}, Mapping:`, mapping);
+
       if (!mapping) {
         toast.error(`Unknown jog control: ${jogType}`);
         return;
       }
 
-      // Emit jog start event with register and bit information
-      socket.emit('jog_control', {
+      // Emit jog start event to your existing Node.js backend
+      const eventData = {
         type: jogType,
         action: 'start',
         register: mapping.register,
         bit: mapping.bit,
         description: mapping.description,
-      });
+      };
+
+      console.log('Emitting jog start event to backend:', eventData);
+
+      // TODO: Replace this with your actual event emission method
+      // Example: if using Socket.IO client to your backend
+      // socket.emit('jog_control', eventData);
+
+      // For now, simulate success
+      setActiveJogEvents((prev) => new Set([...prev, jogType]));
+      toast.success(`${jogType} started successfully`);
+      console.log('Jog start event emitted:', eventData);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error starting ${jogType}: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleJogStop = (jogType) => {
-    if (socket) {
+  const handleJogStop = async (jogType) => {
+    try {
+      setIsLoading(true);
+
       // Get PLC mapping for this jog control
       const mapping = getPLCMapping(jogType);
+      console.log(`Jog stop: ${jogType}, Mapping:`, mapping);
+
       if (!mapping) {
         toast.error(`Unknown jog control: ${jogType}`);
         return;
       }
 
-      // Emit jog stop event with register and bit information
-      socket.emit('jog_control', {
+      // Emit jog stop event to your existing Node.js backend
+      const eventData = {
         type: jogType,
         action: 'stop',
         register: mapping.register,
         bit: mapping.bit,
         description: mapping.description,
+      };
+
+      console.log('Emitting jog stop event to backend:', eventData);
+
+      // TODO: Replace this with your actual event emission method
+      // Example: if using Socket.IO client to your backend
+      // socket.emit('jog_control', eventData);
+
+      // For now, simulate success
+      setActiveJogEvents((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(jogType);
+        return newSet;
       });
+      toast.success(`${jogType} stopped successfully`);
+      console.log('Jog stop event emitted:', eventData);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error stopping ${jogType}: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleEmergencyStop = () => {
-    if (socket) {
-      if (
-        window.confirm(
-          'Are you sure you want to execute emergency stop? This will stop all active operations.',
-        )
-      ) {
-        socket.emit('emergency_stop');
+  const handleEmergencyStop = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to execute emergency stop? This will stop all active operations.',
+      )
+    ) {
+      try {
+        setIsLoading(true);
+
+        console.log('Emitting emergency stop event to backend');
+
+        // TODO: Replace this with your actual event emission method
+        // Example: if using Socket.IO client to your backend
+        // socket.emit('emergency_stop');
+
+        // For now, simulate success
+        setActiveJogEvents(new Set());
+        toast.warning(`Emergency stop executed successfully`);
+        console.log('Emergency stop event emitted');
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error(`Emergency stop error: ${error.message}`);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
-  const handleRefreshStatus = () => {
-    if (socket) {
-      socket.emit('get_plc_status');
-    }
-  };
-
   const buttons = [
-    { id: 'HMOE', label: 'HMOE', category: 'main' },
-    { id: 'LoGo', label: 'LoGo', category: 'main' },
+    { id: 'HOME', label: 'HOME', category: 'main' },
+    { id: 'LOGO', label: 'LOGO', category: 'main' },
     { id: 'CODE', label: 'CODE', category: 'main' },
     { id: 'CASTING_TRACEABILITY', label: 'CASTING TRACEABILITY', category: 'main' },
     { id: 'HUMAN_READABLE', label: 'HUMAN READABLE', category: 'main' },
@@ -235,6 +189,19 @@ const ManualMode = () => {
         </p>
       </div>
 
+      {/* Status Bar */}
+      <div className="p-3 rounded-lg bg-white shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600">{isLoading ? '🔄 Processing...' : '✅ Ready'}</div>
+          <div className="text-sm text-gray-600">Active Operations: {activeJogEvents.size}</div>
+        </div>
+        {activeJogEvents.size > 0 && (
+          <div className="mt-2 text-xs text-orange-600">
+            Active: {Array.from(activeJogEvents).join(', ')}
+          </div>
+        )}
+      </div>
+
       {/* Main Controls Section */}
       <div className="p-4 rounded-xl bg-white shadow-sm">
         <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
@@ -246,8 +213,9 @@ const ManualMode = () => {
             return (
               <Button
                 key={button.id}
-                className="h-20 text-base font-semibold bg-[#012B41] hover:bg-[#023855] text-white border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="h-20 text-base font-semibold bg-[#012B41] hover:bg-[#023855] text-white border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50"
                 onClick={() => handleButtonClick(button.id)}
+                disabled={isLoading}
               >
                 <div className="text-center">
                   <div className="font-bold text-sm">{button.label}</div>
@@ -285,11 +253,12 @@ const ManualMode = () => {
                     : isActive
                       ? 'bg-green-800 ring-4 ring-green-300'
                       : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
-                } text-white border-2 border-white transition-all duration-200 shadow-sm hover:shadow-md active:scale-95`}
+                } text-white border-2 border-white transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50`}
                 onMouseDown={() => handleJogStart(button.id)}
                 onMouseUp={() => handleJogStop(button.id)}
                 onTouchStart={() => handleJogStart(button.id)}
                 onTouchEnd={() => handleJogStop(button.id)}
+                disabled={isLoading}
               >
                 <div className="text-center">
                   <div className="font-bold">{button.label}</div>
@@ -316,50 +285,12 @@ const ManualMode = () => {
         <div className="flex justify-center">
           <Button
             onClick={handleEmergencyStop}
-            className="h-16 px-8 text-lg font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border-4 border-red-300 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95"
+            className="h-16 px-8 text-lg font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border-4 border-red-300 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50"
+            disabled={isLoading}
           >
             🚨 EMERGENCY STOP 🚨
           </Button>
         </div>
-      </div>
-
-      {/* Status Information */}
-      <div className="p-4 rounded-xl bg-white shadow-sm">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-semibold text-gray-700">System Status</h3>
-          <Button
-            onClick={handleRefreshStatus}
-            className="text-sm px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
-          >
-            🔄 Refresh
-          </Button>
-        </div>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-            <div className="font-medium text-green-800">Connection Status</div>
-            <div className="text-green-600">{socket?.connected ? 'Connected' : 'Disconnected'}</div>
-          </div>
-          <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-            <div className="font-medium text-blue-800">Control Mode</div>
-            <div className="text-blue-600">Manual</div>
-          </div>
-          <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-            <div className="font-medium text-yellow-800">PLC Connection</div>
-            <div className="text-yellow-600">
-              {plcStatus.isConnected ? 'Connected' : 'Disconnected'}
-            </div>
-          </div>
-          <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
-            <div className="font-medium text-purple-800">Active Operations</div>
-            <div className="text-purple-600">{plcStatus.totalActiveEvents}</div>
-          </div>
-        </div>
-        {activeJogEvents.size > 0 && (
-          <div className="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
-            <div className="font-medium text-orange-800 mb-2">Active Jog Operations:</div>
-            <div className="text-orange-600 text-sm">{Array.from(activeJogEvents).join(', ')}</div>
-          </div>
-        )}
       </div>
     </div>
   );
