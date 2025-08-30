@@ -21,7 +21,7 @@ npm run dev
 The system will be available at:
 
 - **Frontend**: http://localhost:3000
-- **PLC Control Server**: http://localhost:3002
+- **PLC Control Server**: http://localhost:3003
 
 ## 🏗️ Architecture
 

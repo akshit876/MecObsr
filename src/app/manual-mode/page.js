@@ -10,15 +10,15 @@ const ManualMode = () => {
   const [activeJogEvents, setActiveJogEvents] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [cycleStatus, setCycleStatus] = useState({ isPaused: false, pauseReason: '' });
-  const socket = useSocket();
+  const { socket, socket3002, socket3003 } = useSocket();
 
   // Emit manual mode enter event when component mounts
   useEffect(() => {
     if (socket?.connected) {
-      // When user navigates to manual mode
+      // When user navigates to manual mode - emit to port 3003 (new microservice)
       socket.emit('manual_mode_enter', { reason: 'Manual control needed' });
 
-      // Check cycle status
+      // Check cycle status - emit to port 3003 (new microservice)
       socket.emit('get_cycle_status');
 
       console.log('Manual mode entered - cycle paused');
@@ -26,7 +26,7 @@ const ManualMode = () => {
       console.log('Socket not connected - cannot emit manual_mode_enter event');
     }
 
-    // Set up cycle status listener
+    // Set up cycle status listener from both ports
     const handleCycleStatus = (status) => {
       setCycleStatus(status);
       if (status.isPaused) {
@@ -40,27 +40,38 @@ const ManualMode = () => {
       }
     };
 
-    if (socket) {
-      socket.on('cycle_status_response', handleCycleStatus);
+    // Listen for cycle status from port 3002 (legacy backend)
+    if (socket3002) {
+      socket3002.on('cycle_status_response', handleCycleStatus);
+    }
+
+    // Listen for cycle status from port 3003 (new microservice)
+    if (socket3003) {
+      socket3003.on('cycle_status_response', handleCycleStatus);
     }
 
     // Cleanup function - emit exit event and remove listeners when component unmounts
     return () => {
       if (socket?.connected) {
-        // When user returns to dashboard
+        // When user returns to dashboard - emit to port 3003 (new microservice)
         socket.emit('manual_mode_exit');
         console.log('Manual mode exited - cycle can resume');
       }
 
-      if (socket) {
-        socket.off('cycle_status_response', handleCycleStatus);
+      // Remove listeners from both ports
+      if (socket3002) {
+        socket3002.off('cycle_status_response', handleCycleStatus);
+      }
+      if (socket3003) {
+        socket3003.off('cycle_status_response', handleCycleStatus);
       }
     };
-  }, [socket]);
+  }, [socket, socket3002, socket3003]);
 
   // Manual exit function
   const handleManualExit = () => {
     if (socket?.connected) {
+      // Emit exit event to port 3003 (new microservice)
       socket.emit('manual_mode_exit');
       toast.info('Exiting manual mode - cycle can resume', {
         position: 'top-center',
@@ -94,13 +105,14 @@ const ManualMode = () => {
 
       console.log('Emitting manual control event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
-      // socket.emit('manual_control', eventData);
-
-      // For now, simulate success
-      toast.success(`${buttonId} activated successfully`);
-      console.log('Manual control event emitted:', eventData);
+      // Emit to port 3003 (new microservice)
+      if (socket?.connected) {
+        socket.emit('manual_control', eventData);
+        toast.success(`${buttonId} activated successfully`);
+        console.log('Manual control event emitted to port 3003:', eventData);
+      } else {
+        toast.error('Socket not connected to port 3003');
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error activating ${buttonId}: ${error.message}`);
@@ -133,14 +145,15 @@ const ManualMode = () => {
 
       console.log('Emitting jog start event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
-      // socket.emit('jog_control', eventData);
-
-      // For now, simulate success
-      setActiveJogEvents((prev) => new Set([...prev, jogType]));
-      toast.success(`${jogType} started successfully`);
-      console.log('Jog start event emitted:', eventData);
+      // Emit to port 3003 (new microservice)
+      if (socket?.connected) {
+        socket.emit('jog_control', eventData);
+        setActiveJogEvents((prev) => new Set([...prev, jogType]));
+        toast.success(`${jogType} started successfully`);
+        console.log('Jog start event emitted to port 3003:', eventData);
+      } else {
+        toast.error('Socket not connected to port 3003');
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error starting ${jogType}: ${error.message}`);
@@ -173,18 +186,19 @@ const ManualMode = () => {
 
       console.log('Emitting jog stop event to backend:', eventData);
 
-      // TODO: Replace this with your actual event emission method
-      // Example: if using Socket.IO client to your backend
-      // socket.emit('jog_control', eventData);
-
-      // For now, simulate success
-      setActiveJogEvents((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(jogType);
-        return newSet;
-      });
-      toast.success(`${jogType} stopped successfully`);
-      console.log('Jog stop event emitted:', eventData);
+      // Emit to port 3003 (new microservice)
+      if (socket?.connected) {
+        socket.emit('jog_control', eventData);
+        setActiveJogEvents((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(jogType);
+          return newSet;
+        });
+        toast.success(`${jogType} stopped successfully`);
+        console.log('Jog stop event emitted to port 3003:', eventData);
+      } else {
+        toast.error('Socket not connected to port 3003');
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error stopping ${jogType}: ${error.message}`);
@@ -204,14 +218,15 @@ const ManualMode = () => {
 
         console.log('Emitting emergency stop event to backend');
 
-        // TODO: Replace this with your actual event emission method
-        // Example: if using Socket.IO client to your backend
-        // socket.emit('emergency_stop');
-
-        // For now, simulate success
-        setActiveJogEvents(new Set());
-        toast.warning(`Emergency stop executed successfully`);
-        console.log('Emergency stop event emitted');
+        // Emit to port 3003 (new microservice)
+        if (socket?.connected) {
+          socket.emit('emergency_stop');
+          setActiveJogEvents(new Set());
+          toast.warning(`Emergency stop executed successfully`);
+          console.log('Emergency stop event emitted to port 3003');
+        } else {
+          toast.error('Socket not connected to port 3003');
+        }
       } catch (error) {
         console.error('Error:', error);
         toast.error(`Emergency stop error: ${error.message}`);
