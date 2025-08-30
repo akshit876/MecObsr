@@ -581,7 +581,7 @@ const ManualMode = () => {
         </div>
 
         {/* Emergency Stop Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="text-center">
             <div className="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
               <AlertTriangle className="w-10 h-10 text-red-600" />
@@ -599,7 +599,7 @@ const ManualMode = () => {
               🚨 EMERGENCY STOP 🚨
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
