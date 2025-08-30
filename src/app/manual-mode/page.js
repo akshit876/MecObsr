@@ -110,6 +110,12 @@ const ManualMode = () => {
 
   const handleJogStart = async (jogType) => {
     try {
+      // Check if jog is already active to prevent multiple toasts
+      if (activeJogEvents.has(jogType)) {
+        console.log(`${jogType} already active, skipping duplicate start`);
+        return;
+      }
+
       setIsLoading(true);
 
       // Get PLC mapping for this jog control
@@ -135,7 +141,7 @@ const ManualMode = () => {
       // Emit jog start event to backend
       socket.emit('jog_control', eventData);
 
-      // For now, simulate success
+      // Set as active and show success toast only once
       setActiveJogEvents((prev) => new Set([...prev, jogType]));
       toast.success(`${jogType} started successfully`);
       console.log('Jog start event emitted:', eventData);
@@ -149,6 +155,12 @@ const ManualMode = () => {
 
   const handleJogStop = async (jogType) => {
     try {
+      // Check if jog is already stopped to prevent multiple toasts
+      if (!activeJogEvents.has(jogType)) {
+        console.log(`${jogType} already stopped, skipping duplicate stop`);
+        return;
+      }
+
       setIsLoading(true);
 
       // Get PLC mapping for this jog control
@@ -174,7 +186,7 @@ const ManualMode = () => {
       // Emit jog stop event to backend
       socket.emit('jog_control', eventData);
 
-      // For now, simulate success
+      // Remove from active and show success toast only once
       setActiveJogEvents((prev) => {
         const newSet = new Set(prev);
         newSet.delete(jogType);
@@ -187,33 +199,6 @@ const ManualMode = () => {
       toast.error(`Error stopping ${jogType}: ${error.message}`);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleEmergencyStop = async () => {
-    if (
-      window.confirm(
-        'Are you sure you want to execute emergency stop? This will stop all active operations.',
-      )
-    ) {
-      try {
-        setIsLoading(true);
-
-        console.log('Emitting emergency stop event to backend');
-
-        // Emit emergency stop event to backend
-        socket.emit('emergency_stop');
-
-        // For now, simulate success
-        setActiveJogEvents(new Set());
-        toast.warning(`Emergency stop executed successfully`);
-        console.log('Emergency stop event emitted');
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error(`Emergency stop error: ${error.message}`);
-      } finally {
-        setIsLoading(false);
-      }
     }
   };
 
@@ -287,6 +272,25 @@ const ManualMode = () => {
             Active: {Array.from(activeJogEvents).join(', ')}
           </div>
         )}
+
+        {/* Debug: Show expected PLC mappings */}
+        <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+          <div className="font-semibold text-gray-700 mb-1">Expected PLC Mappings:</div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              HOME: {getPLCMapping('HOME')?.register}.{getPLCMapping('HOME')?.bit}
+            </div>
+            <div>
+              LOGO: {getPLCMapping('LOGO')?.register}.{getPLCMapping('LOGO')?.bit}
+            </div>
+            <div>
+              X_JOG_PLUS: {getPLCMapping('X_JOG_PLUS')?.register}.{getPLCMapping('X_JOG_PLUS')?.bit}
+            </div>
+            <div>
+              Z_JOG_PLUS: {getPLCMapping('Z_JOG_PLUS')?.register}.{getPLCMapping('Z_JOG_PLUS')?.bit}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Controls Section */}
