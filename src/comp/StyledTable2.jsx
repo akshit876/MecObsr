@@ -57,15 +57,22 @@ const createColumns = (data) => [
     header: 'Serial No',
     cell: (info) => {
       const serialNumber = info.row.original.SerialNumber;
+      return (
+        <div className="text-sm font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
+          {serialNumber}
+        </div>
+      );
+    },
+    size: 100,
+  }),
+
+  columnHelper.accessor('ModelNumber', {
+    header: 'Model No',
+    cell: (info) => {
       const modelNumber = info.row.original.ModelNumber || 'N/A';
       return (
-        <div className="space-y-1">
-          <div className="text-sm font-medium text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100 px-1.5 py-0.5 rounded border border-blue-200/50 truncate">
-            {serialNumber}
-          </div>
-          <div className="text-sm font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
-            {modelNumber}
-          </div>
+        <div className="text-sm font-medium text-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 truncate">
+          {modelNumber}
         </div>
       );
     },

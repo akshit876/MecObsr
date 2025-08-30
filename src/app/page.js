@@ -309,11 +309,11 @@ function Page() {
       const formattedData = data.map((row) => ({
         'Piece #': calculatePieceNumber(row.Timestamp, data),
         'Serial No': row.SerialNumber || 'N/A',
-        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
-        MarkingData: row.MarkingData,
-        ScannerData: row.ScannerData,
-        ModelNumber: row.ModelNumber || 'N/A',
+        'Model No': row.ModelNumber || 'N/A',
+        'Marking Data': row.MarkingData,
+        'Scanner Data': row.ScannerData,
         Result: row.Result,
+        Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
       }));
 
       // Create a worksheet from the formatted data
