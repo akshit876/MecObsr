@@ -121,11 +121,11 @@ const createColumns = (data) => [
     size: 60,
   }),
 
-  columnHelper.accessor('Timestamp', {
+  columnHelper.accessor('CreatedAt', {
     header: 'Created At',
     cell: (info) => (
       <div className="text-gray-600 text-xs leading-tight whitespace-nowrap">
-        {new Date(info.getValue()).toLocaleString('en-US', {
+        {new Date(info.row.original.Timestamp).toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
           hour: '2-digit',
