@@ -96,7 +96,7 @@ const ManualMode = () => {
 
       // TODO: Replace this with your actual event emission method
       // Example: if using Socket.IO client to your backend
-      // socket.emit('manual_control', eventData);
+      socket.emit('manual_control', eventData);
 
       // For now, simulate success
       toast.success(`${buttonId} activated successfully`);
@@ -135,7 +135,7 @@ const ManualMode = () => {
 
       // TODO: Replace this with your actual event emission method
       // Example: if using Socket.IO client to your backend
-      // socket.emit('jog_control', eventData);
+      socket.emit('jog_control', eventData);
 
       // For now, simulate success
       setActiveJogEvents((prev) => new Set([...prev, jogType]));
@@ -175,7 +175,7 @@ const ManualMode = () => {
 
       // TODO: Replace this with your actual event emission method
       // Example: if using Socket.IO client to your backend
-      // socket.emit('jog_control', eventData);
+      socket.emit('jog_control', eventData);
 
       // For now, simulate success
       setActiveJogEvents((prev) => {
@@ -206,7 +206,7 @@ const ManualMode = () => {
 
         // TODO: Replace this with your actual event emission method
         // Example: if using Socket.IO client to your backend
-        // socket.emit('emergency_stop');
+        socket.emit('emergency_stop');
 
         // For now, simulate success
         setActiveJogEvents(new Set());
