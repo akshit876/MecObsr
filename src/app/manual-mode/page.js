@@ -9,22 +9,66 @@ import { useSocket } from '@/SocketContext';
 const ManualMode = () => {
   const [activeJogEvents, setActiveJogEvents] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [cycleStatus, setCycleStatus] = useState({ isPaused: false, pauseReason: '' });
   const socket = useSocket();
 
   // Emit manual mode enter event when component mounts
   useEffect(() => {
     if (socket?.connected) {
-      // UI emits this event
-      socket.emit('manual_mode_enter', { reason: 'User in manual mode' });
+      // When user navigates to manual mode
+      socket.emit('manual_mode_enter', { reason: 'Manual control needed' });
 
-      // Backend pauses the cycle
-      // scannerController.pauseCycle('User in manual mode');
+      // Check cycle status
+      socket.emit('get_cycle_status');
 
       console.log('Manual mode entered - cycle paused');
     } else {
       console.log('Socket not connected - cannot emit manual_mode_enter event');
     }
+
+    // Set up cycle status listener
+    const handleCycleStatus = (status) => {
+      setCycleStatus(status);
+      if (status.isPaused) {
+        console.log('Cycle paused:', status.pauseReason);
+        toast.info(`Cycle paused: ${status.pauseReason}`, {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+      } else {
+        console.log('Cycle status:', status);
+      }
+    };
+
+    if (socket) {
+      socket.on('cycle_status_response', handleCycleStatus);
+    }
+
+    // Cleanup function - emit exit event and remove listeners when component unmounts
+    return () => {
+      if (socket?.connected) {
+        // When user returns to dashboard
+        socket.emit('manual_mode_exit');
+        console.log('Manual mode exited - cycle can resume');
+      }
+
+      if (socket) {
+        socket.off('cycle_status_response', handleCycleStatus);
+      }
+    };
   }, [socket]);
+
+  // Manual exit function
+  const handleManualExit = () => {
+    if (socket?.connected) {
+      socket.emit('manual_mode_exit');
+      toast.info('Exiting manual mode - cycle can resume', {
+        position: 'top-center',
+        autoClose: 2000,
+      });
+      console.log('Manual mode exited manually - cycle can resume');
+    }
+  };
 
   const handleButtonClick = async (buttonId) => {
     try {
@@ -204,6 +248,36 @@ const ManualMode = () => {
         <p className="text-sm text-gray-300 text-center mt-2">
           Professional control interface for machine operations
         </p>
+      </div>
+
+      {/* Cycle Status & Exit Controls */}
+      <div className="p-4 rounded-lg bg-white shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="text-sm">
+              <span className="font-medium text-gray-700">Cycle Status:</span>
+              <span
+                className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                  cycleStatus.isPaused
+                    ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                    : 'bg-green-100 text-green-800 border border-green-300'
+                }`}
+              >
+                {cycleStatus.isPaused ? 'PAUSED' : 'RUNNING'}
+              </span>
+            </div>
+            {cycleStatus.isPaused && cycleStatus.pauseReason && (
+              <div className="text-sm text-gray-600">Reason: {cycleStatus.pauseReason}</div>
+            )}
+          </div>
+          <Button
+            onClick={handleManualExit}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            disabled={isLoading}
+          >
+            Exit Manual Mode
+          </Button>
+        </div>
       </div>
 
       {/* Status Bar */}
