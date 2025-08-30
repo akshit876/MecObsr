@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
+  Hand,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -41,6 +42,11 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
       label: 'Dashboard',
       href: '/',
       icon: Home,
+    },
+    {
+      label: 'Manual Mode',
+      href: '/manual-mode',
+      icon: Hand,
     },
     ...(session?.user?.role === 'admin'
       ? [

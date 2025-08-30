@@ -1,6 +1,14 @@
 // components/Sidebar.js
 'use client';
-import { FaHome, FaChartBar, FaCogs, FaBell, FaTable, FaCalendar } from 'react-icons/fa';
+import {
+  FaHome,
+  FaChartBar,
+  FaCogs,
+  FaBell,
+  FaTable,
+  FaCalendar,
+  FaHandPaper,
+} from 'react-icons/fa';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useProtectedRoute } from '../../hooks/useProtectedRoute';
@@ -10,6 +18,7 @@ const Sidebar = () => {
   const { session } = useProtectedRoute();
   const menuItems = [
     { name: 'Dashboard', icon: <FaHome />, href: '/' },
+    { name: 'Manual Mode', icon: <FaHandPaper />, href: '/manual-mode' }, // Available for both admins and operators
     ...(session?.user?.role === 'admin'
       ? [{ name: 'Settings', icon: <FaCogs />, href: '/settings' }]
       : []), // Conditionally add the settings link if the user is an admin
