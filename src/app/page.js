@@ -445,22 +445,22 @@ function Page() {
                   className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
                 />
               </div>
-            </div>
-            <div className="flex justify-center">
-              <Button
-                size="sm"
-                className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
-                onClick={handleDownloadExcel}
-                disabled={isLoading || !startDate || !endDate}
-                title="Download Excel Report"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Download className="h-3 w-3" />
-                )}
-                <span className="text-xs">Download</span>
-              </Button>
+              <div className="flex items-end">
+                <Button
+                  size="sm"
+                  className="bg-blue-500 hover:bg-blue-600 h-7 px-3 rounded font-medium flex items-center gap-1"
+                  onClick={handleDownloadExcel}
+                  disabled={isLoading || !startDate || !endDate}
+                  title="Download Excel Report"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Download className="h-3 w-3" />
+                  )}
+                  <span className="text-xs">Download</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -502,7 +502,7 @@ function Page() {
         <div className="col-span-2 p-3 rounded-xl bg-white shadow-sm">
           <p className="text-xs font-medium text-gray-600 mb-1">Manual Controls</p>
           <div className="space-y-2">
-            {/* Row 1 */}
+            {/* All three buttons in one row */}
             <div className="flex gap-1.5">
               <Button
                 className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
@@ -516,9 +516,6 @@ function Page() {
               >
                 Mark
               </Button>
-            </div>
-            {/* Row 2 */}
-            <div className="flex gap-1.5">
               <Button
                 className="flex-1 bg-[#012B41] hover:bg-[#023855] text-[10px] font-medium h-7 rounded-lg shadow-sm px-1"
                 onClick={handleLigt}
