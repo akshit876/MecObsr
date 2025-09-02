@@ -301,14 +301,14 @@ const ManualMode = () => {
     },
     {
       id: 'Z_JOG_PLUS',
-      label: 'Z JOG+',
+      label: 'Z-JOG+ DOWN',
       icon: ArrowUp,
       color: 'green',
       description: 'Z-axis forward',
     },
     {
       id: 'Z_JOG_MINUS',
-      label: 'Z JOG-',
+      label: 'Z-JOG- UP',
       icon: ArrowDown,
       color: 'green',
       description: 'Z-axis backward',
