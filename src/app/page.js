@@ -16,6 +16,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
+import { useAlarmManager } from '@/hooks/useAlarmManager';
+import AlarmTestComponent from '@/components/AlarmTestComponent';
 
 // Helper function to calculate piece number based on timestamp
 const calculatePieceNumber = (timestamp, data) => {
@@ -64,6 +66,7 @@ function Page() {
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   // const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
+  const { showAlarm } = useAlarmManager();
 
   // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
@@ -174,22 +177,8 @@ function Page() {
     const handleSafetyViolation = (data) => {
       console.log('Safety violation detected:', data);
 
-      // Show critical toast notification
-      toast.error(`Alarm: ${data.violation}`, {
-        position: 'top-center',
-        autoClose: 8000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: {
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          backgroundColor: '#dc2626',
-          color: 'white',
-          textAlign: 'center',
-        },
-      });
+      // Use alarm manager to show safety violation with high priority
+      showAlarm('safety-violation', `Alarm: ${data.violation}`, 'high');
 
       // You can also update any safety status indicators here
       // For example, you could set a state variable to show safety violation status
@@ -475,6 +464,11 @@ function Page() {
           </div>
         </div>
       </div>
+
+      {/* Alarm Test Component - Remove this in production */}
+      {/* <div className="mb-4">
+        <AlarmTestComponent />
+      </div> */}
 
       {/* Table section - direct render */}
       <div className="flex-grow">

@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Play,
-  AlertTriangle,
   Settings,
   Power,
 } from 'lucide-react';
@@ -216,32 +214,6 @@ const ManualMode = () => {
     }
   };
 
-  const handleEmergencyStop = async () => {
-    if (
-      window.confirm(
-        'Are you sure you want to execute emergency stop? This will stop all active operations.',
-      )
-    ) {
-      try {
-        setIsLoading(true);
-
-        console.log('Emitting emergency stop event to backend');
-
-        // Emit emergency stop event to backend
-        socket.emit('emergency_stop');
-
-        setActiveJogEvents(new Set());
-        toast.warning(`Emergency stop executed successfully`);
-        console.log('Emergency stop event emitted');
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error(`Emergency stop error: ${error.message}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   const buttons = [
     {
       id: 'HOME',
@@ -317,69 +289,77 @@ const ManualMode = () => {
 
   const getIconColor = (color) => {
     const colors = {
-      blue: 'text-blue-500',
-      green: 'text-green-500',
-      purple: 'text-purple-500',
-      indigo: 'text-indigo-500',
-      teal: 'text-teal-500',
-      cyan: 'text-cyan-500',
-      orange: 'text-orange-500',
-      red: 'text-red-500',
-      yellow: 'text-yellow-500',
+      blue: 'text-blue-400',
+      green: 'text-green-400',
+      purple: 'text-purple-400',
+      indigo: 'text-indigo-400',
+      teal: 'text-teal-400',
+      cyan: 'text-cyan-400',
+      orange: 'text-orange-400',
+      red: 'text-red-400',
+      yellow: 'text-yellow-400',
     };
-    return colors[color] || 'text-gray-500';
+    return colors[color] || 'text-gray-400';
   };
 
   const getBgColor = (color) => {
     const colors = {
-      blue: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-      green: 'bg-green-50 border-green-200 hover:bg-green-100',
-      purple: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
-      indigo: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
-      teal: 'bg-teal-50 border-teal-200 hover:bg-teal-100',
-      cyan: 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100',
-      orange: 'bg-orange-50 border-orange-200 hover:bg-orange-100',
-      red: 'bg-red-50 border-red-200 hover:bg-red-100',
-      yellow: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100',
+      blue: 'bg-blue-900/20 border-blue-700/50 hover:bg-blue-900/30 dark:bg-blue-900/30 dark:border-blue-600/50 dark:hover:bg-blue-900/40',
+      green:
+        'bg-green-900/20 border-green-700/50 hover:bg-green-900/30 dark:bg-green-900/30 dark:border-green-600/50 dark:hover:bg-green-900/40',
+      purple:
+        'bg-purple-900/20 border-purple-700/50 hover:bg-purple-900/30 dark:bg-purple-900/30 dark:border-purple-600/50 dark:hover:bg-purple-900/40',
+      indigo:
+        'bg-indigo-900/20 border-indigo-700/50 hover:bg-indigo-900/30 dark:bg-indigo-900/30 dark:border-indigo-600/50 dark:hover:bg-indigo-900/40',
+      teal: 'bg-teal-900/20 border-teal-700/50 hover:bg-teal-900/30 dark:bg-teal-900/30 dark:border-teal-600/50 dark:hover:bg-teal-900/40',
+      cyan: 'bg-cyan-900/20 border-cyan-700/50 hover:bg-cyan-900/30 dark:bg-cyan-900/30 dark:border-cyan-600/50 dark:hover:bg-cyan-900/40',
+      orange:
+        'bg-orange-900/20 border-orange-700/50 hover:bg-orange-900/30 dark:bg-orange-900/30 dark:border-orange-600/50 dark:hover:bg-orange-900/40',
+      red: 'bg-red-900/20 border-red-700/50 hover:bg-red-900/30 dark:bg-red-900/30 dark:border-red-600/50 dark:hover:bg-red-900/40',
+      yellow:
+        'bg-yellow-900/20 border-yellow-700/50 hover:bg-yellow-900/30 dark:bg-yellow-900/30 dark:border-yellow-600/50 dark:hover:bg-yellow-900/40',
     };
-    return colors[color] || 'bg-gray-50 border-gray-200 hover:bg-gray-100';
+    return (
+      colors[color] ||
+      'bg-gray-900/20 border-gray-700/50 hover:bg-gray-900/30 dark:bg-gray-900/30 dark:border-gray-600/50 dark:hover:bg-gray-900/40'
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-slate-900 dark:via-gray-900 dark:to-slate-800">
       {/* Header Section */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div className="bg-gray-800/90 border-b border-gray-700 shadow-sm backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
                   <Settings className="w-6 h-6 text-white" />
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Manual Mode Controls</h1>
-                <p className="text-sm text-gray-500">Professional machine operation interface</p>
+                <h1 className="text-2xl font-bold text-white">Manual Mode Controls</h1>
+                <p className="text-sm text-gray-300">Professional machine operation interface</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
               {/* Cycle Status Indicator */}
-              <div className="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg border">
+              <div className="flex items-center space-x-3 px-4 py-2 bg-gray-700/50 rounded-lg border border-gray-600 backdrop-blur-sm">
                 <div
                   className={`w-3 h-3 rounded-full ${cycleStatus.isPaused ? 'bg-yellow-400' : 'bg-green-400'}`}
                 ></div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-200">
                   {cycleStatus.isPaused ? 'PAUSED' : 'RUNNING'}
                 </span>
                 {cycleStatus.isPaused && cycleStatus.pauseReason && (
-                  <span className="text-xs text-gray-500">({cycleStatus.pauseReason})</span>
+                  <span className="text-xs text-gray-400">({cycleStatus.pauseReason})</span>
                 )}
               </div>
 
               <Button
                 onClick={handleManualExit}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 border border-blue-400/20"
                 disabled={isLoading}
               >
                 Exit Manual Mode
@@ -393,59 +373,59 @@ const ManualMode = () => {
         {/* Status Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* System Status */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-gray-800/50 rounded-xl shadow-sm border border-gray-700 p-6 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">System Status</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-300">System Status</p>
+                <p className="text-2xl font-bold text-white">
                   {isLoading ? '🔄 Processing' : '✅ Ready'}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Power className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center border border-green-700/50">
+                <Power className="w-6 h-6 text-green-400" />
               </div>
             </div>
           </div>
 
           {/* Active Operations */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-gray-800/50 rounded-xl shadow-sm border border-gray-700 p-6 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Operations</p>
-                <p className="text-2xl font-bold text-gray-900">{activeJogEvents.size}</p>
+                <p className="text-sm font-medium text-gray-300">Active Operations</p>
+                <p className="text-2xl font-bold text-white">{activeJogEvents.size}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Play className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-blue-900/30 rounded-lg flex items-center justify-center border border-blue-700/50">
+                <Play className="w-6 h-6 text-blue-400" />
               </div>
             </div>
             {activeJogEvents.size > 0 && (
-              <div className="mt-2 text-xs text-blue-600 font-medium">
+              <div className="mt-2 text-xs text-blue-400 font-medium">
                 {Array.from(activeJogEvents).join(', ')}
               </div>
             )}
           </div>
 
           {/* PLC Connection */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-gray-800/50 rounded-xl shadow-sm border border-gray-700 p-6 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">PLC Connection</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-300">PLC Connection</p>
+                <p className="text-2xl font-bold text-white">
                   {socket?.connected ? '🟢 Connected' : '🔴 Disconnected'}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Settings className="w-6 h-6 text-indigo-600" />
+              <div className="w-12 h-12 bg-indigo-900/30 rounded-lg flex items-center justify-center border border-indigo-700/50">
+                <Settings className="w-6 h-6 text-indigo-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Control Operations */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+        <div className="bg-gray-800/50 rounded-xl shadow-sm border border-gray-700 p-8 mb-8 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Main Control Operations</h2>
-            <div className="text-sm text-gray-500">PLC-controlled machine operations</div>
+            <h2 className="text-xl font-bold text-white">Main Control Operations</h2>
+            <div className="text-sm text-gray-300">PLC-controlled machine operations</div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
@@ -476,17 +456,17 @@ const ManualMode = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <div
-                      className={`w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm ${getIconColor(button.color)}`}
+                      className={`w-12 h-12 bg-gray-700/50 rounded-lg flex items-center justify-center shadow-sm border border-gray-600/50 ${getIconColor(button.color)}`}
                     >
                       <IconComponent className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-gray-700">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-gray-200">
                         {button.label}
                       </h3>
-                      <p className="text-sm text-gray-600">{button.description}</p>
+                      <p className="text-sm text-gray-300">{button.description}</p>
                       {mapping && (
-                        <div className="mt-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <div className="mt-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-700/50 text-gray-200 border border-gray-600/50">
                           <span className="mr-1">PLC:</span>
                           <span className="font-mono">
                             {mapping.register}.{mapping.bit}
@@ -497,7 +477,7 @@ const ManualMode = () => {
                   </div>
 
                   {/* Hover effect overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-200"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-200"></div>
                 </div>
               );
             })}
@@ -505,10 +485,10 @@ const ManualMode = () => {
         </div>
 
         {/* Jog Controls Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+        <div className="bg-gray-800/50 rounded-xl shadow-sm border border-gray-700 p-8 mb-8 backdrop-blur-sm">
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Precision Jog Controls</h2>
-            <p className="text-gray-600">Press and hold for continuous movement, release to stop</p>
+            <h2 className="text-xl font-bold text-white mb-2">Precision Jog Controls</h2>
+            <p className="text-gray-300">Press and hold for continuous movement, release to stop</p>
           </div>
 
           <div className="max-w-2xl mx-auto">
@@ -524,7 +504,7 @@ const ManualMode = () => {
                     className={`relative p-6 rounded-xl border-2 transition-all duration-200 ${
                       isActive
                         ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg scale-105'
-                        : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
+                        : 'bg-gray-700/50 border-gray-600 hover:border-blue-400/50 hover:shadow-md backdrop-blur-sm'
                     }`}
                     onMouseDown={() => handleJogStart(button.id)}
                     onMouseUp={() => handleJogStop(button.id)}
@@ -536,28 +516,30 @@ const ManualMode = () => {
                         className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
                           isActive
                             ? 'bg-white/20 ring-4 ring-white/30'
-                            : 'bg-gray-100 group-hover:bg-blue-100'
+                            : 'bg-gray-600/50 group-hover:bg-blue-600/30 border border-gray-500/50'
                         }`}
                       >
                         <IconComponent
-                          className={`w-8 h-8 ${isActive ? 'text-white' : 'text-gray-600'}`}
+                          className={`w-8 h-8 ${isActive ? 'text-white' : 'text-gray-300'}`}
                         />
                       </div>
 
                       <h3
-                        className={`text-lg font-bold mb-2 ${isActive ? 'text-white' : 'text-gray-900'}`}
+                        className={`text-lg font-bold mb-2 ${isActive ? 'text-white' : 'text-white'}`}
                       >
                         {button.label}
                       </h3>
 
-                      <p className={`text-sm mb-3 ${isActive ? 'text-white/80' : 'text-gray-600'}`}>
+                      <p className={`text-sm mb-3 ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
                         {button.description}
                       </p>
 
                       {mapping && (
                         <div
                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-800'
+                            isActive
+                              ? 'bg-white/20 text-white'
+                              : 'bg-gray-600/50 text-gray-200 border border-gray-500/50'
                           }`}
                         >
                           <span className="mr-1">PLC:</span>

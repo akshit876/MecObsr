@@ -1,73 +1,21 @@
-import { useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
-// import socket from '../socket'; // Adjust path as needed
-
-const toastConfig = {
-  position: "top-center",
-  className: "machine-event-toast",
-  autoClose: 3000,
-  style: {
-    fontSize: '1.25rem',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
-};
+import { useEffect } from 'react';
+import { useAlarmManager } from './useAlarmManager';
 
 export const useMachineEvents = (socket) => {
-  // Add ref to track active toasts
-  const activeToasts = useRef({});
+  const { showAlarm } = useAlarmManager();
 
   useEffect(() => {
     if (!socket) return;
 
     const eventHandlers = {
       'part-presence': (data) => {
-        // Check if toast already exists
-        if (!activeToasts.current['part-presence']) {
-          const toastId = toast(data.message || "Part not present", {
-            ...toastConfig,
-            style: {
-              ...toastConfig.style,
-              color: '#2563eb',
-            },
-            onClose: () => {
-              // Remove from tracking when toast closes
-              delete activeToasts.current['part-presence'];
-            }
-          });
-          // Track the active toast
-          activeToasts.current['part-presence'] = toastId;
-        }
+        showAlarm('part-presence', data.message || "Part not present", 'normal');
       },
       'emergency-stop': (data) => {
-        if (!activeToasts.current['emergency-stop']) {
-          const toastId = toast(data.message || "Emergency button pressed", {
-            ...toastConfig,
-            style: {
-              ...toastConfig.style,
-              color: '#dc2626',
-            },
-            onClose: () => {
-              delete activeToasts.current['emergency-stop'];
-            }
-          });
-          activeToasts.current['emergency-stop'] = toastId;
-        }
+        showAlarm('emergency-stop', data.message || "Emergency button pressed", 'high');
       },
       'light-curtation': (data) => {
-        if (!activeToasts.current['light-curtation']) {
-          const toastId = toast(data.message || "Light curtain error", {
-            ...toastConfig,
-            style: {
-              ...toastConfig.style,
-              color: '#2563eb',
-            },
-            onClose: () => {
-              delete activeToasts.current['light-curtation'];
-            }
-          });
-          activeToasts.current['light-curtation'] = toastId;
-        }
+        showAlarm('light-curtain', data.message || "Light curtain error", 'normal');
       }
     };
 
