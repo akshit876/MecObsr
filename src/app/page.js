@@ -8,27 +8,22 @@ import { useCsvData } from '../../hooks/useSocket';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useRouter } from 'next/navigation';
-import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
-import { HourlyDataDisplayWidget } from '@/components/HourlyDataDisplayWidget';
+import { useAlarmManager } from '@/hooks/useAlarmManager';
+import DashboardAlarmTest from '@/components/DashboardAlarmTest';
 
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
-  const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
-
-  const { session, status } = useProtectedRoute();
+  const { showAlarm } = useAlarmManager();
   console.log({ startDate, endDate });
 
   // Move useRef declarations to component level
@@ -60,18 +55,80 @@ function Page() {
       setMarkingData(data.data);
     };
 
+    // Alarm event handlers
+    const handleSafetyViolation = (data) => {
+      console.log('Safety violation detected on dashboard:', data);
+      showAlarm('safety-violation', `Safety Violation: ${data.violation || data.message}`, 'high');
+    };
+
+    const handleEmergencyStop = (data) => {
+      console.log('Emergency stop detected on dashboard:', data);
+      showAlarm(
+        'emergency-stop',
+        `Emergency Stop: ${data.message || 'System emergency stop activated'}`,
+        'high',
+      );
+    };
+
+    const handleMachineError = (data) => {
+      console.log('Machine error detected on dashboard:', data);
+      showAlarm('machine-error', `Machine Error: ${data.message || data.error}`, 'normal');
+    };
+
+    const handleOperationSuccess = (data) => {
+      console.log('Operation success on dashboard:', data);
+      showAlarm(
+        'operation-success',
+        `Success: ${data.message || 'Operation completed successfully'}`,
+        'normal',
+      );
+    };
+
+    const handlePartPresence = (data) => {
+      console.log('Part presence issue on dashboard:', data);
+      showAlarm('part-presence', `Part Issue: ${data.message || 'Part not detected'}`, 'normal');
+    };
+
+    const handleLightCurtain = (data) => {
+      console.log('Light curtain issue on dashboard:', data);
+      showAlarm(
+        'light-curtain',
+        `Light Curtain: ${data.message || 'Light curtain interrupted'}`,
+        'normal',
+      );
+    };
+
+    // Register socket event handlers
     socket.on('marking_data', handleMarkingData);
 
-    // Cleanup function - remove timeout refs and clearTimeout calls
+    // Register alarm event handlers
+    socket.on('safety_violation', handleSafetyViolation);
+    socket.on('emergency_stop', handleEmergencyStop);
+    socket.on('machine_error', handleMachineError);
+    socket.on('operation_success', handleOperationSuccess);
+    socket.on('part_presence', handlePartPresence);
+    socket.on('light_curtain', handleLightCurtain);
+    socket.on('error', handleMachineError);
+
+    // Cleanup function
     return () => {
       socket.off('marking_data', handleMarkingData);
+
+      // Clear alarm event listeners
+      socket.off('safety_violation', handleSafetyViolation);
+      socket.off('emergency_stop', handleEmergencyStop);
+      socket.off('machine_error', handleMachineError);
+      socket.off('operation_success', handleOperationSuccess);
+      socket.off('part_presence', handlePartPresence);
+      socket.off('light_curtain', handleLightCurtain);
+      socket.off('error', handleMachineError);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
         clearTimeout(markingTimeoutRef.current);
       }
     };
-  }, [socket]);
+  }, [socket, showAlarm]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
@@ -255,6 +312,9 @@ function Page() {
           </div>
         </div>
       </div>
+
+      {/* Alarm Test Component - Remove this in production */}
+      {/* <DashboardAlarmTest /> */}
 
       {/* Table section remains unchanged */}
       <div className="flex-grow rounded-xl bg-white shadow-sm">
