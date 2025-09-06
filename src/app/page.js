@@ -16,6 +16,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
+import { useAlarmManager } from '@/hooks/useAlarmManager';
+import DashboardAlarmTest from '@/components/DashboardAlarmTest';
 
 // Helper function to calculate piece number based on timestamp
 const calculatePieceNumber = (timestamp, data) => {
@@ -70,6 +72,7 @@ function Page() {
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   // const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
+  const { showAlarm } = useAlarmManager();
 
   // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
@@ -194,6 +197,49 @@ function Page() {
       updateProductionRecords();
     };
 
+    // Alarm event handlers
+    const handleSafetyViolation = (data) => {
+      console.log('Safety violation detected on dashboard:', data);
+      showAlarm('safety-violation', `Safety Violation: ${data.violation || data.message}`, 'high');
+    };
+
+    const handleEmergencyStop = (data) => {
+      console.log('Emergency stop detected on dashboard:', data);
+      showAlarm(
+        'emergency-stop',
+        `Emergency Stop: ${data.message || 'System emergency stop activated'}`,
+        'high',
+      );
+    };
+
+    const handleMachineError = (data) => {
+      console.log('Machine error detected on dashboard:', data);
+      showAlarm('machine-error', `Machine Error: ${data.message || data.error}`, 'normal');
+    };
+
+    const handleOperationSuccess = (data) => {
+      console.log('Operation success on dashboard:', data);
+      showAlarm(
+        'operation-success',
+        `Success: ${data.message || 'Operation completed successfully'}`,
+        'normal',
+      );
+    };
+
+    const handlePartPresence = (data) => {
+      console.log('Part presence issue on dashboard:', data);
+      showAlarm('part-presence', `Part Issue: ${data.message || 'Part not detected'}`, 'normal');
+    };
+
+    const handleLightCurtain = (data) => {
+      console.log('Light curtain issue on dashboard:', data);
+      showAlarm(
+        'light-curtain',
+        `Light Curtain: ${data.message || 'Light curtain interrupted'}`,
+        'normal',
+      );
+    };
+
     // Register all socket event handlers
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
@@ -202,6 +248,15 @@ function Page() {
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
     socket.on('recent-records', handleRecentRecords);
+
+    // Register alarm event handlers
+    socket.on('safety_violation', handleSafetyViolation);
+    socket.on('emergency_stop', handleEmergencyStop);
+    socket.on('machine_error', handleMachineError);
+    socket.on('operation_success', handleOperationSuccess);
+    socket.on('part_presence', handlePartPresence);
+    socket.on('light_curtain', handleLightCurtain);
+    socket.on('error', handleMachineError);
 
     // Cleanup function
     return () => {
@@ -214,6 +269,15 @@ function Page() {
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
       socket.off('recent-records', handleRecentRecords);
 
+      // Clear alarm event listeners
+      socket.off('safety_violation', handleSafetyViolation);
+      socket.off('emergency_stop', handleEmergencyStop);
+      socket.off('machine_error', handleMachineError);
+      socket.off('operation_success', handleOperationSuccess);
+      socket.off('part_presence', handlePartPresence);
+      socket.off('light_curtain', handleLightCurtain);
+      socket.off('error', handleMachineError);
+
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {
         clearTimeout(markingTimeoutRef.current);
@@ -222,7 +286,7 @@ function Page() {
         clearTimeout(scannerTimeoutRef.current);
       }
     };
-  }, [socket]);
+  }, [socket, showAlarm]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
@@ -473,6 +537,9 @@ function Page() {
           </div>
         </div>
       </div>
+
+      {/* Alarm Test Component - Remove this in production */}
+      {/* <DashboardAlarmTest /> */}
 
       {/* Table section - direct render */}
       <div className="flex-1 min-h-0">
