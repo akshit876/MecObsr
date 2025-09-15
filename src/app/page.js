@@ -100,11 +100,6 @@ function Page() {
     // Cycle completion event handlers
     const handleCycleCompleted = (data) => {
       console.log('Cycle completed on dashboard:', data);
-      showAlarm(
-        'cycle-completed',
-        `Cycle ${data.cycleNumber || ''} completed successfully`,
-        'normal',
-      );
       // Trigger data refresh
       if (refreshData) {
         refreshData();
@@ -113,11 +108,6 @@ function Page() {
 
     const handleCycleFailed = (data) => {
       console.log('Cycle failed on dashboard:', data);
-      showAlarm(
-        'cycle-failed',
-        `Cycle ${data.cycleNumber || ''} failed: ${data.message || 'Unknown error'}`,
-        'high',
-      );
       // Trigger data refresh
       if (refreshData) {
         refreshData();
@@ -126,11 +116,6 @@ function Page() {
 
     const handleScanCycleCompleted = (data) => {
       console.log('Scan cycle completed on dashboard:', data);
-      showAlarm(
-        'scan-cycle-completed',
-        `Scan cycle ${data.cycleNumber || ''} ${data.success ? 'completed successfully' : 'failed'}`,
-        data.success ? 'normal' : 'high',
-      );
       // Trigger data refresh
       if (refreshData) {
         refreshData();
@@ -147,7 +132,6 @@ function Page() {
 
     const handleDataUpdated = (data) => {
       console.log('Data updated on dashboard:', data);
-      showAlarm('data-updated', 'Data updated successfully', 'normal');
       // Trigger data refresh
       if (refreshData) {
         refreshData();
