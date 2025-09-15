@@ -14,10 +14,9 @@ import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
 import { useAlarmManager } from '@/hooks/useAlarmManager';
-import DashboardAlarmTest from '@/components/DashboardAlarmTest';
 
 function Page() {
-  const { csvData, loading: isTableLoading } = useCsvData();
+  const { csvData, loading: isTableLoading, refreshData } = useCsvData();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -98,6 +97,63 @@ function Page() {
       );
     };
 
+    // Cycle completion event handlers
+    const handleCycleCompleted = (data) => {
+      console.log('Cycle completed on dashboard:', data);
+      showAlarm(
+        'cycle-completed',
+        `Cycle ${data.cycleNumber || ''} completed successfully`,
+        'normal',
+      );
+      // Trigger data refresh
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    const handleCycleFailed = (data) => {
+      console.log('Cycle failed on dashboard:', data);
+      showAlarm(
+        'cycle-failed',
+        `Cycle ${data.cycleNumber || ''} failed: ${data.message || 'Unknown error'}`,
+        'high',
+      );
+      // Trigger data refresh
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    const handleScanCycleCompleted = (data) => {
+      console.log('Scan cycle completed on dashboard:', data);
+      showAlarm(
+        'scan-cycle-completed',
+        `Scan cycle ${data.cycleNumber || ''} ${data.success ? 'completed successfully' : 'failed'}`,
+        data.success ? 'normal' : 'high',
+      );
+      // Trigger data refresh
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    // Data refresh event handlers
+    const handleDataRefresh = () => {
+      console.log('Data refresh requested by server');
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    const handleDataUpdated = (data) => {
+      console.log('Data updated on dashboard:', data);
+      showAlarm('data-updated', 'Data updated successfully', 'normal');
+      // Trigger data refresh
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
     // Register socket event handlers
     socket.on('marking_data', handleMarkingData);
 
@@ -109,6 +165,15 @@ function Page() {
     socket.on('part_presence', handlePartPresence);
     socket.on('light_curtain', handleLightCurtain);
     socket.on('error', handleMachineError);
+
+    // Register cycle completion event handlers
+    socket.on('cycle_completed', handleCycleCompleted);
+    socket.on('cycle_failed', handleCycleFailed);
+    socket.on('scan-cycle-completed', handleScanCycleCompleted);
+
+    // Register data refresh event handlers
+    socket.on('request-data-refresh', handleDataRefresh);
+    socket.on('data_updated', handleDataUpdated);
 
     // Cleanup function
     return () => {
@@ -122,6 +187,15 @@ function Page() {
       socket.off('part_presence', handlePartPresence);
       socket.off('light_curtain', handleLightCurtain);
       socket.off('error', handleMachineError);
+
+      // Clear cycle completion event listeners
+      socket.off('cycle_completed', handleCycleCompleted);
+      socket.off('cycle_failed', handleCycleFailed);
+      socket.off('scan-cycle-completed', handleScanCycleCompleted);
+
+      // Clear data refresh event listeners
+      socket.off('request-data-refresh', handleDataRefresh);
+      socket.off('data_updated', handleDataUpdated);
 
       // Clear any pending timeouts
       if (markingTimeoutRef.current) {

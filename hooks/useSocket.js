@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 import { useSocket } from '@/SocketContext';
 import { useState, useEffect, useCallback } from 'react';
 import { useProtectedRoute } from './useProtectedRoute';
@@ -7,7 +6,7 @@ export const useCsvData = () => {
   const [csvData, setCsvData] = useState([]);
   const [loading, setLoading] = useState(true);
   const socket = useSocket();
-  const { session, status } = useProtectedRoute();
+  const { session } = useProtectedRoute();
 
   // Create a memoized function for requesting data
   const requestCsvData = useCallback(() => {
@@ -42,6 +41,20 @@ export const useCsvData = () => {
       requestCsvData();
     });
 
+    // Handle data refresh events
+    const handleDataRefresh = () => {
+      console.log('Data refresh requested by server');
+      requestCsvData();
+    };
+
+    const handleDataUpdated = (data) => {
+      console.log('Data updated, refreshing...', data);
+      requestCsvData();
+    };
+
+    socket.on('request-data-refresh', handleDataRefresh);
+    socket.on('data_updated', handleDataUpdated);
+
     // Initial request for data
     requestCsvData();
 
@@ -50,6 +63,8 @@ export const useCsvData = () => {
       socket.off('csv-data', handleCsvData);
       socket.off('connect');
       socket.off('reconnect');
+      socket.off('request-data-refresh', handleDataRefresh);
+      socket.off('data_updated', handleDataUpdated);
     };
   }, [socket, session, requestCsvData]);
 
@@ -58,9 +73,9 @@ export const useCsvData = () => {
     requestCsvData();
   };
 
-  return { 
-    csvData, 
+  return {
+    csvData,
     loading,
-    refreshData // Expose refresh function
+    refreshData, // Expose refresh function
   };
 };
