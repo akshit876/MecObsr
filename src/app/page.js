@@ -328,124 +328,7 @@ function Page() {
     safetySocket.on('connect', handleConnect);
     safetySocket.on('disconnect', handleDisconnect);
 
-    const handleSafetyViolation3005 = (data) => {
-      console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
-      console.log('Safety violation from port 3005:', data);
-      console.log('Data value:', data.value, 'Type:', typeof data.value);
-      console.log('Full data object:', JSON.stringify(data, null, 2));
-
-      // Handle different alarm data structures
-      let isViolationActive = false;
-      let alarmType = 'Unknown violation';
-      let alarmMessage = '🚨 SAFETY VIOLATION! 🚨';
-
-      // Check if data is an array of alarms (from backend logs)
-      if (Array.isArray(data)) {
-        isViolationActive = data.length > 0;
-        if (data.includes('emergency_stop')) {
-          alarmType = 'Emergency stop activated';
-          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
-        }
-      }
-      // Check if data is a string containing alarm information
-      else if (typeof data === 'string') {
-        isViolationActive = data.includes('emergency_stop') || data.includes('Emergency stop');
-        if (isViolationActive) {
-          alarmType = 'Emergency stop activated';
-          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
-        }
-      }
-      // Check if data has alarms array
-      else if (data.alarms && Array.isArray(data.alarms)) {
-        isViolationActive = data.alarms.length > 0;
-        if (data.alarms.includes('emergency_stop')) {
-          alarmType = 'Emergency stop activated';
-          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
-        }
-      }
-      // Check if data has activeAlarms array
-      else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
-        isViolationActive = data.activeAlarms.length > 0;
-        if (data.activeAlarms.includes('emergency_stop')) {
-          alarmType = 'Emergency stop activated';
-          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
-        }
-      }
-      // Check different possible value formats (legacy support)
-      else if (data.value !== undefined && data.value !== null) {
-        isViolationActive =
-          data.value === true ||
-          data.value === 1 ||
-          data.value === '1' ||
-          data.value === 'true' ||
-          data.value === 'on' ||
-          data.value === 'ON' ||
-          data.value === 'active' ||
-          data.value === 'ACTIVE';
-      }
-      // Also check if there's a status field
-      else if (data.status !== undefined) {
-        isViolationActive =
-          data.status === 'active' ||
-          data.status === 'violation' ||
-          data.status === 'error' ||
-          data.status === 'critical';
-      }
-      // Check if there's an active field
-      else if (data.active !== undefined) {
-        isViolationActive = data.active === true || data.active === 1;
-      }
-
-      console.log('Is violation active?', isViolationActive);
-      console.log('Alarm type:', alarmType);
-      console.log('Value check details:', {
-        value: data.value,
-        status: data.status,
-        active: data.active,
-        alarms: data.alarms,
-        activeAlarms: data.activeAlarms,
-        isViolationActive,
-      });
-
-      // Only show toast if violation is active
-      if (!isViolationActive) {
-        console.log('🚫 Violation not active, dismissing any existing safety toast');
-        // Dismiss any existing safety toast when violation is cleared
-        if (currentSafetyToastRef.current) {
-          toast.dismiss(currentSafetyToastRef.current);
-          currentSafetyToastRef.current = null;
-        }
-        return;
-      }
-
-      // Clear any existing timeout
-      if (safetyViolationTimeoutRef.current) {
-        clearTimeout(safetyViolationTimeoutRef.current);
-      }
-
-      // Show toast immediately for safety violations
-      // Dismiss any existing safety toast first
-      if (currentSafetyToastRef.current) {
-        console.log('🚫 Dismissing previous safety toast');
-        toast.dismiss(currentSafetyToastRef.current);
-        currentSafetyToastRef.current = null;
-      }
-
-      const description = `${alarmType} (Alarms: ${Array.isArray(data) ? data.join(', ') : data.alarms || data.activeAlarms || 'N/A'})`;
-
-      console.log('🎨 About to show toast with message:', alarmMessage);
-
-      // Use showToast function for consistency
-      currentSafetyToastRef.current = showToast('error', alarmMessage, {
-        description: description,
-        duration: 8000,
-        onClose: () => {
-          console.log('🚫 Safety toast closed');
-          currentSafetyToastRef.current = null;
-        },
-      });
-      console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-    };
+    // Safety violation handling is now managed by useMachineEvents hook
 
     const handleAlarmCleared = (data) => {
       console.log('Alarm cleared from port 3005:', data);
@@ -481,37 +364,18 @@ function Page() {
         console.log(`🔍 Full event data:`, JSON.stringify(data, null, 2));
       }
 
-      // If it's a safety_violation event, also trigger the handler
-      if (eventName === 'safety_violation' || eventName === 'emergency_stop') {
-        console.log('🚨 General listener triggering safety violation handler...');
-        handleSafetyViolation3005(data);
-      }
+      // Safety violation events are now handled by useMachineEvents hook
     };
 
-    // Register safety socket event handlers
-    console.log('🔧 Registering safety socket event handlers...');
-    safetySocket.on('safety_violation', (data) => {
-      console.log('🎯 SPECIFIC safety_violation handler triggered!', data);
-      handleSafetyViolation3005(data);
-    });
-    safetySocket.on('emergency_stop', (data) => {
-      console.log('🎯 SPECIFIC emergency_stop handler triggered!', data);
-      handleSafetyViolation3005(data);
-    });
+    // Safety socket event handlers are now managed by useMachineEvents hook
+    console.log('🔧 Safety socket event handlers managed by useMachineEvents hook');
     safetySocket.on('alarm_cleared', handleAlarmCleared);
     safetySocket.on('system_status', handleSystemStatus);
-    safetySocket.on('safety_sensor_error', handleSafetyViolation3005);
-    safetySocket.on('light_curtain_violation', handleSafetyViolation3005);
-    safetySocket.on('door_open_violation', handleSafetyViolation3005);
-    safetySocket.on('pressure_violation', handleSafetyViolation3005);
-    safetySocket.on('temperature_violation', handleSafetyViolation3005);
-    safetySocket.on('vibration_violation', handleSafetyViolation3005);
     console.log('✅ Safety socket event handlers registered');
 
-    // Also listen for safety events on the main socket (port 3002) as fallback
+    // Safety events on main socket are now handled by useMachineEvents hook
     if (socket) {
-      console.log('Adding safety event listeners to main socket (port 3002) as fallback...');
-      socket.on('safety_violation', handleSafetyViolation3005);
+      console.log('Safety events on main socket managed by useMachineEvents hook');
       socket.on('alarm_cleared', handleAlarmCleared);
       socket.on('system_status', handleSystemStatus);
     }
@@ -539,36 +403,11 @@ function Page() {
     safetyEvents.forEach((eventName) => {
       safetySocket.on(eventName, (data) => {
         console.log(`🎯 ${eventName.toUpperCase()} event received:`, data);
-        if (
-          eventName === 'safety_violation' ||
-          eventName === 'part_not_present' ||
-          eventName === 'emergency_stop_activated'
-        ) {
-          handleSafetyViolation3005(data);
-        }
+        // Safety violation events are now handled by useMachineEvents hook
       });
     });
 
-    // Test function to manually trigger safety violation (for debugging)
-    const testSafetyViolation = () => {
-      console.log('🧪 Testing safety violation handler...');
-      handleSafetyViolation3005({
-        timestamp: '2025-09-30T11:35:02.000Z',
-        violation: 'Part not present',
-        register: '1490.0',
-        value: true,
-        severity: 'critical',
-        action: 'stop_cycle',
-        alarmType: 'part_not_present',
-        service: 'independent',
-      });
-    };
-
-    // Test function for emergency stop alarm (for debugging)
-    const testEmergencyStop = () => {
-      console.log('🧪 Testing emergency stop handler...');
-      handleSafetyViolation3005(['emergency_stop']);
-    };
+    // Test functions removed - safety violations now handled by useMachineEvents hook
 
     // Test function for alarm cleared
     const testAlarmCleared = () => {
@@ -580,8 +419,6 @@ function Page() {
     };
 
     // Make test functions available globally for debugging
-    window.testSafetyViolation = testSafetyViolation;
-    window.testEmergencyStop = testEmergencyStop;
     window.testAlarmCleared = testAlarmCleared;
     window.safetySocket = safetySocket; // Make socket available for debugging
 
@@ -605,22 +442,11 @@ function Page() {
     };
     window.testMainSocketSafety = testMainSocketSafety;
 
-    // Register event handlers with a small delay to ensure socket is ready
+    // Safety event handlers are now managed by useMachineEvents hook
     setTimeout(() => {
-      console.log('🔧 Registering safety event handlers...');
-      safetySocket.on('safety_violation', (data) => {
-        console.log('🎯 SPECIFIC safety_violation handler triggered!', data);
-        handleSafetyViolation3005(data);
-      });
+      console.log('🔧 Safety event handlers managed by useMachineEvents hook');
       safetySocket.on('alarm_cleared', handleAlarmCleared);
       safetySocket.on('system_status', handleSystemStatus);
-      safetySocket.on('emergency_stop', handleSafetyViolation3005);
-      safetySocket.on('safety_sensor_error', handleSafetyViolation3005);
-      safetySocket.on('light_curtain_violation', handleSafetyViolation3005);
-      safetySocket.on('door_open_violation', handleSafetyViolation3005);
-      safetySocket.on('pressure_violation', handleSafetyViolation3005);
-      safetySocket.on('temperature_violation', handleSafetyViolation3005);
-      safetySocket.on('vibration_violation', handleSafetyViolation3005);
       safetySocket.onAny(handleAnyEvent);
       console.log('✅ Safety socket event handlers registered');
     }, 100);
@@ -630,21 +456,12 @@ function Page() {
       console.log('Cleaning up safety socket event listeners...');
       safetySocket.off('connect', handleConnect);
       safetySocket.off('disconnect', handleDisconnect);
-      safetySocket.off('safety_violation', handleSafetyViolation3005);
       safetySocket.off('alarm_cleared', handleAlarmCleared);
       safetySocket.off('system_status', handleSystemStatus);
-      safetySocket.off('emergency_stop', handleSafetyViolation3005);
-      safetySocket.off('safety_sensor_error', handleSafetyViolation3005);
-      safetySocket.off('light_curtain_violation', handleSafetyViolation3005);
-      safetySocket.off('door_open_violation', handleSafetyViolation3005);
-      safetySocket.off('pressure_violation', handleSafetyViolation3005);
-      safetySocket.off('temperature_violation', handleSafetyViolation3005);
-      safetySocket.off('vibration_violation', handleSafetyViolation3005);
       safetySocket.offAny(handleAnyEvent);
 
       // Cleanup main socket safety events
       if (socket) {
-        socket.off('safety_violation', handleSafetyViolation3005);
         socket.off('alarm_cleared', handleAlarmCleared);
         socket.off('system_status', handleSystemStatus);
       }

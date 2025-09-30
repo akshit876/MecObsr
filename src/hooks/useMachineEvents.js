@@ -118,68 +118,59 @@ export const useMachineEvents = (socket, safetySocket = null) => {
         }
 
         // Determine violation type and message
-        let violationMessage = '🚨 SAFETY VIOLATION! 🚨';
-        let violationColor = '#dc2626';
+        let violationMessage = 'SAFETY VIOLATION!';
 
         if (Array.isArray(data)) {
           if (data.includes('emergency_stop')) {
-            violationMessage = '🚨 EMERGENCY STOP! 🚨';
+            violationMessage = 'EMERGENCY STOP!';
           } else if (data.includes('part_not_present') || data.includes('part not present')) {
-            violationMessage = '🚨 PART NOT PRESENT! 🚨';
-            violationColor = '#2563eb';
+            violationMessage = 'PART NOT PRESENT!';
           } else if (data.includes('safety_sensor_error') || data.includes('safety sensor error')) {
-            violationMessage = '🚨 SAFETY SENSOR ERROR! 🚨';
-            violationColor = '#f59e0b';
+            violationMessage = 'SAFETY SENSOR ERROR!';
           }
         } else if (typeof data === 'string') {
           if (data.includes('emergency_stop') || data.includes('Emergency stop')) {
-            violationMessage = '🚨 EMERGENCY STOP! 🚨';
+            violationMessage = 'EMERGENCY STOP!';
           } else if (
             data.includes('part_not_present') ||
             data.includes('part not present') ||
             data.includes('Part not present')
           ) {
-            violationMessage = '🚨 PART NOT PRESENT! 🚨';
-            violationColor = '#2563eb';
+            violationMessage = 'PART NOT PRESENT!';
           } else if (
             data.includes('safety_sensor_error') ||
             data.includes('safety sensor error') ||
             data.includes('Safety sensor error')
           ) {
-            violationMessage = '🚨 SAFETY SENSOR ERROR! 🚨';
-            violationColor = '#f59e0b';
+            violationMessage = 'SAFETY SENSOR ERROR!';
           }
         } else if (data.alarms && Array.isArray(data.alarms)) {
           if (data.alarms.includes('emergency_stop')) {
-            violationMessage = '🚨 EMERGENCY STOP! 🚨';
+            violationMessage = 'EMERGENCY STOP!';
           } else if (
             data.alarms.includes('part_not_present') ||
             data.alarms.includes('part not present')
           ) {
-            violationMessage = '🚨 PART NOT PRESENT! 🚨';
-            violationColor = '#2563eb';
+            violationMessage = 'PART NOT PRESENT!';
           } else if (
             data.alarms.includes('safety_sensor_error') ||
             data.alarms.includes('safety sensor error')
           ) {
-            violationMessage = '🚨 SAFETY SENSOR ERROR! 🚨';
-            violationColor = '#f59e0b';
+            violationMessage = 'SAFETY SENSOR ERROR!';
           }
         } else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
           if (data.activeAlarms.includes('emergency_stop')) {
-            violationMessage = '🚨 EMERGENCY STOP! 🚨';
+            violationMessage = 'EMERGENCY STOP!';
           } else if (
             data.activeAlarms.includes('part_not_present') ||
             data.activeAlarms.includes('part not present')
           ) {
-            violationMessage = '🚨 PART NOT PRESENT! 🚨';
-            violationColor = '#2563eb';
+            violationMessage = 'PART NOT PRESENT!';
           } else if (
             data.activeAlarms.includes('safety_sensor_error') ||
             data.activeAlarms.includes('safety sensor error')
           ) {
-            violationMessage = '🚨 SAFETY SENSOR ERROR! 🚨';
-            violationColor = '#f59e0b';
+            violationMessage = 'SAFETY SENSOR ERROR!';
           }
         } else if (data.violation) {
           // Handle data.violation field
@@ -187,19 +178,17 @@ export const useMachineEvents = (socket, safetySocket = null) => {
             data.violation.includes('Emergency stop') ||
             data.violation.includes('emergency_stop')
           ) {
-            violationMessage = '🚨 EMERGENCY STOP! 🚨';
+            violationMessage = 'EMERGENCY STOP!';
           } else if (
             data.violation.includes('Part not present') ||
             data.violation.includes('part not present')
           ) {
-            violationMessage = '🚨 PART NOT PRESENT! 🚨';
-            violationColor = '#2563eb';
+            violationMessage = 'PART NOT PRESENT!';
           } else if (
             data.violation.includes('Safety sensor') ||
             data.violation.includes('safety sensor')
           ) {
-            violationMessage = '🚨 SAFETY SENSOR ERROR! 🚨';
-            violationColor = '#f59e0b';
+            violationMessage = 'SAFETY SENSOR ERROR!';
           }
         }
 
@@ -207,11 +196,12 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           ...toastConfig,
           style: {
             ...toastConfig.style,
-            color: violationColor,
-            backgroundColor: '#dc2626',
-            border: '4px solid #b91c1c',
-            borderRadius: '10px',
-            boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
+            color: '#dc2626', // Red text for all safety violations
+            backgroundColor: '#fef2f2', // Light red background
+            border: '2px solid #dc2626',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
           },
           onClose: () => {
             delete activeToasts.current['safety-violation'];
@@ -229,15 +219,16 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           delete activeToasts.current['emergency-stop'];
         }
 
-        const toastId = toast('🚨 EMERGENCY STOP! 🚨', {
+        const toastId = toast('EMERGENCY STOP!', {
           ...toastConfig,
           style: {
             ...toastConfig.style,
-            color: '#ffffff',
-            backgroundColor: '#dc2626',
-            border: '4px solid #b91c1c',
-            borderRadius: '10px',
-            boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
+            color: '#dc2626', // Red text
+            backgroundColor: '#fef2f2', // Light red background
+            border: '2px solid #dc2626',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
           },
           onClose: () => {
             delete activeToasts.current['emergency-stop'];
@@ -255,15 +246,16 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           delete activeToasts.current['part-not-present'];
         }
 
-        const toastId = toast('🚨 PART NOT PRESENT! 🚨', {
+        const toastId = toast('PART NOT PRESENT!', {
           ...toastConfig,
           style: {
             ...toastConfig.style,
-            color: '#ffffff',
-            backgroundColor: '#2563eb',
-            border: '4px solid #1d4ed8',
-            borderRadius: '10px',
-            boxShadow: '0 6px 20px rgba(37, 99, 235, 0.6)',
+            color: '#dc2626', // Red text
+            backgroundColor: '#fef2f2', // Light red background
+            border: '2px solid #dc2626',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
           },
           onClose: () => {
             delete activeToasts.current['part-not-present'];
@@ -281,15 +273,16 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           delete activeToasts.current['safety-sensor-error'];
         }
 
-        const toastId = toast('🚨 SAFETY SENSOR ERROR! 🚨', {
+        const toastId = toast('SAFETY SENSOR ERROR!', {
           ...toastConfig,
           style: {
             ...toastConfig.style,
-            color: '#ffffff',
-            backgroundColor: '#f59e0b',
-            border: '4px solid #d97706',
-            borderRadius: '10px',
-            boxShadow: '0 6px 20px rgba(245, 158, 11, 0.6)',
+            color: '#dc2626', // Red text
+            backgroundColor: '#fef2f2', // Light red background
+            border: '2px solid #dc2626',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
           },
           onClose: () => {
             delete activeToasts.current['safety-sensor-error'];
