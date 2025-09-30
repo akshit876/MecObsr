@@ -1,8 +1,7 @@
 'use client';
 import { useSocket } from '@/SocketContext';
 import React, { useState, useEffect, useRef } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const ServoSettings = () => {
   const [settings, setSettings] = useState({
@@ -240,7 +239,6 @@ const ServoSettings = () => {
           </div>
         </div>
       </div>
-      <ToastContainer position="bottom-right" theme="dark" />
     </div>
   );
 };

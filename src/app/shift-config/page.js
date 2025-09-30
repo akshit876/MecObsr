@@ -12,9 +12,8 @@ import {
   SelectGroup,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { Check } from 'lucide-react';
-import 'react-toastify/dist/ReactToastify.css';
 
 const ShiftSetting = () => {
   const [shifts, setShifts] = useState([
@@ -182,7 +181,6 @@ const ShiftSetting = () => {
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-50 p-6">
-      <ToastContainer />
       {initialLoading ? (
         <div className="flex items-center justify-center w-[850px] h-[400px] bg-white rounded-lg shadow">
           <div className="flex flex-col items-center gap-3">

@@ -5,8 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/SocketContext';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 const ShiftSetting = () => {
   const socket = useSocket();
@@ -89,18 +88,6 @@ const ShiftSetting = () => {
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gray-100">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
       <Card className="w-[850px]">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">SHIFT SETTING</CardTitle>
