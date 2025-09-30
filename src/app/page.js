@@ -206,7 +206,6 @@ function Page() {
           border: '4px solid #b91c1c',
           borderRadius: '10px',
           boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
-          animation: 'pulse 1s infinite',
         },
         bodyStyle: {
           fontSize: '16px',
