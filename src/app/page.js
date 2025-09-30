@@ -335,69 +335,95 @@ function Page() {
       console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
       console.log('Safety violation from port 3005:', data);
       console.log('Data value:', data.value, 'Type:', typeof data.value);
+      console.log('Full data object:', JSON.stringify(data, null, 2));
 
-      // Check if this is a violation activation (value = true/1) or deactivation (value = false/0)
-      const isViolationActive =
-        data.value === true || data.value === 1 || data.value === '1' || data.value === 'true';
+      // More flexible value checking - check various possible formats
+      let isViolationActive = false;
+
+      // Check different possible value formats
+      if (data.value !== undefined && data.value !== null) {
+        isViolationActive =
+          data.value === true ||
+          data.value === 1 ||
+          data.value === '1' ||
+          data.value === 'true' ||
+          data.value === 'on' ||
+          data.value === 'ON' ||
+          data.value === 'active' ||
+          data.value === 'ACTIVE';
+      }
+
+      // Also check if there's a status field
+      if (data.status !== undefined) {
+        isViolationActive =
+          isViolationActive ||
+          data.status === 'active' ||
+          data.status === 'violation' ||
+          data.status === 'error' ||
+          data.status === 'critical';
+      }
+
+      // Check if there's an active field
+      if (data.active !== undefined) {
+        isViolationActive = isViolationActive || data.active === true || data.active === 1;
+      }
 
       console.log('Is violation active?', isViolationActive);
+      console.log('Value check details:', {
+        value: data.value,
+        status: data.status,
+        active: data.active,
+        isViolationActive,
+      });
 
       // Clear any existing timeout
       if (safetyViolationTimeoutRef.current) {
         clearTimeout(safetyViolationTimeoutRef.current);
       }
 
-      // Only show toast when violation is ACTIVE (turned ON)
-      if (isViolationActive) {
-        // Debounce safety violations to prevent multiple toasts
-        safetyViolationTimeoutRef.current = setTimeout(() => {
-          // Dismiss any existing safety toast first
-          if (currentSafetyToastRef.current) {
-            console.log('🚫 Dismissing previous safety toast');
-            toast.dismiss(currentSafetyToastRef.current);
-            currentSafetyToastRef.current = null;
-          }
+      // TEMPORARY: Always show toast for debugging - we'll fix the logic once we see what data is coming
+      console.log('🚨 SHOWING TOAST FOR DEBUGGING - ANY SAFETY EVENT!');
 
-          const violationMessages = {
-            'Part not present': '🚨 PART NOT PRESENT! 🚨',
-            'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
-            'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
-            'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
-            'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
-            'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
-            'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
-            'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
-          };
-
-          const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
-          const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
-
-          console.log('🎨 About to show toast with message:', message);
-
-          try {
-            // Show new safety toast and store its ID
-            currentSafetyToastRef.current = toast.error(message, {
-              description: description,
-              duration: 8000,
-              onClose: () => {
-                console.log('🚫 Safety toast closed');
-                currentSafetyToastRef.current = null;
-              },
-            });
-            console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-          } catch (error) {
-            console.error('❌ Error showing safety toast:', error);
-          }
-        }, 500); // 500ms debounce delay
-      } else {
-        // Violation is cleared (turned OFF) - dismiss any existing safety toast
-        console.log('🚫 Safety violation cleared, dismissing any existing safety toast');
+      // Debounce safety violations to prevent multiple toasts
+      safetyViolationTimeoutRef.current = setTimeout(() => {
+        // Dismiss any existing safety toast first
         if (currentSafetyToastRef.current) {
-          console.log('🚫 Dismissing safety toast due to violation cleared');
+          console.log('🚫 Dismissing previous safety toast');
           toast.dismiss(currentSafetyToastRef.current);
           currentSafetyToastRef.current = null;
         }
-      }
+
+        const violationMessages = {
+          'Part not present': '🚨 PART NOT PRESENT! 🚨',
+          'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
+          'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
+          'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
+          'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
+          'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
+          'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
+          'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
+        };
+
+        const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
+        const description = `${data.violation || 'Unknown violation'} (Register: ${data.register || 'N/A'}, Value: ${data.value || 'N/A'}) - Active: ${isViolationActive}`;
+
+        console.log('🎨 About to show toast with message:', message);
+
+        try {
+          // Show new safety toast and store its ID
+          currentSafetyToastRef.current = toast.error(message, {
+            description: description,
+            duration: 8000,
+            onClose: () => {
+              console.log('🚫 Safety toast closed');
+              currentSafetyToastRef.current = null;
+            },
+          });
+          console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
+        } catch (error) {
+          console.error('❌ Error showing safety toast:', error);
+        }
+      }, 100); // Reduced debounce delay to 100ms for faster response
     };
 
     const handleAlarmCleared = (data) => {
@@ -792,7 +818,7 @@ function Page() {
                 className="w-full h-7 text-xs px-2 rounded bg-white/10 border-0 text-white placeholder:text-gray-400"
               />
             </div>
-            <div className="w-[10%] flex justify-center">
+            <div className="w-[10%] flex justify-center gap-2">
               <Button
                 size="sm"
                 className="bg-blue-500 hover:bg-blue-600 h-8 w-8 p-0 rounded-full flex items-center justify-center"
@@ -805,6 +831,29 @@ function Page() {
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
+              </Button>
+              <Button
+                size="sm"
+                className="bg-red-500 hover:bg-red-600 h-8 px-2 text-xs"
+                onClick={() => {
+                  console.log('🧪 Testing force toast...');
+                  try {
+                    currentSafetyToastRef.current = toast.error('🚨 TEST SAFETY VIOLATION! 🚨', {
+                      description: 'This is a test toast to verify the system works',
+                      duration: 5000,
+                      onClose: () => {
+                        console.log('🚫 Test toast closed');
+                        currentSafetyToastRef.current = null;
+                      },
+                    });
+                    console.log('✅ Test toast displayed, ID:', currentSafetyToastRef.current);
+                  } catch (error) {
+                    console.error('❌ Error showing test toast:', error);
+                  }
+                }}
+                title="Test Safety Toast"
+              >
+                Test
               </Button>
             </div>
           </div>
