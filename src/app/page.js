@@ -54,11 +54,6 @@ const showToast = (type, message, options = {}) => {
   console.log('🎨 showToast called with:', { type, message, options });
 
   try {
-    // Clear all existing toasts first
-    if (toast && typeof toast.dismiss === 'function') {
-      toast.dismiss();
-    }
-
     // Show toast immediately without delay
     let toastId;
     if (type === 'error' && toast && typeof toast.error === 'function') {
@@ -71,8 +66,10 @@ const showToast = (type, message, options = {}) => {
       toastId = toast.info(message, options);
     }
     console.log('✅ Toast method called successfully, toastId:', toastId);
+    return toastId;
   } catch (error) {
     console.error('❌ Error calling toast method:', error);
+    return null;
   }
 };
 
@@ -376,13 +373,21 @@ function Page() {
         isViolationActive,
       });
 
+      // Only show toast if violation is active
+      if (!isViolationActive) {
+        console.log('🚫 Violation not active, dismissing any existing safety toast');
+        // Dismiss any existing safety toast when violation is cleared
+        if (currentSafetyToastRef.current) {
+          toast.dismiss(currentSafetyToastRef.current);
+          currentSafetyToastRef.current = null;
+        }
+        return;
+      }
+
       // Clear any existing timeout
       if (safetyViolationTimeoutRef.current) {
         clearTimeout(safetyViolationTimeoutRef.current);
       }
-
-      // TEMPORARY: Always show toast for debugging - we'll fix the logic once we see what data is coming
-      console.log('🚨 SHOWING TOAST FOR DEBUGGING - ANY SAFETY EVENT!');
 
       // Debounce safety violations to prevent multiple toasts
       safetyViolationTimeoutRef.current = setTimeout(() => {
@@ -405,24 +410,20 @@ function Page() {
         };
 
         const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
-        const description = `${data.violation || 'Unknown violation'} (Register: ${data.register || 'N/A'}, Value: ${data.value || 'N/A'}) - Active: ${isViolationActive}`;
+        const description = `${data.violation || 'Unknown violation'} (Register: ${data.register || 'N/A'}, Value: ${data.value || 'N/A'})`;
 
         console.log('🎨 About to show toast with message:', message);
 
-        try {
-          // Show new safety toast and store its ID
-          currentSafetyToastRef.current = toast.error(message, {
-            description: description,
-            duration: 8000,
-            onClose: () => {
-              console.log('🚫 Safety toast closed');
-              currentSafetyToastRef.current = null;
-            },
-          });
-          console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-        } catch (error) {
-          console.error('❌ Error showing safety toast:', error);
-        }
+        // Use showToast function for consistency
+        currentSafetyToastRef.current = showToast('error', message, {
+          description: description,
+          duration: 8000,
+          onClose: () => {
+            console.log('🚫 Safety toast closed');
+            currentSafetyToastRef.current = null;
+          },
+        });
+        console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
       }, 100); // Reduced debounce delay to 100ms for faster response
     };
 
@@ -436,10 +437,7 @@ function Page() {
         currentSafetyToastRef.current = null;
       }
 
-      showToast('success', '✅ ALARM CLEARED! ✅', {
-        description: 'All safety alarms have been cleared',
-        duration: 3000,
-      });
+      // No toast shown for alarm cleared as requested
     };
 
     const handleSystemStatus = (data) => {
@@ -831,29 +829,6 @@ function Page() {
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
-              </Button>
-              <Button
-                size="sm"
-                className="bg-red-500 hover:bg-red-600 h-8 px-2 text-xs"
-                onClick={() => {
-                  console.log('🧪 Testing force toast...');
-                  try {
-                    currentSafetyToastRef.current = toast.error('🚨 TEST SAFETY VIOLATION! 🚨', {
-                      description: 'This is a test toast to verify the system works',
-                      duration: 5000,
-                      onClose: () => {
-                        console.log('🚫 Test toast closed');
-                        currentSafetyToastRef.current = null;
-                      },
-                    });
-                    console.log('✅ Test toast displayed, ID:', currentSafetyToastRef.current);
-                  } catch (error) {
-                    console.error('❌ Error showing test toast:', error);
-                  }
-                }}
-                title="Test Safety Toast"
-              >
-                Test
               </Button>
             </div>
           </div>
