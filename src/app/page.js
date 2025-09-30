@@ -325,24 +325,32 @@ function Page() {
       const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
       const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
 
-      showToast('error', message, {
-        description: description,
-        duration: 8000, // Longer duration for safety violations
-        style: {
-          fontSize: '18px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          backgroundColor: '#dc2626',
-          color: 'white',
-          border: '4px solid #b91c1c',
-          borderRadius: '10px',
-          boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
-        },
-        bodyStyle: {
-          fontSize: '16px',
-          fontWeight: '700',
-        },
-      });
+      console.log('🎨 About to show toast with message:', message);
+      console.log('🎨 Toast description:', description);
+
+      try {
+        showToast('error', message, {
+          description: description,
+          duration: 8000, // Longer duration for safety violations
+          style: {
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            backgroundColor: '#dc2626',
+            color: 'white',
+            border: '4px solid #b91c1c',
+            borderRadius: '10px',
+            boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
+          },
+          bodyStyle: {
+            fontSize: '16px',
+            fontWeight: '700',
+          },
+        });
+        console.log('✅ Toast should be displayed now');
+      } catch (error) {
+        console.error('❌ Error showing toast:', error);
+      }
     };
 
     const handleAlarmCleared = (data) => {
@@ -394,10 +402,22 @@ function Page() {
     // Add a general event listener to catch any events
     const handleAnyEvent = (eventName, data) => {
       console.log(`🔍 Safety Socket Event Received: ${eventName}`, data);
+      console.log(`🔍 Event data type:`, typeof data);
+      console.log(`🔍 Event data keys:`, Object.keys(data || {}));
+
+      // If it's a safety_violation event, also trigger the handler
+      if (eventName === 'safety_violation') {
+        console.log('🚨 General listener triggering safety violation handler...');
+        handleSafetyViolation3005(data);
+      }
     };
 
     // Register safety socket event handlers
-    safetySocket.on('safety_violation', handleSafetyViolation3005);
+    console.log('🔧 Registering safety socket event handlers...');
+    safetySocket.on('safety_violation', (data) => {
+      console.log('🎯 SPECIFIC safety_violation handler triggered!', data);
+      handleSafetyViolation3005(data);
+    });
     safetySocket.on('alarm_cleared', handleAlarmCleared);
     safetySocket.on('system_status', handleSystemStatus);
     safetySocket.on('emergency_stop', handleSafetyViolation3005);
@@ -407,6 +427,15 @@ function Page() {
     safetySocket.on('pressure_violation', handleSafetyViolation3005);
     safetySocket.on('temperature_violation', handleSafetyViolation3005);
     safetySocket.on('vibration_violation', handleSafetyViolation3005);
+    console.log('✅ Safety socket event handlers registered');
+
+    // Also listen for safety events on the main socket (port 3002) as fallback
+    if (socket) {
+      console.log('Adding safety event listeners to main socket (port 3002) as fallback...');
+      socket.on('safety_violation', handleSafetyViolation3005);
+      socket.on('alarm_cleared', handleAlarmCleared);
+      socket.on('system_status', handleSystemStatus);
+    }
 
     // Add general event listener for debugging
     safetySocket.onAny(handleAnyEvent);
@@ -430,6 +459,46 @@ function Page() {
     window.testSafetyViolation = testSafetyViolation;
     window.safetySocket = safetySocket; // Make socket available for debugging
 
+    // Test function to emit safety event from main socket
+    const testMainSocketSafety = () => {
+      console.log('🧪 Testing safety event from main socket (port 3002)...');
+      if (socket) {
+        socket.emit('safety_violation', {
+          timestamp: '2025-09-30T11:35:02.000Z',
+          violation: 'Part not present',
+          register: '1490.0',
+          value: true,
+          severity: 'critical',
+          action: 'stop_cycle',
+          alarmType: 'part_not_present',
+          service: 'independent',
+        });
+      } else {
+        console.log('❌ Main socket not available');
+      }
+    };
+    window.testMainSocketSafety = testMainSocketSafety;
+
+    // Register event handlers with a small delay to ensure socket is ready
+    setTimeout(() => {
+      console.log('🔧 Registering safety event handlers...');
+      safetySocket.on('safety_violation', (data) => {
+        console.log('🎯 SPECIFIC safety_violation handler triggered!', data);
+        handleSafetyViolation3005(data);
+      });
+      safetySocket.on('alarm_cleared', handleAlarmCleared);
+      safetySocket.on('system_status', handleSystemStatus);
+      safetySocket.on('emergency_stop', handleSafetyViolation3005);
+      safetySocket.on('safety_sensor_error', handleSafetyViolation3005);
+      safetySocket.on('light_curtain_violation', handleSafetyViolation3005);
+      safetySocket.on('door_open_violation', handleSafetyViolation3005);
+      safetySocket.on('pressure_violation', handleSafetyViolation3005);
+      safetySocket.on('temperature_violation', handleSafetyViolation3005);
+      safetySocket.on('vibration_violation', handleSafetyViolation3005);
+      safetySocket.onAny(handleAnyEvent);
+      console.log('✅ Safety socket event handlers registered');
+    }, 100);
+
     // Cleanup function
     return () => {
       console.log('Cleaning up safety socket event listeners...');
@@ -446,6 +515,14 @@ function Page() {
       safetySocket.off('temperature_violation', handleSafetyViolation3005);
       safetySocket.off('vibration_violation', handleSafetyViolation3005);
       safetySocket.offAny(handleAnyEvent);
+
+      // Cleanup main socket safety events
+      if (socket) {
+        socket.off('safety_violation', handleSafetyViolation3005);
+        socket.off('alarm_cleared', handleAlarmCleared);
+        socket.off('system_status', handleSystemStatus);
+      }
+
       setSafetySocketConnected(false);
     };
   }, [safetySocket]);
@@ -712,12 +789,18 @@ function Page() {
               Light
             </Button>
           </div>
-          <div className="mt-1">
+          <div className="mt-1 space-y-1">
             <Button
               className="w-full bg-red-600 hover:bg-red-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
               onClick={() => window.testSafetyViolation && window.testSafetyViolation()}
             >
               Test Safety
+            </Button>
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
+              onClick={() => window.testMainSocketSafety && window.testMainSocketSafety()}
+            >
+              Test Main Socket
             </Button>
           </div>
         </div>
