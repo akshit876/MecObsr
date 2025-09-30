@@ -184,6 +184,37 @@ function Page() {
       });
     };
 
+    const handleSafetyViolation = (data) => {
+      const violationMessages = {
+        'Part not present': '🚨 PART NOT PRESENT! 🚨',
+        'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
+        'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
+      };
+
+      const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
+      const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
+
+      showToast('error', message, {
+        description: description,
+        duration: 8000, // Longer duration for safety violations
+        style: {
+          fontSize: '18px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '4px solid #b91c1c',
+          borderRadius: '10px',
+          boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
+          animation: 'pulse 1s infinite',
+        },
+        bodyStyle: {
+          fontSize: '16px',
+          fontWeight: '700',
+        },
+      });
+    };
+
     // Initial data load
     const handleCsvData = (data) => {
       console.log('Received csv-data:', data);
@@ -220,6 +251,7 @@ function Page() {
     socket.on('scanner_read', handleScannerData);
     socket.on('first_scan_ok', handleFirstScanOk);
     socket.on('no_code_found', handleNoCodeFound);
+    socket.on('safety_violation', handleSafetyViolation);
     socket.on('csv-data', handleCsvData);
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
@@ -232,6 +264,7 @@ function Page() {
       socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
       socket.off('no_code_found', handleNoCodeFound);
+      socket.off('safety_violation', handleSafetyViolation);
       socket.off('csv-data', handleCsvData);
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
