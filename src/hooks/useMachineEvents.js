@@ -16,6 +16,8 @@ const toastConfig = {
 export const useMachineEvents = (socket, safetySocket = null) => {
   // Add ref to track active toasts
   const activeToasts = useRef({});
+  // Add ref to track toast timeouts for auto-dismissal
+  const toastTimeouts = useRef({});
 
   // Function to clear all toasts
   const clearAllToasts = () => {
@@ -25,6 +27,33 @@ export const useMachineEvents = (socket, safetySocket = null) => {
       }
     });
     activeToasts.current = {};
+
+    // Clear all timeouts
+    Object.values(toastTimeouts.current).forEach((timeoutId) => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    });
+    toastTimeouts.current = {};
+  };
+
+  // Function to set auto-dismiss timeout for a toast
+  // This ensures toasts are automatically dismissed if no further events are received from the backend
+  const setToastTimeout = (toastKey, timeoutMs = 10000) => {
+    // Clear existing timeout for this toast
+    if (toastTimeouts.current[toastKey]) {
+      clearTimeout(toastTimeouts.current[toastKey]);
+    }
+
+    // Set new timeout
+    toastTimeouts.current[toastKey] = setTimeout(() => {
+      console.log(`⏰ Auto-dismissing toast for ${toastKey} after ${timeoutMs}ms of inactivity`);
+      if (activeToasts.current[toastKey]) {
+        toast.dismiss(activeToasts.current[toastKey]);
+        delete activeToasts.current[toastKey];
+      }
+      delete toastTimeouts.current[toastKey];
+    }, timeoutMs);
   };
 
   useEffect(() => {
@@ -147,13 +176,37 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           // Check various fields that might indicate active violation
           if (data.value !== undefined) {
             isViolationActive = Boolean(data.value);
+            console.log(
+              '🔍 Using data.value for violation status:',
+              data.value,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
           } else if (data.status !== undefined) {
             isViolationActive =
               data.status === 'active' || data.status === 'violation' || data.status === 'error';
+            console.log(
+              '🔍 Using data.status for violation status:',
+              data.status,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
           } else if (data.active !== undefined) {
             isViolationActive = Boolean(data.active);
+            console.log(
+              '🔍 Using data.active for violation status:',
+              data.active,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
           } else if (data.alarms && Array.isArray(data.alarms)) {
             isViolationActive = data.alarms.length > 0;
+            console.log(
+              '🔍 Using data.alarms for violation status:',
+              data.alarms,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
             if (data.alarms.includes('emergency_stop')) {
               violationMessage = 'EMERGENCY STOP!';
             } else if (
@@ -169,6 +222,12 @@ export const useMachineEvents = (socket, safetySocket = null) => {
             }
           } else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
             isViolationActive = data.activeAlarms.length > 0;
+            console.log(
+              '🔍 Using data.activeAlarms for violation status:',
+              data.activeAlarms,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
             if (data.activeAlarms.includes('emergency_stop')) {
               violationMessage = 'EMERGENCY STOP!';
             } else if (
@@ -185,6 +244,12 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           } else if (data.violation) {
             isViolationActive =
               !data.violation.includes('cleared') && !data.violation.includes('resolved');
+            console.log(
+              '🔍 Using data.violation for violation status:',
+              data.violation,
+              '-> isViolationActive:',
+              isViolationActive,
+            );
             if (
               data.violation.includes('Emergency stop') ||
               data.violation.includes('emergency_stop')
@@ -204,10 +269,65 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           } else {
             // Default: if object has content, consider it active
             isViolationActive = Object.keys(data).length > 0;
+            console.log(
+              '🔍 Using default logic for violation status:',
+              Object.keys(data),
+              '-> isViolationActive:',
+              isViolationActive,
+            );
+          }
+
+          // Determine violation message based on alarmType or violation field
+          if (data.alarmType) {
+            console.log('🔍 Using data.alarmType for message:', data.alarmType);
+            if (
+              data.alarmType.includes('emergency_stop') ||
+              data.alarmType.includes('emergency-stop')
+            ) {
+              violationMessage = 'EMERGENCY STOP!';
+            } else if (
+              data.alarmType.includes('part_not_present') ||
+              data.alarmType.includes('part-not-present')
+            ) {
+              violationMessage = 'PART NOT PRESENT!';
+            } else if (
+              data.alarmType.includes('safety_sensor_error') ||
+              data.alarmType.includes('safety-sensor-error')
+            ) {
+              violationMessage = 'SAFETY SENSOR ERROR!';
+            }
+          } else if (data.violation) {
+            console.log('🔍 Using data.violation for message:', data.violation);
+            if (
+              data.violation.includes('Emergency stop') ||
+              data.violation.includes('emergency_stop') ||
+              data.violation.includes('emergency-stop')
+            ) {
+              violationMessage = 'EMERGENCY STOP!';
+            } else if (
+              data.violation.includes('Part not present') ||
+              data.violation.includes('part not present') ||
+              data.violation.includes('part_not_present') ||
+              data.violation.includes('part-not-present')
+            ) {
+              violationMessage = 'PART NOT PRESENT!';
+            } else if (
+              data.violation.includes('Safety sensor') ||
+              data.violation.includes('safety sensor') ||
+              data.violation.includes('safety_sensor_error') ||
+              data.violation.includes('safety-sensor-error')
+            ) {
+              violationMessage = 'SAFETY SENSOR ERROR!';
+            }
           }
         }
 
-        console.log('Is violation active?', isViolationActive);
+        console.log(
+          '🔍 Final violation status - isViolationActive:',
+          isViolationActive,
+          'violationMessage:',
+          violationMessage,
+        );
 
         // If violation is not active, dismiss any existing toast
         if (!isViolationActive) {
@@ -216,16 +336,28 @@ export const useMachineEvents = (socket, safetySocket = null) => {
             toast.dismiss(activeToasts.current['safety-violation']);
             delete activeToasts.current['safety-violation'];
           }
+          // Clear timeout when violation is not active
+          if (toastTimeouts.current['safety-violation']) {
+            clearTimeout(toastTimeouts.current['safety-violation']);
+            delete toastTimeouts.current['safety-violation'];
+          }
           return;
         }
 
         // Clear any existing safety violation toast before showing new one
         if (activeToasts.current['safety-violation']) {
+          console.log('🔄 Dismissing existing safety toast before showing new one');
           toast.dismiss(activeToasts.current['safety-violation']);
           delete activeToasts.current['safety-violation'];
         }
+        // Clear timeout when dismissing existing toast
+        if (toastTimeouts.current['safety-violation']) {
+          clearTimeout(toastTimeouts.current['safety-violation']);
+          delete toastTimeouts.current['safety-violation'];
+        }
 
         // Show new toast for active violation
+        console.log('🎨 Showing safety violation toast:', violationMessage);
         const toastId = toast(violationMessage, {
           ...toastConfig,
           style: {
@@ -238,10 +370,22 @@ export const useMachineEvents = (socket, safetySocket = null) => {
             boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)',
           },
           onClose: () => {
+            console.log('🚫 Safety toast closed');
             delete activeToasts.current['safety-violation'];
+            // Clear timeout when toast is manually closed
+            if (toastTimeouts.current['safety-violation']) {
+              clearTimeout(toastTimeouts.current['safety-violation']);
+              delete toastTimeouts.current['safety-violation'];
+            }
           },
         });
         activeToasts.current['safety-violation'] = toastId;
+
+        // Set or reset auto-dismiss timeout (10 seconds of inactivity)
+        // This will reset the timeout each time a new event is received
+        setToastTimeout('safety-violation', 10000);
+
+        console.log('✅ Safety toast displayed with ID:', toastId);
       },
       // Listen for safety violation cleared events
       safety_violation_cleared: (data) => {
@@ -249,6 +393,24 @@ export const useMachineEvents = (socket, safetySocket = null) => {
         if (activeToasts.current['safety-violation']) {
           toast.dismiss(activeToasts.current['safety-violation']);
           delete activeToasts.current['safety-violation'];
+        }
+        // Clear timeout when violation is cleared
+        if (toastTimeouts.current['safety-violation']) {
+          clearTimeout(toastTimeouts.current['safety-violation']);
+          delete toastTimeouts.current['safety-violation'];
+        }
+      },
+      // Listen for safety violation resolved events (when bit is turned off)
+      safety_violation_resolved: (data) => {
+        console.log('✅ Safety violation resolved event received:', data);
+        if (activeToasts.current['safety-violation']) {
+          toast.dismiss(activeToasts.current['safety-violation']);
+          delete activeToasts.current['safety-violation'];
+        }
+        // Clear timeout when violation is resolved
+        if (toastTimeouts.current['safety-violation']) {
+          clearTimeout(toastTimeouts.current['safety-violation']);
+          delete toastTimeouts.current['safety-violation'];
         }
       },
       // Listen for emergency stop events
@@ -405,6 +567,7 @@ export const useMachineEvents = (socket, safetySocket = null) => {
       // Safety violation events
       safetySocket.on('safety_violation', eventHandlers['safety_violation']);
       safetySocket.on('safety_violation_cleared', eventHandlers['safety_violation_cleared']);
+      safetySocket.on('safety_violation_resolved', eventHandlers['safety_violation_resolved']);
       safetySocket.on('emergency_stop', eventHandlers['emergency_stop']);
       safetySocket.on('safety_sensor_error', eventHandlers['safety-sensor-error']);
       safetySocket.on('part_not_present', eventHandlers['part-not-present']);
@@ -432,6 +595,7 @@ export const useMachineEvents = (socket, safetySocket = null) => {
       if (safetySocket) {
         safetySocket.off('safety_violation', eventHandlers['safety_violation']);
         safetySocket.off('safety_violation_cleared', eventHandlers['safety_violation_cleared']);
+        safetySocket.off('safety_violation_resolved', eventHandlers['safety_violation_resolved']);
         safetySocket.off('emergency_stop', eventHandlers['emergency_stop']);
         safetySocket.off('safety_sensor_error', eventHandlers['safety-sensor-error']);
         safetySocket.off('part_not_present', eventHandlers['part-not-present']);
