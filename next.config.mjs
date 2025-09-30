@@ -18,18 +18,20 @@ const nextConfig = {
     // Don't run ESLint during builds (you can still run it separately)
     ignoreDuringBuilds: true,
   },
-  // next.config.js
+  webpack: (config, { dev, isServer }) => {
+    // Fix source map issues with react-toastify
+    if (dev && !isServer) {
+      config.devtool = 'eval-source-map';
+    }
 
-  // webpack: (config, { dev, isServer }) => {
-  //   if (dev && !isServer) {
-  //     config.watchOptions = {
-  //       poll: 1000, // Check for changes every second
-  //       aggregateTimeout: 300, // Delay before rebuilding
-  //     };
-  //     config.cache = false; // Disabling cache explicitly
-  //   }
-  //   return config;
-  // },
+    // Ignore source map warnings for react-toastify
+    config.ignoreWarnings = [
+      /Failed to parse source map/,
+      /ENOENT: no such file or directory.*\.map$/,
+    ];
+
+    return config;
+  },
 };
 
 export default nextConfig;
