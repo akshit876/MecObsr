@@ -334,52 +334,70 @@ function Page() {
     const handleSafetyViolation3005 = (data) => {
       console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
       console.log('Safety violation from port 3005:', data);
+      console.log('Data value:', data.value, 'Type:', typeof data.value);
+
+      // Check if this is a violation activation (value = true/1) or deactivation (value = false/0)
+      const isViolationActive =
+        data.value === true || data.value === 1 || data.value === '1' || data.value === 'true';
+
+      console.log('Is violation active?', isViolationActive);
 
       // Clear any existing timeout
       if (safetyViolationTimeoutRef.current) {
         clearTimeout(safetyViolationTimeoutRef.current);
       }
 
-      // Debounce safety violations to prevent multiple toasts
-      safetyViolationTimeoutRef.current = setTimeout(() => {
-        // Dismiss any existing safety toast first
+      // Only show toast when violation is ACTIVE (turned ON)
+      if (isViolationActive) {
+        // Debounce safety violations to prevent multiple toasts
+        safetyViolationTimeoutRef.current = setTimeout(() => {
+          // Dismiss any existing safety toast first
+          if (currentSafetyToastRef.current) {
+            console.log('🚫 Dismissing previous safety toast');
+            toast.dismiss(currentSafetyToastRef.current);
+            currentSafetyToastRef.current = null;
+          }
+
+          const violationMessages = {
+            'Part not present': '🚨 PART NOT PRESENT! 🚨',
+            'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
+            'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
+            'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
+            'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
+            'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
+            'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
+            'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
+          };
+
+          const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
+          const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
+
+          console.log('🎨 About to show toast with message:', message);
+
+          try {
+            // Show new safety toast and store its ID
+            currentSafetyToastRef.current = toast.error(message, {
+              description: description,
+              duration: 8000,
+              onClose: () => {
+                console.log('🚫 Safety toast closed');
+                currentSafetyToastRef.current = null;
+              },
+            });
+            console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
+          } catch (error) {
+            console.error('❌ Error showing safety toast:', error);
+          }
+        }, 500); // 500ms debounce delay
+      } else {
+        // Violation is cleared (turned OFF) - dismiss any existing safety toast
+        console.log('🚫 Safety violation cleared, dismissing any existing safety toast');
         if (currentSafetyToastRef.current) {
-          console.log('🚫 Dismissing previous safety toast');
+          console.log('🚫 Dismissing safety toast due to violation cleared');
           toast.dismiss(currentSafetyToastRef.current);
           currentSafetyToastRef.current = null;
         }
-
-        const violationMessages = {
-          'Part not present': '🚨 PART NOT PRESENT! 🚨',
-          'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
-          'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
-          'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
-          'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
-          'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
-          'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
-          'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
-        };
-
-        const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
-        const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
-
-        console.log('🎨 About to show toast with message:', message);
-
-        try {
-          // Show new safety toast and store its ID
-          currentSafetyToastRef.current = toast.error(message, {
-            description: description,
-            duration: 8000,
-            onClose: () => {
-              console.log('🚫 Safety toast closed');
-              currentSafetyToastRef.current = null;
-            },
-          });
-          console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-        } catch (error) {
-          console.error('❌ Error showing safety toast:', error);
-        }
-      }, 500); // 500ms debounce delay
+      }
     };
 
     const handleAlarmCleared = (data) => {
@@ -413,6 +431,11 @@ function Page() {
       console.log(`🔍 Safety Socket Event Received: ${eventName}`, data);
       console.log(`🔍 Event data type:`, typeof data);
       console.log(`🔍 Event data keys:`, Object.keys(data || {}));
+
+      // Log all event data for debugging
+      if (data && typeof data === 'object') {
+        console.log(`🔍 Full event data:`, JSON.stringify(data, null, 2));
+      }
 
       // If it's a safety_violation event, also trigger the handler
       if (eventName === 'safety_violation') {
@@ -448,6 +471,36 @@ function Page() {
 
     // Add general event listener for debugging
     safetySocket.onAny(handleAnyEvent);
+
+    // Also add individual listeners for all possible safety events to debug
+    const safetyEvents = [
+      'safety_violation',
+      'alarm_cleared',
+      'system_status',
+      'emergency_stop',
+      'safety_sensor_error',
+      'light_curtain_violation',
+      'door_open_violation',
+      'pressure_violation',
+      'temperature_violation',
+      'vibration_violation',
+      'alarm_status',
+      'part_not_present',
+      'emergency_stop_activated',
+    ];
+
+    safetyEvents.forEach((eventName) => {
+      safetySocket.on(eventName, (data) => {
+        console.log(`🎯 ${eventName.toUpperCase()} event received:`, data);
+        if (
+          eventName === 'safety_violation' ||
+          eventName === 'part_not_present' ||
+          eventName === 'emergency_stop_activated'
+        ) {
+          handleSafetyViolation3005(data);
+        }
+      });
+    });
 
     // Test function to manually trigger safety violation (for debugging)
     const testSafetyViolation = () => {
