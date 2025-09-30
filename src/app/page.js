@@ -163,6 +163,27 @@ function Page() {
       });
     };
 
+    const handleNoCodeFound = (data) => {
+      showToast('error', '❌ NO CODE FOUND! ❌', {
+        description: data.message || 'No marking code detected during middle scan',
+        duration: 5000,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '3px solid #b91c1c',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+        },
+        bodyStyle: {
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      });
+    };
+
     // Initial data load
     const handleCsvData = (data) => {
       console.log('Received csv-data:', data);
@@ -198,6 +219,7 @@ function Page() {
     socket.on('marking_data', handleMarkingData);
     socket.on('scanner_read', handleScannerData);
     socket.on('first_scan_ok', handleFirstScanOk);
+    socket.on('no_code_found', handleNoCodeFound);
     socket.on('csv-data', handleCsvData);
     socket.on('cycle-completed', handleCycleCompleted);
     socket.on('scan-cycle-completed', handleScanCycleCompleted);
@@ -209,6 +231,7 @@ function Page() {
       socket.off('marking_data', handleMarkingData);
       socket.off('scanner_read', handleScannerData);
       socket.off('first_scan_ok', handleFirstScanOk);
+      socket.off('no_code_found', handleNoCodeFound);
       socket.off('csv-data', handleCsvData);
       socket.off('cycle-completed', handleCycleCompleted);
       socket.off('scan-cycle-completed', handleScanCycleCompleted);
