@@ -423,30 +423,28 @@ function Page() {
         clearTimeout(safetyViolationTimeoutRef.current);
       }
 
-      // Debounce safety violations to prevent multiple toasts
-      safetyViolationTimeoutRef.current = setTimeout(() => {
-        // Dismiss any existing safety toast first
-        if (currentSafetyToastRef.current) {
-          console.log('🚫 Dismissing previous safety toast');
-          toast.dismiss(currentSafetyToastRef.current);
+      // Show toast immediately for safety violations
+      // Dismiss any existing safety toast first
+      if (currentSafetyToastRef.current) {
+        console.log('🚫 Dismissing previous safety toast');
+        toast.dismiss(currentSafetyToastRef.current);
+        currentSafetyToastRef.current = null;
+      }
+
+      const description = `${alarmType} (Alarms: ${Array.isArray(data) ? data.join(', ') : data.alarms || data.activeAlarms || 'N/A'})`;
+
+      console.log('🎨 About to show toast with message:', alarmMessage);
+
+      // Use showToast function for consistency
+      currentSafetyToastRef.current = showToast('error', alarmMessage, {
+        description: description,
+        duration: 8000,
+        onClose: () => {
+          console.log('🚫 Safety toast closed');
           currentSafetyToastRef.current = null;
-        }
-
-        const description = `${alarmType} (Alarms: ${Array.isArray(data) ? data.join(', ') : data.alarms || data.activeAlarms || 'N/A'})`;
-
-        console.log('🎨 About to show toast with message:', alarmMessage);
-
-        // Use showToast function for consistency
-        currentSafetyToastRef.current = showToast('error', alarmMessage, {
-          description: description,
-          duration: 8000,
-          onClose: () => {
-            console.log('🚫 Safety toast closed');
-            currentSafetyToastRef.current = null;
-          },
-        });
-        console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-      }, 100); // Reduced debounce delay to 100ms for faster response
+        },
+      });
+      console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
     };
 
     const handleAlarmCleared = (data) => {
