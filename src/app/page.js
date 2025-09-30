@@ -51,8 +51,28 @@ const calculatePieceNumber = (timestamp, data) => {
 
 // Helper function to show toast and clear previous ones
 const showToast = (type, message, options = {}) => {
+  console.log('🎨 showToast called with:', { type, message, options });
+  console.log('🎨 Toast object:', toast);
+  console.log('🎨 Available toast methods:', Object.keys(toast));
+
   toast.dismiss(); // Clear all existing toasts
-  toast[type](message, options);
+
+  try {
+    let toastId;
+    if (type === 'error') {
+      toastId = toast.error(message, options);
+    } else if (type === 'success') {
+      toastId = toast.success(message, options);
+    } else if (type === 'warning') {
+      toastId = toast.warning(message, options);
+    } else {
+      toastId = toast.info(message, options);
+    }
+    console.log('✅ Toast method called successfully, toastId:', toastId);
+    console.log('✅ Active toasts:', toast.isActive(toastId));
+  } catch (error) {
+    console.error('❌ Error calling toast method:', error);
+  }
 };
 
 function Page() {
@@ -329,23 +349,10 @@ function Page() {
       console.log('🎨 Toast description:', description);
 
       try {
+        // First try with simple options like the working basic toast
         showToast('error', message, {
           description: description,
-          duration: 8000, // Longer duration for safety violations
-          style: {
-            fontSize: '18px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: '4px solid #b91c1c',
-            borderRadius: '10px',
-            boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
-          },
-          bodyStyle: {
-            fontSize: '16px',
-            fontWeight: '700',
-          },
+          duration: 8000,
         });
         console.log('✅ Toast should be displayed now');
       } catch (error) {
@@ -455,8 +462,31 @@ function Page() {
       });
     };
 
+    // Test function for basic toast
+    const testBasicToast = () => {
+      console.log('🧪 Testing basic toast...');
+      showToast('error', 'Test Toast', {
+        description: 'This is a test toast',
+        duration: 3000,
+      });
+    };
+
+    // Test function that matches safety violation exactly
+    const testSafetyToast = () => {
+      console.log('🧪 Testing safety toast with same options...');
+      const message = '🚨 PART NOT PRESENT! 🚨';
+      const description = 'Part not present (Register: 1490.0, Value: true)';
+
+      showToast('error', message, {
+        description: description,
+        duration: 8000,
+      });
+    };
+
     // Make test function available globally for debugging
     window.testSafetyViolation = testSafetyViolation;
+    window.testBasicToast = testBasicToast;
+    window.testSafetyToast = testSafetyToast;
     window.safetySocket = safetySocket; // Make socket available for debugging
 
     // Test function to emit safety event from main socket
@@ -801,6 +831,18 @@ function Page() {
               onClick={() => window.testMainSocketSafety && window.testMainSocketSafety()}
             >
               Test Main Socket
+            </Button>
+            <Button
+              className="w-full bg-green-600 hover:bg-green-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
+              onClick={() => window.testBasicToast && window.testBasicToast()}
+            >
+              Test Basic Toast
+            </Button>
+            <Button
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
+              onClick={() => window.testSafetyToast && window.testSafetyToast()}
+            >
+              Test Safety Toast
             </Button>
           </div>
         </div>
