@@ -55,22 +55,22 @@ const showToast = (type, message, options = {}) => {
 
   try {
     // Clear all existing toasts first
-    toast.dismiss();
+    if (toast && typeof toast.dismiss === 'function') {
+      toast.dismiss();
+    }
 
-    // Add a small delay to ensure previous toasts are cleared
-    setTimeout(() => {
-      let toastId;
-      if (type === 'error') {
-        toastId = toast.error(message, options);
-      } else if (type === 'success') {
-        toastId = toast.success(message, options);
-      } else if (type === 'warning') {
-        toastId = toast.warning(message, options);
-      } else {
-        toastId = toast.info(message, options);
-      }
-      console.log('✅ Toast method called successfully, toastId:', toastId);
-    }, 100); // Small delay to ensure previous toasts are cleared
+    // Show toast immediately without delay
+    let toastId;
+    if (type === 'error' && toast && typeof toast.error === 'function') {
+      toastId = toast.error(message, options);
+    } else if (type === 'success' && toast && typeof toast.success === 'function') {
+      toastId = toast.success(message, options);
+    } else if (type === 'warning' && toast && typeof toast.warning === 'function') {
+      toastId = toast.warning(message, options);
+    } else if (toast && typeof toast.info === 'function') {
+      toastId = toast.info(message, options);
+    }
+    console.log('✅ Toast method called successfully, toastId:', toastId);
   } catch (error) {
     console.error('❌ Error calling toast method:', error);
   }
@@ -101,6 +101,7 @@ function Page() {
   const markingTimeoutRef = useRef(null);
   const scannerTimeoutRef = useRef(null);
   const currentSafetyToastRef = useRef(null);
+  const safetyViolationTimeoutRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
@@ -301,6 +302,9 @@ function Page() {
       if (scannerTimeoutRef.current) {
         clearTimeout(scannerTimeoutRef.current);
       }
+      if (safetyViolationTimeoutRef.current) {
+        clearTimeout(safetyViolationTimeoutRef.current);
+      }
     };
   }, [socket]);
 
@@ -331,43 +335,51 @@ function Page() {
       console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
       console.log('Safety violation from port 3005:', data);
 
-      // Dismiss any existing safety toast first
-      if (currentSafetyToastRef.current) {
-        console.log('🚫 Dismissing previous safety toast');
-        toast.dismiss(currentSafetyToastRef.current);
-        currentSafetyToastRef.current = null;
+      // Clear any existing timeout
+      if (safetyViolationTimeoutRef.current) {
+        clearTimeout(safetyViolationTimeoutRef.current);
       }
 
-      const violationMessages = {
-        'Part not present': '🚨 PART NOT PRESENT! 🚨',
-        'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
-        'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
-        'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
-        'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
-        'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
-        'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
-        'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
-      };
+      // Debounce safety violations to prevent multiple toasts
+      safetyViolationTimeoutRef.current = setTimeout(() => {
+        // Dismiss any existing safety toast first
+        if (currentSafetyToastRef.current) {
+          console.log('🚫 Dismissing previous safety toast');
+          toast.dismiss(currentSafetyToastRef.current);
+          currentSafetyToastRef.current = null;
+        }
 
-      const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
-      const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
+        const violationMessages = {
+          'Part not present': '🚨 PART NOT PRESENT! 🚨',
+          'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
+          'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
+          'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
+          'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
+          'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
+          'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
+          'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
+        };
 
-      console.log('🎨 About to show toast with message:', message);
+        const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
+        const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
 
-      try {
-        // Show new safety toast and store its ID
-        currentSafetyToastRef.current = toast.error(message, {
-          description: description,
-          duration: 8000,
-          onClose: () => {
-            console.log('🚫 Safety toast closed');
-            currentSafetyToastRef.current = null;
-          },
-        });
-        console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
-      } catch (error) {
-        console.error('❌ Error showing safety toast:', error);
-      }
+        console.log('🎨 About to show toast with message:', message);
+
+        try {
+          // Show new safety toast and store its ID
+          currentSafetyToastRef.current = toast.error(message, {
+            description: description,
+            duration: 8000,
+            onClose: () => {
+              console.log('🚫 Safety toast closed');
+              currentSafetyToastRef.current = null;
+            },
+          });
+          console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
+        } catch (error) {
+          console.error('❌ Error showing safety toast:', error);
+        }
+      }, 500); // 500ms debounce delay
     };
 
     const handleAlarmCleared = (data) => {
@@ -528,6 +540,11 @@ function Page() {
         socket.off('safety_violation', handleSafetyViolation3005);
         socket.off('alarm_cleared', handleAlarmCleared);
         socket.off('system_status', handleSystemStatus);
+      }
+
+      // Clear safety violation timeout
+      if (safetyViolationTimeoutRef.current) {
+        clearTimeout(safetyViolationTimeoutRef.current);
       }
 
       setSafetySocketConnected(false);
