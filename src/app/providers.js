@@ -2,16 +2,19 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { SocketProvider } from '@/SocketContext';
+import { SafetySocketProvider } from '@/SafetySocketContext';
 import { ToastProvider } from '@/comp/ToastProvider';
 
 export function Providers({ children }) {
   return (
     <SocketProvider>
-      <ToastProvider>
-        {/* <SessionProvider> */}
-        {children}
-        {/* </SessionProvider> */}
-      </ToastProvider>
+      <SafetySocketProvider>
+        <ToastProvider>
+          {/* <SessionProvider> */}
+          {children}
+          {/* </SessionProvider> */}
+        </ToastProvider>
+      </SafetySocketProvider>
     </SocketProvider>
   );
 }

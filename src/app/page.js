@@ -14,6 +14,7 @@ import { Loader2, Download } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // import useModelStore from '@/store/modelStore';
 import { useSocket } from '@/SocketContext';
+import { useSafetySocket } from '@/SafetySocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
 
@@ -70,6 +71,7 @@ function Page() {
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   // const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
+  const safetySocket = useSafetySocket();
 
   // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
@@ -278,6 +280,120 @@ function Page() {
       }
     };
   }, [socket]);
+
+  // Safety Socket Event Handlers (Port 3005)
+  useEffect(() => {
+    if (!safetySocket) return;
+
+    const handleSafetyViolation3005 = (data) => {
+      console.log('Safety violation from port 3005:', data);
+
+      const violationMessages = {
+        'Part not present': '🚨 PART NOT PRESENT! 🚨',
+        'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
+        'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
+        'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
+        'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
+        'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
+        'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
+        'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
+      };
+
+      const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
+      const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
+
+      showToast('error', message, {
+        description: description,
+        duration: 8000, // Longer duration for safety violations
+        style: {
+          fontSize: '18px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: '4px solid #b91c1c',
+          borderRadius: '10px',
+          boxShadow: '0 6px 20px rgba(220, 38, 38, 0.6)',
+        },
+        bodyStyle: {
+          fontSize: '16px',
+          fontWeight: '700',
+        },
+      });
+    };
+
+    const handleAlarmCleared = (data) => {
+      console.log('Alarm cleared from port 3005:', data);
+      showToast('success', '✅ ALARM CLEARED! ✅', {
+        description: 'All safety alarms have been cleared',
+        duration: 3000,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          backgroundColor: '#16a34a',
+          color: 'white',
+          border: '3px solid #15803d',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4)',
+        },
+        bodyStyle: {
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      });
+    };
+
+    const handleSystemStatus = (data) => {
+      console.log('System status from port 3005:', data);
+      if (data.status === 'error' || data.status === 'critical') {
+        showToast('error', '⚠️ SYSTEM STATUS ALERT! ⚠️', {
+          description: `System Status: ${data.status.toUpperCase()}`,
+          duration: 5000,
+          style: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            backgroundColor: '#dc2626',
+            color: 'white',
+            border: '3px solid #b91c1c',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+          },
+          bodyStyle: {
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        });
+      }
+    };
+
+    // Register safety socket event handlers
+    safetySocket.on('safety_violation', handleSafetyViolation3005);
+    safetySocket.on('alarm_cleared', handleAlarmCleared);
+    safetySocket.on('system_status', handleSystemStatus);
+    safetySocket.on('emergency_stop', handleSafetyViolation3005);
+    safetySocket.on('safety_sensor_error', handleSafetyViolation3005);
+    safetySocket.on('light_curtain_violation', handleSafetyViolation3005);
+    safetySocket.on('door_open_violation', handleSafetyViolation3005);
+    safetySocket.on('pressure_violation', handleSafetyViolation3005);
+    safetySocket.on('temperature_violation', handleSafetyViolation3005);
+    safetySocket.on('vibration_violation', handleSafetyViolation3005);
+
+    // Cleanup function
+    return () => {
+      safetySocket.off('safety_violation', handleSafetyViolation3005);
+      safetySocket.off('alarm_cleared', handleAlarmCleared);
+      safetySocket.off('system_status', handleSystemStatus);
+      safetySocket.off('emergency_stop', handleSafetyViolation3005);
+      safetySocket.off('safety_sensor_error', handleSafetyViolation3005);
+      safetySocket.off('light_curtain_violation', handleSafetyViolation3005);
+      safetySocket.off('door_open_violation', handleSafetyViolation3005);
+      safetySocket.off('pressure_violation', handleSafetyViolation3005);
+      safetySocket.off('temperature_violation', handleSafetyViolation3005);
+      safetySocket.off('vibration_violation', handleSafetyViolation3005);
+    };
+  }, [safetySocket]);
 
   const handleDownloadExcel = async () => {
     console.log('Downloading Excel with date range:', startDate, endDate);
