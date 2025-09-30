@@ -111,16 +111,13 @@ export const useMachineEvents = (socket, safetySocket = null) => {
       safety_violation: (data) => {
         console.log('🚨 Safety violation event received in useMachineEvents:', data);
 
-        // Clear any existing safety violation toast
-        if (activeToasts.current['safety-violation']) {
-          toast.dismiss(activeToasts.current['safety-violation']);
-          delete activeToasts.current['safety-violation'];
-        }
-
-        // Determine violation type and message
+        // Determine if violation is active
+        let isViolationActive = false;
         let violationMessage = 'SAFETY VIOLATION!';
 
+        // Check if data indicates an active violation
         if (Array.isArray(data)) {
+          isViolationActive = data.length > 0;
           if (data.includes('emergency_stop')) {
             violationMessage = 'EMERGENCY STOP!';
           } else if (data.includes('part_not_present') || data.includes('part not present')) {
@@ -129,6 +126,8 @@ export const useMachineEvents = (socket, safetySocket = null) => {
             violationMessage = 'SAFETY SENSOR ERROR!';
           }
         } else if (typeof data === 'string') {
+          isViolationActive =
+            data.length > 0 && !data.includes('cleared') && !data.includes('resolved');
           if (data.includes('emergency_stop') || data.includes('Emergency stop')) {
             violationMessage = 'EMERGENCY STOP!';
           } else if (
@@ -144,54 +143,89 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           ) {
             violationMessage = 'SAFETY SENSOR ERROR!';
           }
-        } else if (data.alarms && Array.isArray(data.alarms)) {
-          if (data.alarms.includes('emergency_stop')) {
-            violationMessage = 'EMERGENCY STOP!';
-          } else if (
-            data.alarms.includes('part_not_present') ||
-            data.alarms.includes('part not present')
-          ) {
-            violationMessage = 'PART NOT PRESENT!';
-          } else if (
-            data.alarms.includes('safety_sensor_error') ||
-            data.alarms.includes('safety sensor error')
-          ) {
-            violationMessage = 'SAFETY SENSOR ERROR!';
-          }
-        } else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
-          if (data.activeAlarms.includes('emergency_stop')) {
-            violationMessage = 'EMERGENCY STOP!';
-          } else if (
-            data.activeAlarms.includes('part_not_present') ||
-            data.activeAlarms.includes('part not present')
-          ) {
-            violationMessage = 'PART NOT PRESENT!';
-          } else if (
-            data.activeAlarms.includes('safety_sensor_error') ||
-            data.activeAlarms.includes('safety sensor error')
-          ) {
-            violationMessage = 'SAFETY SENSOR ERROR!';
-          }
-        } else if (data.violation) {
-          // Handle data.violation field
-          if (
-            data.violation.includes('Emergency stop') ||
-            data.violation.includes('emergency_stop')
-          ) {
-            violationMessage = 'EMERGENCY STOP!';
-          } else if (
-            data.violation.includes('Part not present') ||
-            data.violation.includes('part not present')
-          ) {
-            violationMessage = 'PART NOT PRESENT!';
-          } else if (
-            data.violation.includes('Safety sensor') ||
-            data.violation.includes('safety sensor')
-          ) {
-            violationMessage = 'SAFETY SENSOR ERROR!';
+        } else if (data && typeof data === 'object') {
+          // Check various fields that might indicate active violation
+          if (data.value !== undefined) {
+            isViolationActive = Boolean(data.value);
+          } else if (data.status !== undefined) {
+            isViolationActive =
+              data.status === 'active' || data.status === 'violation' || data.status === 'error';
+          } else if (data.active !== undefined) {
+            isViolationActive = Boolean(data.active);
+          } else if (data.alarms && Array.isArray(data.alarms)) {
+            isViolationActive = data.alarms.length > 0;
+            if (data.alarms.includes('emergency_stop')) {
+              violationMessage = 'EMERGENCY STOP!';
+            } else if (
+              data.alarms.includes('part_not_present') ||
+              data.alarms.includes('part not present')
+            ) {
+              violationMessage = 'PART NOT PRESENT!';
+            } else if (
+              data.alarms.includes('safety_sensor_error') ||
+              data.alarms.includes('safety sensor error')
+            ) {
+              violationMessage = 'SAFETY SENSOR ERROR!';
+            }
+          } else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
+            isViolationActive = data.activeAlarms.length > 0;
+            if (data.activeAlarms.includes('emergency_stop')) {
+              violationMessage = 'EMERGENCY STOP!';
+            } else if (
+              data.activeAlarms.includes('part_not_present') ||
+              data.activeAlarms.includes('part not present')
+            ) {
+              violationMessage = 'PART NOT PRESENT!';
+            } else if (
+              data.activeAlarms.includes('safety_sensor_error') ||
+              data.activeAlarms.includes('safety sensor error')
+            ) {
+              violationMessage = 'SAFETY SENSOR ERROR!';
+            }
+          } else if (data.violation) {
+            isViolationActive =
+              !data.violation.includes('cleared') && !data.violation.includes('resolved');
+            if (
+              data.violation.includes('Emergency stop') ||
+              data.violation.includes('emergency_stop')
+            ) {
+              violationMessage = 'EMERGENCY STOP!';
+            } else if (
+              data.violation.includes('Part not present') ||
+              data.violation.includes('part not present')
+            ) {
+              violationMessage = 'PART NOT PRESENT!';
+            } else if (
+              data.violation.includes('Safety sensor') ||
+              data.violation.includes('safety sensor')
+            ) {
+              violationMessage = 'SAFETY SENSOR ERROR!';
+            }
+          } else {
+            // Default: if object has content, consider it active
+            isViolationActive = Object.keys(data).length > 0;
           }
         }
 
+        console.log('Is violation active?', isViolationActive);
+
+        // If violation is not active, dismiss any existing toast
+        if (!isViolationActive) {
+          console.log('🚫 Violation not active, dismissing safety toast');
+          if (activeToasts.current['safety-violation']) {
+            toast.dismiss(activeToasts.current['safety-violation']);
+            delete activeToasts.current['safety-violation'];
+          }
+          return;
+        }
+
+        // Clear any existing safety violation toast before showing new one
+        if (activeToasts.current['safety-violation']) {
+          toast.dismiss(activeToasts.current['safety-violation']);
+          delete activeToasts.current['safety-violation'];
+        }
+
+        // Show new toast for active violation
         const toastId = toast(violationMessage, {
           ...toastConfig,
           style: {
@@ -208,6 +242,14 @@ export const useMachineEvents = (socket, safetySocket = null) => {
           },
         });
         activeToasts.current['safety-violation'] = toastId;
+      },
+      // Listen for safety violation cleared events
+      safety_violation_cleared: (data) => {
+        console.log('✅ Safety violation cleared event received:', data);
+        if (activeToasts.current['safety-violation']) {
+          toast.dismiss(activeToasts.current['safety-violation']);
+          delete activeToasts.current['safety-violation'];
+        }
       },
       // Listen for emergency stop events
       emergency_stop: (data) => {
@@ -362,6 +404,7 @@ export const useMachineEvents = (socket, safetySocket = null) => {
 
       // Safety violation events
       safetySocket.on('safety_violation', eventHandlers['safety_violation']);
+      safetySocket.on('safety_violation_cleared', eventHandlers['safety_violation_cleared']);
       safetySocket.on('emergency_stop', eventHandlers['emergency_stop']);
       safetySocket.on('safety_sensor_error', eventHandlers['safety-sensor-error']);
       safetySocket.on('part_not_present', eventHandlers['part-not-present']);
@@ -388,6 +431,7 @@ export const useMachineEvents = (socket, safetySocket = null) => {
       // Remove safety socket event listeners
       if (safetySocket) {
         safetySocket.off('safety_violation', eventHandlers['safety_violation']);
+        safetySocket.off('safety_violation_cleared', eventHandlers['safety_violation_cleared']);
         safetySocket.off('emergency_stop', eventHandlers['emergency_stop']);
         safetySocket.off('safety_sensor_error', eventHandlers['safety-sensor-error']);
         safetySocket.off('part_not_present', eventHandlers['part-not-present']);
