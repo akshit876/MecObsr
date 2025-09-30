@@ -334,11 +334,45 @@ function Page() {
       console.log('Data value:', data.value, 'Type:', typeof data.value);
       console.log('Full data object:', JSON.stringify(data, null, 2));
 
-      // More flexible value checking - check various possible formats
+      // Handle different alarm data structures
       let isViolationActive = false;
+      let alarmType = 'Unknown violation';
+      let alarmMessage = '🚨 SAFETY VIOLATION! 🚨';
 
-      // Check different possible value formats
-      if (data.value !== undefined && data.value !== null) {
+      // Check if data is an array of alarms (from backend logs)
+      if (Array.isArray(data)) {
+        isViolationActive = data.length > 0;
+        if (data.includes('emergency_stop')) {
+          alarmType = 'Emergency stop activated';
+          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
+        }
+      }
+      // Check if data is a string containing alarm information
+      else if (typeof data === 'string') {
+        isViolationActive = data.includes('emergency_stop') || data.includes('Emergency stop');
+        if (isViolationActive) {
+          alarmType = 'Emergency stop activated';
+          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
+        }
+      }
+      // Check if data has alarms array
+      else if (data.alarms && Array.isArray(data.alarms)) {
+        isViolationActive = data.alarms.length > 0;
+        if (data.alarms.includes('emergency_stop')) {
+          alarmType = 'Emergency stop activated';
+          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
+        }
+      }
+      // Check if data has activeAlarms array
+      else if (data.activeAlarms && Array.isArray(data.activeAlarms)) {
+        isViolationActive = data.activeAlarms.length > 0;
+        if (data.activeAlarms.includes('emergency_stop')) {
+          alarmType = 'Emergency stop activated';
+          alarmMessage = '🚨 EMERGENCY STOP! 🚨';
+        }
+      }
+      // Check different possible value formats (legacy support)
+      else if (data.value !== undefined && data.value !== null) {
         isViolationActive =
           data.value === true ||
           data.value === 1 ||
@@ -349,27 +383,27 @@ function Page() {
           data.value === 'active' ||
           data.value === 'ACTIVE';
       }
-
       // Also check if there's a status field
-      if (data.status !== undefined) {
+      else if (data.status !== undefined) {
         isViolationActive =
-          isViolationActive ||
           data.status === 'active' ||
           data.status === 'violation' ||
           data.status === 'error' ||
           data.status === 'critical';
       }
-
       // Check if there's an active field
-      if (data.active !== undefined) {
-        isViolationActive = isViolationActive || data.active === true || data.active === 1;
+      else if (data.active !== undefined) {
+        isViolationActive = data.active === true || data.active === 1;
       }
 
       console.log('Is violation active?', isViolationActive);
+      console.log('Alarm type:', alarmType);
       console.log('Value check details:', {
         value: data.value,
         status: data.status,
         active: data.active,
+        alarms: data.alarms,
+        activeAlarms: data.activeAlarms,
         isViolationActive,
       });
 
@@ -398,24 +432,12 @@ function Page() {
           currentSafetyToastRef.current = null;
         }
 
-        const violationMessages = {
-          'Part not present': '🚨 PART NOT PRESENT! 🚨',
-          'Emergency stop activated': '🚨 EMERGENCY STOP! 🚨',
-          'Safety sensor not engaged': '🚨 SAFETY SENSOR ERROR! 🚨',
-          'Light curtain violation': '🚨 LIGHT CURTAIN VIOLATION! 🚨',
-          'Door open violation': '🚨 DOOR OPEN VIOLATION! 🚨',
-          'Pressure sensor violation': '🚨 PRESSURE SENSOR VIOLATION! 🚨',
-          'Temperature violation': '🚨 TEMPERATURE VIOLATION! 🚨',
-          'Vibration violation': '🚨 VIBRATION VIOLATION! 🚨',
-        };
+        const description = `${alarmType} (Alarms: ${Array.isArray(data) ? data.join(', ') : data.alarms || data.activeAlarms || 'N/A'})`;
 
-        const message = violationMessages[data.violation] || '🚨 SAFETY VIOLATION! 🚨';
-        const description = `${data.violation || 'Unknown violation'} (Register: ${data.register || 'N/A'}, Value: ${data.value || 'N/A'})`;
-
-        console.log('🎨 About to show toast with message:', message);
+        console.log('🎨 About to show toast with message:', alarmMessage);
 
         // Use showToast function for consistency
-        currentSafetyToastRef.current = showToast('error', message, {
+        currentSafetyToastRef.current = showToast('error', alarmMessage, {
           description: description,
           duration: 8000,
           onClose: () => {
@@ -462,7 +484,7 @@ function Page() {
       }
 
       // If it's a safety_violation event, also trigger the handler
-      if (eventName === 'safety_violation') {
+      if (eventName === 'safety_violation' || eventName === 'emergency_stop') {
         console.log('🚨 General listener triggering safety violation handler...');
         handleSafetyViolation3005(data);
       }
@@ -474,9 +496,12 @@ function Page() {
       console.log('🎯 SPECIFIC safety_violation handler triggered!', data);
       handleSafetyViolation3005(data);
     });
+    safetySocket.on('emergency_stop', (data) => {
+      console.log('🎯 SPECIFIC emergency_stop handler triggered!', data);
+      handleSafetyViolation3005(data);
+    });
     safetySocket.on('alarm_cleared', handleAlarmCleared);
     safetySocket.on('system_status', handleSystemStatus);
-    safetySocket.on('emergency_stop', handleSafetyViolation3005);
     safetySocket.on('safety_sensor_error', handleSafetyViolation3005);
     safetySocket.on('light_curtain_violation', handleSafetyViolation3005);
     safetySocket.on('door_open_violation', handleSafetyViolation3005);
@@ -541,6 +566,12 @@ function Page() {
       });
     };
 
+    // Test function for emergency stop alarm (for debugging)
+    const testEmergencyStop = () => {
+      console.log('🧪 Testing emergency stop handler...');
+      handleSafetyViolation3005(['emergency_stop']);
+    };
+
     // Test function for alarm cleared
     const testAlarmCleared = () => {
       console.log('🧪 Testing alarm cleared handler...');
@@ -550,8 +581,9 @@ function Page() {
       });
     };
 
-    // Make test function available globally for debugging
+    // Make test functions available globally for debugging
     window.testSafetyViolation = testSafetyViolation;
+    window.testEmergencyStop = testEmergencyStop;
     window.testAlarmCleared = testAlarmCleared;
     window.safetySocket = safetySocket; // Make socket available for debugging
 
