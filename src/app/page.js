@@ -52,24 +52,25 @@ const calculatePieceNumber = (timestamp, data) => {
 // Helper function to show toast and clear previous ones
 const showToast = (type, message, options = {}) => {
   console.log('🎨 showToast called with:', { type, message, options });
-  console.log('🎨 Toast object:', toast);
-  console.log('🎨 Available toast methods:', Object.keys(toast));
-
-  toast.dismiss(); // Clear all existing toasts
 
   try {
-    let toastId;
-    if (type === 'error') {
-      toastId = toast.error(message, options);
-    } else if (type === 'success') {
-      toastId = toast.success(message, options);
-    } else if (type === 'warning') {
-      toastId = toast.warning(message, options);
-    } else {
-      toastId = toast.info(message, options);
-    }
-    console.log('✅ Toast method called successfully, toastId:', toastId);
-    console.log('✅ Active toasts:', toast.isActive(toastId));
+    // Clear all existing toasts first
+    toast.dismiss();
+
+    // Add a small delay to ensure previous toasts are cleared
+    setTimeout(() => {
+      let toastId;
+      if (type === 'error') {
+        toastId = toast.error(message, options);
+      } else if (type === 'success') {
+        toastId = toast.success(message, options);
+      } else if (type === 'warning') {
+        toastId = toast.warning(message, options);
+      } else {
+        toastId = toast.info(message, options);
+      }
+      console.log('✅ Toast method called successfully, toastId:', toastId);
+    }, 100); // Small delay to ensure previous toasts are cleared
   } catch (error) {
     console.error('❌ Error calling toast method:', error);
   }
@@ -99,6 +100,7 @@ function Page() {
   // Move useRef declarations to component level
   const markingTimeoutRef = useRef(null);
   const scannerTimeoutRef = useRef(null);
+  const currentSafetyToastRef = useRef(null);
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
@@ -328,8 +330,13 @@ function Page() {
     const handleSafetyViolation3005 = (data) => {
       console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
       console.log('Safety violation from port 3005:', data);
-      console.log('Data type:', typeof data);
-      console.log('Data keys:', Object.keys(data || {}));
+
+      // Dismiss any existing safety toast first
+      if (currentSafetyToastRef.current) {
+        console.log('🚫 Dismissing previous safety toast');
+        toast.dismiss(currentSafetyToastRef.current);
+        currentSafetyToastRef.current = null;
+      }
 
       const violationMessages = {
         'Part not present': '🚨 PART NOT PRESENT! 🚨',
@@ -346,22 +353,33 @@ function Page() {
       const description = `${data.violation} (Register: ${data.register}, Value: ${data.value})`;
 
       console.log('🎨 About to show toast with message:', message);
-      console.log('🎨 Toast description:', description);
 
       try {
-        // First try with simple options like the working basic toast
-        showToast('error', message, {
+        // Show new safety toast and store its ID
+        currentSafetyToastRef.current = toast.error(message, {
           description: description,
           duration: 8000,
+          onClose: () => {
+            console.log('🚫 Safety toast closed');
+            currentSafetyToastRef.current = null;
+          },
         });
-        console.log('✅ Toast should be displayed now');
+        console.log('✅ Safety toast displayed, ID:', currentSafetyToastRef.current);
       } catch (error) {
-        console.error('❌ Error showing toast:', error);
+        console.error('❌ Error showing safety toast:', error);
       }
     };
 
     const handleAlarmCleared = (data) => {
       console.log('Alarm cleared from port 3005:', data);
+
+      // Dismiss any existing safety toast when alarm is cleared
+      if (currentSafetyToastRef.current) {
+        console.log('🚫 Dismissing safety toast due to alarm cleared');
+        toast.dismiss(currentSafetyToastRef.current);
+        currentSafetyToastRef.current = null;
+      }
+
       showToast('success', '✅ ALARM CLEARED! ✅', {
         description: 'All safety alarms have been cleared',
         duration: 3000,
