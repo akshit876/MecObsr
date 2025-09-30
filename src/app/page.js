@@ -365,20 +365,6 @@ function Page() {
       showToast('success', '✅ ALARM CLEARED! ✅', {
         description: 'All safety alarms have been cleared',
         duration: 3000,
-        style: {
-          fontSize: '16px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          backgroundColor: '#16a34a',
-          color: 'white',
-          border: '3px solid #15803d',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4)',
-        },
-        bodyStyle: {
-          fontSize: '14px',
-          fontWeight: '600',
-        },
       });
     };
 
@@ -388,20 +374,6 @@ function Page() {
         showToast('error', '⚠️ SYSTEM STATUS ALERT! ⚠️', {
           description: `System Status: ${data.status.toUpperCase()}`,
           duration: 5000,
-          style: {
-            fontSize: '16px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: '3px solid #b91c1c',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
-          },
-          bodyStyle: {
-            fontSize: '14px',
-            fontWeight: '600',
-          },
         });
       }
     };
@@ -462,31 +434,18 @@ function Page() {
       });
     };
 
-    // Test function for basic toast
-    const testBasicToast = () => {
-      console.log('🧪 Testing basic toast...');
-      showToast('error', 'Test Toast', {
-        description: 'This is a test toast',
-        duration: 3000,
-      });
-    };
-
-    // Test function that matches safety violation exactly
-    const testSafetyToast = () => {
-      console.log('🧪 Testing safety toast with same options...');
-      const message = '🚨 PART NOT PRESENT! 🚨';
-      const description = 'Part not present (Register: 1490.0, Value: true)';
-
-      showToast('error', message, {
-        description: description,
-        duration: 8000,
+    // Test function for alarm cleared
+    const testAlarmCleared = () => {
+      console.log('🧪 Testing alarm cleared handler...');
+      handleAlarmCleared({
+        timestamp: '2025-09-30T11:35:02.000Z',
+        message: 'All alarms cleared',
       });
     };
 
     // Make test function available globally for debugging
     window.testSafetyViolation = testSafetyViolation;
-    window.testBasicToast = testBasicToast;
-    window.testSafetyToast = testSafetyToast;
+    window.testAlarmCleared = testAlarmCleared;
     window.safetySocket = safetySocket; // Make socket available for debugging
 
     // Test function to emit safety event from main socket
@@ -820,30 +779,18 @@ function Page() {
             </Button>
           </div>
           <div className="mt-1 space-y-1">
-            <Button
+            {/* <Button
               className="w-full bg-red-600 hover:bg-red-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
               onClick={() => window.testSafetyViolation && window.testSafetyViolation()}
             >
               Test Safety
-            </Button>
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
-              onClick={() => window.testMainSocketSafety && window.testMainSocketSafety()}
-            >
-              Test Main Socket
-            </Button>
-            <Button
+            </Button> */}
+            {/* <Button
               className="w-full bg-green-600 hover:bg-green-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
-              onClick={() => window.testBasicToast && window.testBasicToast()}
+              onClick={() => window.testAlarmCleared && window.testAlarmCleared()}
             >
-              Test Basic Toast
-            </Button>
-            <Button
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
-              onClick={() => window.testSafetyToast && window.testSafetyToast()}
-            >
-              Test Safety Toast
-            </Button>
+              Test Alarm Cleared */}
+            {/* </Button> */}
           </div>
         </div>
       </div>
