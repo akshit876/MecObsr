@@ -17,8 +17,11 @@ export const SafetySocketProvider = ({ children }) => {
   const { status, data: session } = useSession();
 
   useEffect(() => {
+    console.log('SafetySocket useEffect triggered:', { status, session: !!session });
+
     // Only connect if user is authenticated
     if (status === 'authenticated' && session) {
+      console.log('Creating safety socket connection to port 3005...');
       const newSafetySocket = io.connect('http://localhost:3005', {
         withCredentials: true,
         transportOptions: {
@@ -29,16 +32,38 @@ export const SafetySocketProvider = ({ children }) => {
           },
         },
       });
+
+      // Add connection event listeners for debugging
+      newSafetySocket.on('connect', () => {
+        console.log('✅ Safety Socket Connected to port 3005');
+      });
+
+      newSafetySocket.on('disconnect', (reason) => {
+        console.log('❌ Safety Socket Disconnected from port 3005:', reason);
+      });
+
+      newSafetySocket.on('connect_error', (error) => {
+        console.error('🚨 Safety Socket Connection Error:', error);
+      });
+
+      newSafetySocket.on('error', (error) => {
+        console.error('🚨 Safety Socket Error:', error);
+      });
+
       setSafetySocket(newSafetySocket);
 
       return () => {
+        console.log('Cleaning up safety socket connection...');
         newSafetySocket.disconnect();
       };
+    } else {
+      console.log('Not authenticated, not creating safety socket connection');
     }
 
     // Cleanup socket if session ends
     return () => {
       if (safetySocket) {
+        console.log('Session ended, cleaning up safety socket...');
         safetySocket.disconnect();
         setSafetySocket(null);
       }

@@ -82,6 +82,7 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [safetySocketConnected, setSafetySocketConnected] = useState(false);
 
   useEffect(() => {
     const fetchCurrentModel = async () => {
@@ -283,10 +284,32 @@ function Page() {
 
   // Safety Socket Event Handlers (Port 3005)
   useEffect(() => {
-    if (!safetySocket) return;
+    console.log('Safety socket useEffect triggered, safetySocket:', safetySocket);
+    if (!safetySocket) {
+      console.log('No safety socket available, skipping event handlers');
+      setSafetySocketConnected(false);
+      return;
+    }
+
+    // Track connection status
+    const handleConnect = () => {
+      console.log('✅ Safety Socket Connected!');
+      setSafetySocketConnected(true);
+    };
+
+    const handleDisconnect = () => {
+      console.log('❌ Safety Socket Disconnected!');
+      setSafetySocketConnected(false);
+    };
+
+    safetySocket.on('connect', handleConnect);
+    safetySocket.on('disconnect', handleDisconnect);
 
     const handleSafetyViolation3005 = (data) => {
+      console.log('🚨 SAFETY VIOLATION HANDLER TRIGGERED! 🚨');
       console.log('Safety violation from port 3005:', data);
+      console.log('Data type:', typeof data);
+      console.log('Data keys:', Object.keys(data || {}));
 
       const violationMessages = {
         'Part not present': '🚨 PART NOT PRESENT! 🚨',
@@ -368,6 +391,11 @@ function Page() {
       }
     };
 
+    // Add a general event listener to catch any events
+    const handleAnyEvent = (eventName, data) => {
+      console.log(`🔍 Safety Socket Event Received: ${eventName}`, data);
+    };
+
     // Register safety socket event handlers
     safetySocket.on('safety_violation', handleSafetyViolation3005);
     safetySocket.on('alarm_cleared', handleAlarmCleared);
@@ -380,8 +408,33 @@ function Page() {
     safetySocket.on('temperature_violation', handleSafetyViolation3005);
     safetySocket.on('vibration_violation', handleSafetyViolation3005);
 
+    // Add general event listener for debugging
+    safetySocket.onAny(handleAnyEvent);
+
+    // Test function to manually trigger safety violation (for debugging)
+    const testSafetyViolation = () => {
+      console.log('🧪 Testing safety violation handler...');
+      handleSafetyViolation3005({
+        timestamp: '2025-09-30T11:35:02.000Z',
+        violation: 'Part not present',
+        register: '1490.0',
+        value: true,
+        severity: 'critical',
+        action: 'stop_cycle',
+        alarmType: 'part_not_present',
+        service: 'independent',
+      });
+    };
+
+    // Make test function available globally for debugging
+    window.testSafetyViolation = testSafetyViolation;
+    window.safetySocket = safetySocket; // Make socket available for debugging
+
     // Cleanup function
     return () => {
+      console.log('Cleaning up safety socket event listeners...');
+      safetySocket.off('connect', handleConnect);
+      safetySocket.off('disconnect', handleDisconnect);
       safetySocket.off('safety_violation', handleSafetyViolation3005);
       safetySocket.off('alarm_cleared', handleAlarmCleared);
       safetySocket.off('system_status', handleSystemStatus);
@@ -392,6 +445,8 @@ function Page() {
       safetySocket.off('pressure_violation', handleSafetyViolation3005);
       safetySocket.off('temperature_violation', handleSafetyViolation3005);
       safetySocket.off('vibration_violation', handleSafetyViolation3005);
+      safetySocket.offAny(handleAnyEvent);
+      setSafetySocketConnected(false);
     };
   }, [safetySocket]);
 
@@ -547,8 +602,23 @@ function Page() {
           </div>
         </div>
 
+        {/* Safety Socket Status */}
+        <div className="col-span-1 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xs text-gray-300 mb-1">Safety</p>
+              <div className="flex items-center justify-center">
+                <span
+                  className={`w-2 h-2 rounded-full mr-1 ${safetySocketConnected ? 'bg-green-400' : 'bg-red-400'}`}
+                ></span>
+                <span className="text-xs">{safetySocketConnected ? 'ON' : 'OFF'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Date Selection */}
-        <div className="col-span-10 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
+        <div className="col-span-9 p-2 rounded-lg bg-[#012B41] text-white shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-[40%]">
               <p className="text-xs text-gray-300 mb-1">Start Date</p>
@@ -640,6 +710,14 @@ function Page() {
               onClick={handleLigt}
             >
               Light
+            </Button>
+          </div>
+          <div className="mt-1">
+            <Button
+              className="w-full bg-red-600 hover:bg-red-700 text-[10px] font-medium h-6 rounded-lg shadow-sm px-1"
+              onClick={() => window.testSafetyViolation && window.testSafetyViolation()}
+            >
+              Test Safety
             </Button>
           </div>
         </div>
