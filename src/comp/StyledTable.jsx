@@ -19,6 +19,7 @@ const StyledTable = ({ data, highlightNGRows = false }) => {
     { key: 'SerialNumber', label: 'Serial Number', width: '12%' },
     { key: 'MarkingData', label: 'Marking Data', width: '30%' },
     { key: 'ScannerData', label: 'Scanner Data', width: '30%' },
+    { key: 'Grade', label: 'Grade', width: '8%' },
     { key: 'Result', label: 'Result', width: '8%' },
     { key: 'User', label: 'User', width: '10%' },
     { key: 'Timestamp', label: 'Timestamp', width: '10%' },
