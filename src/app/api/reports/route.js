@@ -61,6 +61,7 @@ export async function GET(request) {
       SerialNumber: item?.SerialNumber,
       MarkingData: item?.MarkingData,
       ScannerData: item?.ScannerData,
+      Grade: item?.Grade,
       ModelNumber: item?.ModelNumber,
       Result: item?.Result,
       User: item?.User,
