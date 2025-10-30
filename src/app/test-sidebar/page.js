@@ -43,11 +43,6 @@ export default function TestSidebar({ isCollapsed, setIsCollapsed }) {
       href: '/',
       icon: Home,
     },
-    {
-      label: 'Manual Mode',
-      href: '/manual-mode',
-      icon: Hand,
-    },
     ...(session?.user?.role === 'admin'
       ? [
           {
