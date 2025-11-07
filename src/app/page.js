@@ -37,6 +37,7 @@ function Page() {
 
   const [markingData, setMarkingData] = useState('');
   const [scannerData, setScannerData] = useState('');
+  const [ocrData, setOcrData] = useState('');
   const [todayCounts, setTodayCounts] = useState({ okCount: 0, ngCount: 0 });
   const [isLoadingCounts, setIsLoadingCounts] = useState(true);
 
@@ -299,6 +300,88 @@ function Page() {
     socket.emit('light_on');
   };
 
+  const handleOcrSubmit = () => {
+    if (!socket?.connected) {
+      toast.error('Socket not connected');
+      return;
+    }
+    
+    const trimmedOcrData = ocrData.trim();
+    
+    if (!trimmedOcrData) {
+      toast.error('Please enter OCR data');
+      return;
+    }
+
+    // Basic format validation - length check
+    if (trimmedOcrData.length < 7) {
+      toast.error(`Invalid OCR data length. Expected length >= 7, received length: ${trimmedOcrData.length}`, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
+      return;
+    }
+
+    // Extract and validate components
+    try {
+      const rawDieNo = trimmedOcrData.substring(0, 2); // S1
+      const dieNo = rawDieNo.replace('S', '0'); // Replace S with 0
+      const day = trimmedOcrData.substring(2, 4); // 13
+      const shift = trimmedOcrData.substring(4, 5); // A
+      const year = trimmedOcrData.substring(5, 6); // 5
+      const month = trimmedOcrData.substring(6); // A
+
+      // Validate day is numeric (01-31)
+      if (!/^\d{2}$/.test(day) || parseInt(day) < 1 || parseInt(day) > 31) {
+        toast.error('Invalid day format. Expected 2-digit number (01-31)', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        return;
+      }
+
+      // Validate shift is a single character (A, B, C, etc.)
+      if (!/^[A-Za-z]$/.test(shift)) {
+        toast.error('Invalid shift format. Expected single letter (A-Z)', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        return;
+      }
+
+      // Validate year is a single digit (0-9)
+      if (!/^\d$/.test(year)) {
+        toast.error('Invalid year format. Expected single digit (0-9)', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        return;
+      }
+
+      // Validate month is a single character (A-L or 1-9)
+      if (!/^[A-Za-z0-9]$/.test(month)) {
+        toast.error('Invalid month format. Expected single character', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        return;
+      }
+
+      // All validations passed, send the data
+      socket.emit('ocr_data', { data: trimmedOcrData });
+      toast.success('OCR data sent successfully', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      setOcrData(''); // Clear the input after sending
+    } catch (error) {
+      toast.error('Error validating OCR data: ' + error.message, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
+    }
+  };
+
   // Use the pulse signal hook
   usePulseSignal(socket);
 
@@ -459,6 +542,36 @@ function Page() {
           </div>
         </div>
       </div>
+
+      {/* OCR Input Row - Only for Supervisor */}
+      {session?.user?.role === 'supervisor' && (
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 p-3 rounded-xl bg-white shadow-sm">
+            <p className="text-xs font-medium text-gray-600 mb-1">OCR</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={ocrData}
+                onChange={(e) => setOcrData(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleOcrSubmit();
+                  }
+                }}
+                placeholder="Enter OCR data..."
+                className="flex-1 h-8 rounded-lg px-3 text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <Button
+                className="bg-[#012B41] hover:bg-[#023855] text-[11px] font-medium h-8 rounded-lg shadow-sm px-4"
+                onClick={handleOcrSubmit}
+                disabled={!ocrData.trim()}
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table section remains unchanged */}
       <div className="flex-grow rounded-xl bg-white shadow-sm">
