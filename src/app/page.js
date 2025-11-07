@@ -577,6 +577,11 @@ function Page() {
                 type="text"
                 value={ocrData}
                 onChange={(e) => setOcrData(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleOcrSubmit();
+                  }
+                }}
                 placeholder="Enter OCR data..."
                 className="flex-1 h-8 rounded-lg px-3 text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
