@@ -355,8 +355,9 @@ function Page() {
       const year = trimmedOcrData.substring(5, 6); // 5
       const month = trimmedOcrData.substring(6); // A
 
-      // Validate day is numeric (01-31)
-      if (!/^\d{2}$/.test(day) || parseInt(day) < 1 || parseInt(day) > 31) {
+      // Validate basic formats first
+      // Validate day format (must be 2 digits)
+      if (!/^\d{2}$/.test(day)) {
         toast.error('Invalid day format. Expected 2-digit number (01-31)', {
           position: 'top-right',
           autoClose: 5000,
@@ -382,12 +383,104 @@ function Page() {
         return;
       }
 
-      // Validate month is a single character (A-L or 1-9)
-      if (!/^[A-Za-z0-9]$/.test(month)) {
-        toast.error('Invalid month format. Expected single character', {
+      const yearNum = parseInt(year, 10);
+      const currentDate = new Date();
+      // Set Dec 20, 2025 at start of day for comparison
+      const dec20_2025 = new Date(2025, 11, 20, 0, 0, 0, 0); // Month is 0-indexed, so 11 = December
+
+      // Year validation: Until Dec 20, 2025 only allow 5 (2025), on/after Dec 20, 2025 allow 5 or 6
+      if (currentDate < dec20_2025) {
+        // Before Dec 20, 2025: only allow year 5 (2025)
+        if (yearNum !== 5) {
+          toast.error(
+            `Invalid year. Before December 20, 2025, only year 5 (2025) is allowed. Received: ${year}`,
+            {
+              position: 'top-right',
+              autoClose: 5000,
+            },
+          );
+          return;
+        }
+      } else {
+        // On or after Dec 20, 2025: allow 5 (2025) or 6 (2026)
+        if (yearNum !== 5 && yearNum !== 6) {
+          toast.error(
+            `Invalid year. On or after December 20, 2025, only years 5 (2025) or 6 (2026) are allowed. Received: ${year}`,
+            {
+              position: 'top-right',
+              autoClose: 5000,
+            },
+          );
+          return;
+        }
+      }
+
+      // Validate month and convert to numeric month (1-12)
+      // Month can be: single letter (A-L), single digit (1-9), or two digits (10-12)
+      let monthNum;
+      if (/^[A-Za-z]$/.test(month)) {
+        // Month is a letter (A-L represents months 1-12)
+        const monthLetter = month.toUpperCase();
+        const monthIndex = monthLetter.charCodeAt(0) - 'A'.charCodeAt(0);
+        if (monthIndex < 0 || monthIndex > 11) {
+          toast.error(
+            `Invalid month letter. Month must be A-L (representing months 1-12). Received: ${month}`,
+            {
+              position: 'top-right',
+              autoClose: 5000,
+            },
+          );
+          return;
+        }
+        monthNum = monthIndex + 1; // A=1, B=2, ..., L=12
+      } else if (/^\d{1,2}$/.test(month)) {
+        // Month is a digit (1-9) or two digits (10-12)
+        monthNum = parseInt(month, 10);
+        if (monthNum < 1 || monthNum > 12) {
+          toast.error(`Invalid month value. Month must be between 1 and 12. Received: ${month}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          return;
+        }
+      } else {
+        toast.error(
+          `Invalid month format. Month must be a single letter (A-L), single digit (1-9), or two digits (10-12). Received: ${month}`,
+          {
+            position: 'top-right',
+            autoClose: 5000,
+          },
+        );
+        return;
+      }
+
+      // Now validate day based on the OCR month we extracted (not current month)
+      const dayNum = parseInt(day, 10);
+      // Convert year digit to full year: 5 = 2025, 6 = 2026
+      const fullYear = 2000 + yearNum;
+      // Calculate days in the OCR month (monthNum from OCR data, not current month)
+      const daysInMonth = new Date(fullYear, monthNum, 0).getDate(); // Get days in month
+
+      // Validate day is within valid range for the OCR month
+      if (dayNum < 1) {
+        toast.error(`Invalid day value. Day must be at least 01, received: ${day}`, {
           position: 'top-right',
           autoClose: 5000,
         });
+        return;
+      }
+
+      if (dayNum > daysInMonth) {
+        const monthName = new Date(fullYear, monthNum - 1, 1).toLocaleString('default', {
+          month: 'long',
+        });
+        toast.error(
+          `Invalid day for month. Month ${monthNum} (${monthName}) in year ${fullYear} has only ${daysInMonth} days, but day ${dayNum} was provided.`,
+          {
+            position: 'top-right',
+            autoClose: 5000,
+          },
+        );
         return;
       }
 
