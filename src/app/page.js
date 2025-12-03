@@ -18,6 +18,26 @@ import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
 import { HourlyDataDisplayWidget } from '@/components/HourlyDataDisplayWidget';
 
+// Helper function to convert month letter to month number
+// A-H for Jan-Aug, J for Sep, K for Oct, L for Nov, M for Dec (I is skipped)
+function letterToMonth(letter) {
+  const monthMap = {
+    A: 1, // JAN
+    B: 2, // FEB
+    C: 3, // MAR
+    D: 4, // APR
+    E: 5, // MAY
+    F: 6, // JUN
+    G: 7, // JUL
+    H: 8, // AUG
+    J: 9, // SEP
+    K: 10, // OCT
+    L: 11, // NOV
+    M: 12, // DEC
+  };
+  return monthMap[letter.toUpperCase()] || 0;
+}
+
 function Page() {
   const { csvData, loading: isTableLoading } = useCsvData();
   const [startDate, setStartDate] = useState('');
@@ -416,15 +436,16 @@ function Page() {
       }
 
       // Validate month and convert to numeric month (1-12)
-      // Month can be: single letter (A-L), single digit (1-9), or two digits (10-12)
+      // Month can be: single letter (A-H, J, K, L, M), single digit (1-9), or two digits (10-12)
       let monthNum;
       if (/^[A-Za-z]$/.test(month)) {
-        // Month is a letter (A-L represents months 1-12)
+        // Month is a letter (A-H for Jan-Aug, J for Sep, K for Oct, L for Nov, M for Dec)
         const monthLetter = month.toUpperCase();
-        const monthIndex = monthLetter.charCodeAt(0) - 'A'.charCodeAt(0);
-        if (monthIndex < 0 || monthIndex > 11) {
+        const allowedLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M'];
+
+        if (!allowedLetters.includes(monthLetter)) {
           toast.error(
-            `Invalid month letter. Month must be A-L (representing months 1-12). Received: ${month}`,
+            `Invalid month letter. Month letter must be A-H, J, K, L, or M (I is skipped). Received: ${month}`,
             {
               position: 'top-right',
               autoClose: 5000,
@@ -432,7 +453,18 @@ function Page() {
           );
           return;
         }
-        monthNum = monthIndex + 1; // A=1, B=2, ..., L=12
+
+        monthNum = letterToMonth(monthLetter);
+        if (monthNum === 0) {
+          toast.error(
+            `Invalid month letter. Month letter must be A-H, J, K, L, or M (I is skipped). Received: ${month}`,
+            {
+              position: 'top-right',
+              autoClose: 5000,
+            },
+          );
+          return;
+        }
       } else if (/^\d{1,2}$/.test(month)) {
         // Month is a digit (1-9) or two digits (10-12)
         monthNum = parseInt(month, 10);
@@ -445,7 +477,7 @@ function Page() {
         }
       } else {
         toast.error(
-          `Invalid month format. Month must be a single letter (A-L), single digit (1-9), or two digits (10-12). Received: ${month}`,
+          `Invalid month format. Month must be a single letter (A-H, J, K, L, M), single digit (1-9), or two digits (10-12). Received: ${month}`,
           {
             position: 'top-right',
             autoClose: 5000,
