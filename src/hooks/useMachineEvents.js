@@ -3,14 +3,14 @@ import { toast } from 'react-toastify';
 // import socket from '../socket'; // Adjust path as needed
 
 const toastConfig = {
-  position: "top-center",
-  className: "machine-event-toast",
+  position: 'top-center',
+  className: 'machine-event-toast',
   autoClose: 3000,
   style: {
     fontSize: '1.25rem',
     fontWeight: 'bold',
     textAlign: 'center',
-  }
+  },
 };
 
 export const useMachineEvents = (socket) => {
@@ -24,7 +24,7 @@ export const useMachineEvents = (socket) => {
       'part-presence': (data) => {
         // Check if toast already exists
         if (!activeToasts.current['part-presence']) {
-          const toastId = toast(data.message || "Part not present", {
+          const toastId = toast(data.message || 'Part not present', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -33,7 +33,7 @@ export const useMachineEvents = (socket) => {
             onClose: () => {
               // Remove from tracking when toast closes
               delete activeToasts.current['part-presence'];
-            }
+            },
           });
           // Track the active toast
           activeToasts.current['part-presence'] = toastId;
@@ -41,7 +41,7 @@ export const useMachineEvents = (socket) => {
       },
       'emergency-stop': (data) => {
         if (!activeToasts.current['emergency-stop']) {
-          const toastId = toast(data.message || "Emergency button pressed", {
+          const toastId = toast(data.message || 'Emergency button pressed', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -49,14 +49,14 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['emergency-stop'];
-            }
+            },
           });
           activeToasts.current['emergency-stop'] = toastId;
         }
       },
       'light-curtation': (data) => {
         if (!activeToasts.current['light-curtation']) {
-          const toastId = toast(data.message || "Light curtain error", {
+          const toastId = toast(data.message || 'Light curtain error', {
             ...toastConfig,
             style: {
               ...toastConfig.style,
@@ -64,11 +64,33 @@ export const useMachineEvents = (socket) => {
             },
             onClose: () => {
               delete activeToasts.current['light-curtation'];
-            }
+            },
           });
           activeToasts.current['light-curtation'] = toastId;
         }
-      }
+      },
+      safety_violation: (data) => {
+        // Handle safety violation events from register 1490
+        const violationType = data.type || data.violationType || 'Unknown safety violation';
+        const message = data.message || `Safety Violation: ${violationType}`;
+
+        if (!activeToasts.current['safety_violation']) {
+          const toastId = toast(message, {
+            ...toastConfig,
+            autoClose: false, // Don't auto-close safety violations - user must acknowledge
+            style: {
+              ...toastConfig.style,
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: '3px solid #991b1b',
+            },
+            onClose: () => {
+              delete activeToasts.current['safety_violation'];
+            },
+          });
+          activeToasts.current['safety_violation'] = toastId;
+        }
+      },
     };
 
     // Register all event handlers
@@ -83,4 +105,4 @@ export const useMachineEvents = (socket) => {
       });
     };
   }, [socket]);
-}; 
+};

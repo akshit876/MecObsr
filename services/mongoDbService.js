@@ -102,8 +102,38 @@ class MongoDBService {
     }
   }
 
+  // Helper function to safely emit socket events
+  safeEmit(socket, event, data) {
+    try {
+      // Check if socket exists and is connected
+      if (!socket) {
+        logger.warn('Cannot emit event: socket is null or undefined');
+        return false;
+      }
+
+      // Check if socket is connected (socket.io has connected property)
+      if (socket.connected === false && socket.disconnected === true) {
+        logger.warn(`Cannot emit event '${event}': socket is disconnected`);
+        return false;
+      }
+
+      // Emit the event
+      socket.emit(event, data);
+      return true;
+    } catch (error) {
+      logger.error(`Error emitting socket event '${event}':`, error.message);
+      return false;
+    }
+  }
+
   async sendMongoDbDataToClient(socket, dbName, collectionName) {
     try {
+      // Validate socket before proceeding
+      if (!socket) {
+        logger.error('sendMongoDbDataToClient called without a valid socket');
+        return;
+      }
+
       // Check if we're connected to the database, if not, try to connect
       if (!this.collection) {
         logger.info('MongoDB connection not established. Attempting to connect...');
