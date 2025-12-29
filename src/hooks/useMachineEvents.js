@@ -70,11 +70,16 @@ export const useMachineEvents = (socket) => {
         }
       },
       safety_violation: (data) => {
-        // Handle safety violation events from register 1490
-        const violationType = data.type || data.violationType || 'Unknown safety violation';
-        const message = data.message || `Safety Violation: ${violationType}`;
+        // Backend sends: { violation, timestamp, cycleNumber }
+        // Use violation field as the message
+        const violationMessage =
+          data.violation || data.message || data.type || 'Unknown safety violation';
+        const message = `Safety Violation: ${violationMessage}`;
 
-        if (!activeToasts.current['safety_violation']) {
+        // Create unique key based on violation type to allow multiple different violations
+        const violationKey = `safety_violation_${violationMessage}`;
+
+        if (!activeToasts.current[violationKey]) {
           const toastId = toast(message, {
             ...toastConfig,
             autoClose: false, // Don't auto-close safety violations - user must acknowledge
@@ -85,10 +90,10 @@ export const useMachineEvents = (socket) => {
               border: '3px solid #991b1b',
             },
             onClose: () => {
-              delete activeToasts.current['safety_violation'];
+              delete activeToasts.current[violationKey];
             },
           });
-          activeToasts.current['safety_violation'] = toastId;
+          activeToasts.current[violationKey] = toastId;
         }
       },
     };
