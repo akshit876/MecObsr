@@ -70,17 +70,27 @@ export const useMachineEvents = (socket) => {
         }
       },
       safety_violation: (data) => {
-        // Backend sends: { violation, timestamp, cycleNumber }
+        // Backend sends: { violation, timestamp, cycleNumber, status: 'active' | 'cleared' }
         // Use violation field as the message
         const violationMessage =
           data.violation || data.message || data.type || 'Unknown safety violation';
-        const message = `Safety Violation: ${violationMessage}`;
+        const status = data.status || 'active';
 
         // Create unique key based on violation type to allow multiple different violations
         const violationKey = `safety_violation_${violationMessage}`;
 
-        if (!activeToasts.current[violationKey]) {
-          const toastId = toast(message, {
+        // If status is 'cleared', dismiss the toast if it exists
+        if (status === 'cleared') {
+          if (activeToasts.current[violationKey]) {
+            toast.dismiss(activeToasts.current[violationKey]);
+            delete activeToasts.current[violationKey];
+          }
+          return;
+        }
+
+        // Only show toast if status is 'active' and toast doesn't already exist
+        if (status === 'active' && !activeToasts.current[violationKey]) {
+          const toastId = toast(violationMessage, {
             ...toastConfig,
             autoClose: false, // Don't auto-close safety violations - user must acknowledge
             style: {
