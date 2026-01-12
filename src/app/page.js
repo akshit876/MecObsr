@@ -301,6 +301,7 @@ function Page() {
         'Model No': row.ModelNumber || 'N/A',
         'Marking Data': row.MarkingData,
         'Scanner Data': row.ScannerData,
+        Grade: row.Grade || 'N/A',
         Result: row.Result,
         Timestamp: format(new Date(row.Timestamp), 'dd/MM/yyyy HH:mm:ss'),
       }));
