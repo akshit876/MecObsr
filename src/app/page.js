@@ -66,7 +66,7 @@ function Page() {
   const [currentModelNumber, setCurrentModelNumber] = useState(null);
   // const { selectedModel, modelFields } = useModelStore();
   const socket = useSocket();
-  const { showAlarm } = useAlarmManager();
+  const { showAlarm, clearAlarmByKey } = useAlarmManager();
 
   // const { status } = useProtectedRoute();
   console.log({ startDate, endDate });
@@ -177,11 +177,23 @@ function Page() {
     const handleSafetyViolation = (data) => {
       console.log('Safety violation detected:', data);
 
-      // Use alarm manager to show safety violation with high priority
-      showAlarm('safety-violation', `Alarm: ${data.violation}`, 'high');
+      // Backend sends: { violation, timestamp, cycleNumber, status: 'active' | 'cleared' }
+      const violationMessage = data.violation || data.message || data.type || 'Unknown safety violation';
+      const status = data.status || 'active';
+      
+      // Create unique key based on violation message
+      const violationKey = `safety_violation_${violationMessage}`;
 
-      // You can also update any safety status indicators here
-      // For example, you could set a state variable to show safety violation status
+      // If status is 'cleared', dismiss the alarm if it exists
+      if (status === 'cleared') {
+        clearAlarmByKey(violationKey);
+        return;
+      }
+
+      // Only show alarm if status is 'active'
+      if (status === 'active') {
+        showAlarm('safety-violation', violationMessage, 'high', violationKey);
+      }
     };
 
     // Handle scanner trigger success
