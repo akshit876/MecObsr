@@ -17,7 +17,7 @@ export const PLC_MAPPING = {
 
   // Jog Controls (Keep ON until explicitly stopped)
   JOG_CONTROLS: {
-    X_JOG_PLUS: { register: 1490, bit: 0, description: 'X Axis Jog Forward' },
+    X_JOG_PLUS: { register: 1489, bit: 0, description: 'X Axis Jog Forward' },
     X_JOG_MINUS: { register: 1491, bit: 0, description: 'X Axis Jog Backward' },
     Z_JOG_PLUS: { register: 1492, bit: 0, description: 'Z Axis Jog Forward' },
     Z_JOG_MINUS: { register: 1493, bit: 0, description: 'Z Axis Jog Backward' },
