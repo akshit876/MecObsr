@@ -113,17 +113,12 @@ class MongoDBService {
         await this.connect(dbName, collectionName);
       }
 
-      // Calculate current day range (starting from 6 AM)
+      // Calculate current day range (starting from 12:00 AM midnight)
       const now = new Date();
       const startOfDay = new Date(now);
-      startOfDay.setHours(6, 0, 0, 0); // Start counting from 6 AM
+      startOfDay.setHours(0, 0, 0, 0); // Start counting from midnight
 
-      // If current time is before 6 AM, consider it part of previous day
-      if (now.getHours() < 6) {
-        startOfDay.setDate(startOfDay.getDate() - 1);
-      }
-
-      // End of current production day (6 AM next day)
+      // End of current day (midnight next day)
       const endOfDay = new Date(startOfDay);
       endOfDay.setDate(endOfDay.getDate() + 1);
 
