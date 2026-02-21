@@ -6,8 +6,9 @@ import { useSocket } from '@/SocketContext';
 const MAX_ALARMS = 50;
 
 /**
- * Listens only to safety_violation from backend (PLC register 1490).
- * Payload: { timestamp, violation, cycleNumber }
+ * Listens to safety_violation (add) and safety_cleared (remove) from backend (PLC 1490).
+ * safety_violation: { timestamp, violation, cycleNumber }
+ * safety_cleared: { violation } – remove matching alarm from list
  */
 export function useSafetyAlarms() {
   const socket = useSocket();
@@ -25,10 +26,18 @@ export function useSafetyAlarms() {
       ]);
     };
 
+    const handleSafetyCleared = (payload) => {
+      const violation = payload.violation ?? payload.message ?? null;
+      if (!violation) return;
+      setAlarms((prev) => prev.filter((a) => a.message !== violation));
+    };
+
     socket.on('safety_violation', handleSafetyViolation);
+    socket.on('safety_cleared', handleSafetyCleared);
 
     return () => {
       socket.off('safety_violation', handleSafetyViolation);
+      socket.off('safety_cleared', handleSafetyCleared);
     };
   }, [socket]);
 

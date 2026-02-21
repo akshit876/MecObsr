@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 
 const toastConfig = {
-  position: 'top-center',
+  position: 'top-right',
   className: 'machine-event-toast',
-  autoClose: 3000,
+  autoClose: 5000,
   style: {
     fontSize: '1.25rem',
     fontWeight: 'bold',
@@ -33,7 +33,7 @@ export const useMachineEvents = (socket) => {
         if (!activeToasts.current[violationKey]) {
           const toastId = toast(message, {
             ...toastConfig,
-            autoClose: false,
+            autoClose: 5000,
             style: {
               ...toastConfig.style,
               backgroundColor: '#dc2626',
@@ -45,6 +45,18 @@ export const useMachineEvents = (socket) => {
             },
           });
           activeToasts.current[violationKey] = toastId;
+        }
+      },
+      // Backend emits when a safety bit goes 1→0 (PLC cleared). Dismiss matching toast.
+      safety_cleared: (data) => {
+        const violationMessage =
+          data.violation || data.message || data.type || null;
+        if (!violationMessage) return;
+        const violationKey = `safety_violation_${violationMessage}`;
+        const toastId = activeToasts.current[violationKey];
+        if (toastId != null) {
+          toast.dismiss(toastId);
+          delete activeToasts.current[violationKey];
         }
       },
     };

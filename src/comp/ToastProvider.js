@@ -7,7 +7,7 @@ export function ToastProvider({ children }) {
   return (
     <>
       {children}
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={5000} />
     </>
   );
 }
