@@ -16,6 +16,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSocket } from '@/SocketContext';
 import { usePulseSignal } from '@/hooks/usePulseSignal';
 import { useMachineEvents } from '@/hooks/useMachineEvents';
+import { AlarmsPanel } from '@/components/AlarmsPanel';
 
 // Helper function to calculate piece number based on timestamp
 const calculatePieceNumber = (timestamp, data) => {
@@ -413,6 +414,13 @@ function Page() {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Safety Alarms - safety_violation only (backend register 1490) */}
+      <div className="grid grid-cols-12 gap-2">
+        <div className="col-span-12">
+          <AlarmsPanel />
         </div>
       </div>
 

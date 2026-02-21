@@ -12,6 +12,8 @@ export function useErrorToast() {
     if (!socket) return;
 
     const handleError = (error) => {
+      // EMERGENCY_STOP is shown by useMachineEvents with alarm style – skip generic toast
+      if (error?.type === 'EMERGENCY_STOP') return;
       console.log('eror', error);
       toast.error(error.message || 'An error occurred', {
         position: 'top-center',

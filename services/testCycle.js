@@ -18,6 +18,7 @@ import ShiftUtility from './ShiftUtility.js';
 import BarcodeGenerator from './barcodeGenrator.js';
 import mongoDbService from './mongoDbService.js';
 import BufferedComPortService from './ComPortService.js';
+import { emitEmergencyStop } from './utils.js';
 import EventEmitter from 'events';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { promisify } from 'util';
@@ -308,9 +309,26 @@ export async function runContinuousScan(io = null, comService) {
 
   monitorProcess.postMessage('start');
 
+  // Modbus INPUT register 1400, bit 2 = Emergency Stop push button (0 when pressed)
+  const EMERGENCY_REGISTER = 1400;
+  const EMERGENCY_BIT = 2;
+
   while (true) {
     logger.info(`Test-1`);
     try {
+      // Check emergency stop – emit to UI so alarm renders (same style as part already marked)
+      if (io) {
+        try {
+          const emergencyBit = await readBit(EMERGENCY_REGISTER, EMERGENCY_BIT);
+          if (emergencyBit === 0) {
+            emitEmergencyStop(io, 'Emergency button pressed');
+            await sleep(2000);
+            continue;
+          }
+        } catch (e) {
+          logger.debug('Emergency bit read skipped:', e?.message);
+        }
+      }
       logger.info(`Starting scan cycle ${c + 1}`);
       await resetBits();
       logger.info('Clearing buffer before second scan...');
