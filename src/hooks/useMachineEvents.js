@@ -24,11 +24,10 @@ export const useMachineEvents = (socket) => {
 
     const eventHandlers = {
       safety_violation: (data) => {
-        const violationMessage =
+        const message =
           data.violation || data.message || data.type || 'Unknown safety violation';
-        const message = `Safety: ${violationMessage}`;
 
-        const violationKey = `safety_violation_${violationMessage}`;
+        const violationKey = `safety_violation_${message}`;
 
         if (!activeToasts.current[violationKey]) {
           const toastId = toast(message, {
