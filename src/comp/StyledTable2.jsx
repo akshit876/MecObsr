@@ -106,14 +106,6 @@ const createColumns = (data) => [
     size: 180,
   }),
 
-  columnHelper.accessor('Grade', {
-    header: 'Grade',
-    cell: (info) => (
-      <div className="text-sm font-semibold text-gray-700">{info.getValue() || '—'}</div>
-    ),
-    size: 70,
-  }),
-
   columnHelper.accessor('Result', {
     header: 'Result',
     cell: (info) => {
